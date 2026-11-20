@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <!-- Blokuje powiększanie strony gestem na telefonie -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Snowcraft</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="plansza"></canvas>
+  <div id="obroc">Obróć telefon poziomo</div>
+
+  <!-- Kolejność ma znaczenie: config jako pierwszy, game na końcu -->
+  <script src="config.js"></script>
+  <script src="draw.js"></script>
+  <script src="input.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
