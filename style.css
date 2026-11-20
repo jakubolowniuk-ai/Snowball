@@ -1,0 +1,38 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #cfe3f2; /* kolor pasów obok planszy */
+  /* bez zaznaczania tekstu i szarego błysku przy dotyku */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#plansza {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh; /* wysokość bez paska adresu, gdy przeglądarka to obsługuje */
+  touch-action: none; /* wyłącza przewijanie i powiększanie gestem */
+}
+
+/* Napis widoczny tylko przy pionowym telefonie */
+#obroc {
+  display: none;
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  background: #cfe3f2;
+  color: #2a4a66;
+  font: bold 24px sans-serif;
+  text-align: center;
+  padding: 16px;
+}
+
+@media (orientation: portrait) {
+  #obroc { display: flex; }
+}
