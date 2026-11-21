@@ -26,12 +26,12 @@ const CONFIG = {
   promienCelu: 0.03, // pierścień celu pod palcem
   promienSniezki: 0.012,
   wysokoscLuku: 0.15, // jak wysoko leci śnieżka (ułamek długości lotu), tylko wygląd
-  czasPrzeladowania: 1, // po rzucie: ten czas plus czas ładowania siły
+  czasPrzeladowania: 0.5, // po rzucie: ten czas plus czas ładowania siły
   kolorPrzeladowania: "#b8c4d0", // szary pierścień pod stopami w trakcie przeładowania
 
   // Trafienia
   trafieniaDoEliminacji: 3, // wcześniejsze trafienia tylko ogłuszają
-  czasOgluszenia: 3, // sekundy bez ruchu i bez rzutu
+  czasOgluszenia: 1, // sekundy bez ruchu i bez rzutu
   wibracjaTrafienia: 60, // milisekundy wibracji telefonu przy trafieniu (Android)
   czasChmurki: 0.4, // jak długo widać białą chmurkę śniegu po trafieniu
   czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem

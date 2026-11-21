@@ -44,13 +44,13 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 
 ### Mechanika (ustalona z Jakubem)
 1. **Zawodnik gracza:** jeden, czerwony, zawsze zaznaczony (niebieski pierścień pod stopami).
-2. **Ruch:** za zawodnikiem jest **kropka (uchwyt)** w stałej odległości (ok. 1 cm), po przeciwnej stronie niż najbliższy przeciwnik. Dotknięcie kropki i przeciągnięcie porusza zawodnika, który idzie za kropką z ograniczonym limitem prędkości (w `config.js`). Palec nie zasłania zawodnika.
+2. **Ruch:** za zawodnikiem jest **kropka (uchwyt)** w stałej odległości (ok. 1 cm), zawsze po lewej stronie (z tyłu, bo przeciwnicy są po prawej). Podczas przeciągania jest sztywno przyczepiona i się nie obraca. Każda drużyna chodzi tylko po swojej połowie pola. Dotknięcie kropki i przeciągnięcie porusza zawodnika, który idzie za kropką z ograniczonym limitem prędkości (w `config.js`). Palec nie zasłania zawodnika.
 3. **Rzut:** **drugi palec** dotyka dowolnego punktu planszy (poza kropką) i wyznacza **cel** rzutu. Znacznik celu jest dokładnie w miejscu dotyku, cienka linia łączy go z zawodnikiem.
-4. **Siła:** przytrzymanie ładuje siłę (max **1,5 s**). Siła zwiększa **prędkość i maksymalny zasięg** śnieżki. Miernik siły to pionowy segmentowany zielony pasek, a wzdłuż linii do celu rośnie pierścień zasięgu. Puszczenie palca = rzut.
+4. **Siła:** przytrzymanie ładuje siłę (max **1,5 s**). Siła zwiększa **prędkość i maksymalny zasięg** śnieżki. Bez paska siły: wzdłuż linii do celu rośnie pierścień zasięgu, a gdy sięga celu, zmienia kolor na zielony. Puszczenie palca = rzut.
 5. **Lot śnieżki:** leci prosto w stronę celu. Zatrzymuje się w dotkniętym punkcie albo na końcu zasięgu, jeśli ten jest bliżej. Długie przytrzymanie nie sprawia, że leci za cel. Rysujemy ją z cieniem na ziemi (efekt łuku), to tylko wygląd.
-6. **Trafienia:** śnieżka **trafia każdego, kto stoi na jej drodze** (przeciwnika, nie samego rzucającego). Dwa trafienia ogłuszają na 3 s, trzecie eliminuje. Liczba trafień liczy się przez cały poziom.
+6. **Trafienia:** śnieżka **trafia każdego, kto stoi na jej drodze** (przeciwnika, nie samego rzucającego). Dwa trafienia ogłuszają na 1 s, trzecie eliminuje. Liczba trafień liczy się przez cały poziom.
 7. **Ruch w trakcie ładowania** jest dozwolony (dwa kciuki: jeden na kropce, drugi na planszy).
-8. **Przeładowanie:** po rzucie 1 s plus czas, który przytrzymaliśmy siłę. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pierścień pod stopami pokazuje odliczanie.
+8. **Przeładowanie:** po rzucie 0,5 s plus czas, który przytrzymaliśmy siłę. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pierścień pod stopami pokazuje odliczanie.
 9. **Przeciwnicy:** te same reguły co gracz. Przed rzutem **unoszą śnieżkę nad głowę** (ostrzeżenie): im silniejszy rzut, tym dłużej unoszenie. Poziom 1: 1 przeciwnik, poziom 2: 2, poziom 3: 3 itd. Wyższe poziomy: lepsze uniki i celność.
 10. **Bonusy:** pojawiają się na planszy i aktywują się trafieniem śnieżką (rzut w ich miejsce).
 11. **Wygrana:** wyeliminowanie wszystkich przeciwników. **Przegrana:** wyeliminowanie zawodnika.
