@@ -22,7 +22,8 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
     if (naKropce && palecKropki === null) {
       palecKropki = e.pointerId;
       zlapKropke(stan, p);
-    } else if (!naKropce && palecCelu === null) {
+    } else if (!naKropce && palecCelu === null && stan.gracz.przeladowanie <= 0) {
+      // W trakcie przeładowania dotyk planszy nic nie robi
       palecCelu = e.pointerId;
       zacznijCelowanie(stan, p);
     } else {

@@ -21,6 +21,8 @@ function nowaPostac(druzyna, start) {
     y: j(start.y),
     trafienia: 0, // liczą się przez cały poziom
     ogluszenie: 0, // ile sekund ogłuszenia zostało (0 = nieogłuszony)
+    przeladowanie: 0, // ile sekund przeładowania zostało (0 = może rzucać)
+    przeladowanieCalosc: 0, // ile trwało całe obecne przeładowanie (do rysowania postępu)
     wyeliminowany: false,
   };
 }
@@ -163,6 +165,10 @@ function rzuc(stan, p) {
     predkosc: j(pomiedzy(CONFIG.predkoscSniezkiMin, CONFIG.predkoscSniezkiMax, s)),
     przebyte: 0,
   });
+
+  // Przeładowanie: stały czas plus czas ładowania siły
+  g.przeladowanie = CONFIG.czasPrzeladowania + Math.min(c.czas, CONFIG.MAX_CHARGE);
+  g.przeladowanieCalosc = g.przeladowanie;
 }
 
 // Pozycja śnieżki na ziemi (cień) i wysokość nad ziemią (łuk, tylko wygląd)
@@ -281,9 +287,10 @@ function aktualizuj(dt) {
   // Lot śnieżek: znikają po trafieniu albo na końcu lotu
   stan.sniezki = stan.sniezki.filter((sn) => !lotSniezki(stan, sn, dt));
 
-  // Odliczanie ogłuszenia
+  // Odliczanie ogłuszenia i przeładowania (niezależnie od siebie)
   for (const z of [stan.gracz, ...stan.przeciwnicy]) {
     if (z.ogluszenie > 0) z.ogluszenie = Math.max(z.ogluszenie - dt, 0);
+    if (z.przeladowanie > 0) z.przeladowanie = Math.max(z.przeladowanie - dt, 0);
   }
 
   // Chmurki śniegu znikają po chwili
