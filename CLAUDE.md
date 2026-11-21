@@ -38,7 +38,7 @@ Snowcraft to gra na telefon (przeglądarka) inspirowana klasyczną grą Flash z 
 - **Bonusy** (później): pojawiają się na planszy i aktywują się trafieniem śnieżką.
 
 ## Układ planszy
-Wzorowany na oryginale: widok skośnie z góry, biała połać śniegu z delikatnym niebieskawym przyciemnieniem brzegów, cień pod postaciami, dwie dekoracyjne zaspy w stałych miejscach (bez kolizji). Postacie ok. 1/8 szerokości pola gry (większe niż w oryginale, bo palec jest duży). Interfejs minimalny: tylko napis "Level N" na środku przez 1–2 s. Wyeliminowani zostają leżeć na planszy do końca poziomu. Przy trafieniu: biała chmurka śniegu i krótka wibracja telefonu (`navigator.vibrate`, jeśli działa). Grafiki rysujemy własne i nie kopiujemy grafik z oryginału.
+Wzorowany na oryginale: widok skośnie z góry, tło z grafiki `assets/tlo/tlo_plansza.png` z delikatnym niebieskawym przyciemnieniem poza polem i przy jego brzegach, cień pod postaciami. Dekoracje (choinki, bałwany, płotki, forty) z `assets/dekoracje/`, bez kolizji. Rysowanych zasp już nie ma. Postacie ok. 1/8 szerokości pola gry (większe niż w oryginale, bo palec jest duży). Interfejs minimalny: tylko napis "Level N" na środku przez 1–2 s. Wyeliminowani zostają leżeć na planszy do końca poziomu. Przy trafieniu: biała chmurka śniegu i krótka wibracja telefonu (`navigator.vibrate`, jeśli działa). Grafiki rysujemy własne i nie kopiujemy grafik z oryginału.
 
 ## Styl graficzny
 Kreskówkowy, jak w oryginale, ale dopracowany. Na początku wystarczą proste kształty zastępcze (kółka, kolory). Grafikę dopracujemy dopiero, gdy rozgrywka będzie działać.
