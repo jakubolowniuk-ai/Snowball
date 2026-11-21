@@ -3,18 +3,42 @@
 const canvas = document.getElementById("plansza");
 const ctx = canvas.getContext("2d");
 
-// Stan gry: wszyscy zawodnicy, kto jest zaznaczony i dokąd idzie
+// Stan gry
 const stan = {
-  zawodnicy: [],
-  zaznaczony: null,
-  cel: null, // punkt, do którego idzie zaznaczony (gdy palec jest przytrzymany)
+  gracz: { druzyna: "czerwoni", x: CONFIG.startGracz.x, y: CONFIG.startGracz.y },
+  przeciwnicy: CONFIG.startPrzeciwnicy.map((p) => ({ druzyna: "zieloni", x: p.x, y: p.y })),
+  palec: null, // gdzie jest palec trzymający kropkę (null = nikt jej nie trzyma)
 };
 
-for (const p of CONFIG.startCzerwoni) {
-  stan.zawodnicy.push({ druzyna: "czerwoni", x: p.x, y: p.y });
+// Odległość środka kropki od środka zawodnika
+function dlugoscSmyczy() {
+  return CONFIG.promienZawodnika + CONFIG.odlegloscKropki;
 }
-for (const p of CONFIG.startZieloni) {
-  stan.zawodnicy.push({ druzyna: "zieloni", x: p.x, y: p.y });
+
+// Gdzie leży kropka: pod palcem, gdy jest trzymana,
+// a w spoczynku za zawodnikiem, po przeciwnej stronie niż najbliższy przeciwnik.
+function pozycjaKropki(stan) {
+  if (stan.palec) return stan.palec;
+  const g = stan.gracz;
+
+  let najblizszy = null;
+  let najmniej = Infinity;
+  for (const p of stan.przeciwnicy) {
+    const d = Math.hypot(p.x - g.x, p.y - g.y);
+    if (d < najmniej) {
+      najmniej = d;
+      najblizszy = p;
+    }
+  }
+
+  // Kierunek od przeciwnika do gracza (domyślnie w lewo)
+  let kx = -1;
+  let ky = 0;
+  if (najblizszy && najmniej > 0) {
+    kx = (g.x - najblizszy.x) / najmniej;
+    ky = (g.y - najblizszy.y) / najmniej;
+  }
+  return { x: g.x + kx * dlugoscSmyczy(), y: g.y + ky * dlugoscSmyczy() };
 }
 
 // --- Skalowanie planszy do ekranu ---
@@ -52,25 +76,36 @@ podepnijSterowanie(canvas, stan, ekranNaPlansze);
 
 // --- Aktualizacja świata ---
 function aktualizuj(dt) {
-  const z = stan.zaznaczony;
-  if (z && stan.cel) {
-    const dx = stan.cel.x - z.x;
-    const dy = stan.cel.y - z.y;
-    const dystans = Math.hypot(dx, dy);
-    const krok = CONFIG.predkoscZawodnika * dt;
-    if (dystans <= krok) {
-      // Doszedł do palca
-      z.x = stan.cel.x;
-      z.y = stan.cel.y;
-    } else {
-      z.x += (dx / dystans) * krok;
-      z.y += (dy / dystans) * krok;
-    }
-    // Nie wychodzi poza planszę
-    const r = CONFIG.promienZawodnika;
-    z.x = Math.min(Math.max(z.x, r), CONFIG.szerokoscPlanszy - r);
-    z.y = Math.min(Math.max(z.y, r), CONFIG.wysokoscPlanszy - r);
+  const g = stan.gracz;
+  const palec = stan.palec;
+  if (!palec) return;
+
+  // "Smycz": zawodnik chce stać w stałej odległości od palca,
+  // na linii palec -> zawodnik. Ciągniesz: idzie za palcem. Pchasz: cofa się.
+  const odPalcaX = g.x - palec.x;
+  const odPalcaY = g.y - palec.y;
+  const d = Math.hypot(odPalcaX, odPalcaY);
+  if (d === 0) return;
+  const celX = palec.x + (odPalcaX / d) * dlugoscSmyczy();
+  const celY = palec.y + (odPalcaY / d) * dlugoscSmyczy();
+
+  // Krok w stronę celu, z limitem prędkości
+  const dx = celX - g.x;
+  const dy = celY - g.y;
+  const dystans = Math.hypot(dx, dy);
+  const krok = CONFIG.predkoscZawodnika * dt;
+  if (dystans <= krok) {
+    g.x = celX;
+    g.y = celY;
+  } else {
+    g.x += (dx / dystans) * krok;
+    g.y += (dy / dystans) * krok;
   }
+
+  // Nie wychodzi poza planszę
+  const r = CONFIG.promienZawodnika;
+  g.x = Math.min(Math.max(g.x, r), CONFIG.szerokoscPlanszy - r);
+  g.y = Math.min(Math.max(g.y, r), CONFIG.wysokoscPlanszy - r);
 }
 
 // --- Pętla gry ---

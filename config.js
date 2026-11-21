@@ -8,26 +8,21 @@ const CONFIG = {
 
   // Zawodnik
   promienZawodnika: 22,
-  predkoscZawodnika: 160, // jednostek planszy na sekundę
+  predkoscZawodnika: 280, // limit prędkości: jednostek planszy na sekundę
 
-  // Sterowanie
-  promienPobliza: 150, // jak daleko od zaznaczonego można dotknąć, żeby szedł
-  zapasDotyku: 10, // ile dodać do promienia zawodnika, żeby łatwiej trafić palcem
+  // Kropka (uchwyt) za zawodnikiem
+  odlegloscKropki: 77, // od krawędzi zawodnika, ok. 8% szerokości planszy (ok. 1 cm na telefonie)
+  promienKropki: 12, // wielkość rysowanej kropki
+  promienDotykuKropki: 35, // jak blisko kropki trzeba dotknąć, żeby ją złapać
+  przezroczystoscKropki: 0.4, // gdy nikt jej nie dotyka (1 = pełna)
 
   // Pozycje startowe (x, y)
-  startCzerwoni: [
-    { x: 150, y: 140 },
-    { x: 110, y: 270 },
-    { x: 150, y: 400 },
-  ],
-  startZieloni: [
-    { x: 810, y: 140 },
-    { x: 850, y: 270 },
-    { x: 810, y: 400 },
-  ],
+  startGracz: { x: 150, y: 270 },
+  startPrzeciwnicy: [{ x: 810, y: 270 }],
 
   // Kolory
   kolorCzerwony: "#d93a3a",
   kolorZielony: "#3a9a4a",
   kolorZaznaczenia: "#ffd23f",
+  kolorKropki: "#2a6fd6",
 };

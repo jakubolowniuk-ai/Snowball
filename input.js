@@ -1,4 +1,5 @@
 // Dotyk i mysz przez Pointer Events (jedno API dla obu).
+// Każdy palec ma swój numer (pointerId), więc później dojdzie drugi palec do rzutu.
 
 function odleglosc(ax, ay, bx, by) {
   return Math.hypot(ax - bx, ay - by);
@@ -7,43 +8,30 @@ function odleglosc(ax, ay, bx, by) {
 // Podpina obsługę wskaźnika do canvasa.
 // ekranNaPlansze: funkcja zamieniająca współrzędne ekranu na współrzędne planszy.
 function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
-  // Śledzimy tylko jeden palec naraz
-  let aktywnyPalec = null;
+  // Numer palca, który trzyma kropkę (null = nikt)
+  let palecKropki = null;
 
   canvas.addEventListener("pointerdown", (e) => {
-    if (aktywnyPalec !== null) return;
+    if (palecKropki !== null) return;
     const p = ekranNaPlansze(e.clientX, e.clientY);
-
-    // Czy dotknięto czerwonego zawodnika? Wtedy go zaznaczamy.
-    const zasieg = CONFIG.promienZawodnika + CONFIG.zapasDotyku;
-    const trafiony = stan.zawodnicy.find(
-      (z) => z.druzyna === "czerwoni" && odleglosc(p.x, p.y, z.x, z.y) <= zasieg
-    );
-    if (trafiony) {
-      stan.zaznaczony = trafiony;
-      stan.cel = null;
-      return;
-    }
-
-    // Czy dotyk jest w pobliżu zaznaczonego? Wtedy zawodnik idzie do palca.
-    const z = stan.zaznaczony;
-    if (z && odleglosc(p.x, p.y, z.x, z.y) <= CONFIG.promienPobliza) {
-      aktywnyPalec = e.pointerId;
-      stan.cel = p;
+    const k = pozycjaKropki(stan);
+    if (odleglosc(p.x, p.y, k.x, k.y) <= CONFIG.promienDotykuKropki) {
+      palecKropki = e.pointerId;
+      stan.palec = p;
       // Dalej dostajemy ruchy palca, nawet gdy wyjedzie poza canvas
       canvas.setPointerCapture(e.pointerId);
     }
   });
 
   canvas.addEventListener("pointermove", (e) => {
-    if (e.pointerId !== aktywnyPalec) return;
-    stan.cel = ekranNaPlansze(e.clientX, e.clientY);
+    if (e.pointerId !== palecKropki) return;
+    stan.palec = ekranNaPlansze(e.clientX, e.clientY);
   });
 
   function puszczenie(e) {
-    if (e.pointerId !== aktywnyPalec) return;
-    aktywnyPalec = null;
-    stan.cel = null;
+    if (e.pointerId !== palecKropki) return;
+    palecKropki = null;
+    stan.palec = null;
   }
   canvas.addEventListener("pointerup", puszczenie);
   canvas.addEventListener("pointercancel", puszczenie);
