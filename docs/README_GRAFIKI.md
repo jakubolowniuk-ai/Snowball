@@ -1,0 +1,94 @@
+# Snowcraft: grafiki do gry (stan z 21.11.2026)
+
+Wszystkie grafiki są wycięte (przezroczyste tło), bez wypalonych cieni i przeskalowane do rozmiarów z gry.
+
+## Skala
+- Pole gry ma 1000 x 500 jednostek (tyle co w `game.js`). **2 piksele pliku = 1 jednostka pola**, czyli pole to 2000 x 1000 px.
+- Rozmiary w jednostkach wynikają z `config.js`: zawodnik ma ok. 72 jednostki wysokości (połowa pierwszej wersji, bo ta była za duża względem planszy); dekoracje mają 2/3 rozmiaru pierwszej wersji, śnieżka ok. 13 jednostek średnicy.
+- **Wymagana zmiana w `config.js`:** `rozmiarPostaci: 1 / 16` (średnica hitboxu ok. 62 jednostki, było 1/8) i `promienSniezki: 0.0065` (było 0.012). Bez tego trafienia nie będą pasować do wyglądu.
+- Gdyby obiekty nadal były za duże lub za małe, zmień jeden mnożnik w `config.js` zamiast grafik.
+- Pełne dane (rozmiary, kotwice) są w `sprites.json`.
+
+## Kotwica
+Punkt grafiki, który kładziemy na pozycji obiektu w grze. Podana jako ułamek rozmiaru obrazka (x od lewej, y od góry).
+- **Zawodnik:** kotwica to środek kurtki i podeszwy butów. Rysuj tak, żeby podeszwy były w punkcie `(z.x, z.y + 0.85 * PROMIEN_POSTACI)` (tak jak dziś stoi cień).
+- **Dekoracje:** środek podstawy. **Efekty:** środek obrazka.
+
+## Zasady
+- **Cieni na grafikach nie ma.** Cienie, pierścień pod stopami, kropki żyć, linię i pierścienie celowania oraz napisy rysuje kod.
+- **Dekoracje (choinki, bałwany, płotki, forty) to tylko ozdoba, bez kolizji.** Śnieżki i postacie przechodzą przez nie.
+- Czerwony zawodnik to gracz, zielony to przeciwnicy. Pozostałe kolory są na później.
+- Forty pochodzą z arkusza w stylu miękkiego śniegu (wybrany przez Jakuba).
+
+## 16 kolorów zawodnika (`gracze/<kolor>_przod.png`, `<kolor>_tyl.png`)
+- czerwony: #E02020
+- zielony: #2E9E3F
+- niebieski: #2A6FD6
+- zolty: #F2C417
+- pomaranczowy: #F28A1C
+- fioletowy: #8E44C9
+- rozowy: #F06BA8
+- blekitny: #4FC3F7
+- limonkowy: #9ACD32
+- brazowy: #8B5A2B
+- turkusowy: #1ABC9C
+- granatowy: #1F3A7A
+- magenta: #D81B8C
+- szary: #7F8C8D
+- bordowy: #8B1E3F
+- zloty: #D4A017
+
+Żółty, błękitny, limonkowy i złoty słabiej widać na białym śniegu. Warto je sprawdzić na telefonie.
+
+## Tło
+`tlo/tlo_plansza.png` ma 2400 x 1500 px (1200 x 750 jednostek). Pole gry leży na środku: od punktu (200, 250) px, rozmiar 2000 x 1000 px. Zapas wokół pola pokrywa ekrany od 4:3 do 2,4:1. Tło jest płaską, bardzo jasną teksturą z lekkim powtarzaniem wzoru.
+
+### Zawodnik (przód i tył, wszystkie kolory mają ten sam rozmiar)
+
+| Plik | Rozmiar w grze (jednostki pola) | Rozmiar pliku (px) | Kotwica (ułamek rozmiaru) |
+| --- | --- | --- | --- |
+| `gracze/czerwony_przod.png` | 57.0 x 72.0 | 114 x 144 | x 0.367, y 0.98 |
+| `gracze/czerwony_tyl.png` | 55.0 x 71.5 | 110 x 143 | x 0.563, y 0.98 |
+
+### Dekoracje
+
+| Plik | Rozmiar w grze (jednostki pola) | Rozmiar pliku (px) | Kotwica (ułamek rozmiaru) |
+| --- | --- | --- | --- |
+| `dekoracje/balwan_1.png` | 77.0 x 83.5 | 154 x 167 | x 0.5, y 0.95 |
+| `dekoracje/balwan_2.png` | 76.0 x 85.5 | 152 x 171 | x 0.5, y 0.95 |
+| `dekoracje/balwan_3.png` | 71.5 x 81.0 | 143 x 162 | x 0.5, y 0.95 |
+| `dekoracje/balwan_4.png` | 71.0 x 81.0 | 142 x 162 | x 0.5, y 0.95 |
+| `dekoracje/choinka_1.png` | 72.0 x 102.0 | 144 x 204 | x 0.5, y 0.97 |
+| `dekoracje/choinka_2.png` | 58.0 x 87.5 | 116 x 175 | x 0.5, y 0.97 |
+| `dekoracje/choinka_3.png` | 50.5 x 64.5 | 101 x 129 | x 0.5, y 0.97 |
+| `dekoracje/choinka_4.png` | 44.5 x 51.5 | 89 x 103 | x 0.5, y 0.97 |
+| `dekoracje/fort_1.png` | 102.0 x 51.0 | 204 x 102 | x 0.5, y 0.95 |
+| `dekoracje/fort_2.png` | 99.5 x 43.0 | 199 x 86 | x 0.5, y 0.95 |
+| `dekoracje/fort_3.png` | 99.0 x 55.0 | 198 x 110 | x 0.5, y 0.95 |
+| `dekoracje/fort_4.png` | 99.5 x 47.5 | 199 x 95 | x 0.5, y 0.95 |
+| `dekoracje/plot_1.png` | 78.0 x 45.5 | 156 x 91 | x 0.5, y 0.95 |
+| `dekoracje/plot_2.png` | 88.5 x 42.5 | 177 x 85 | x 0.5, y 0.95 |
+| `dekoracje/plot_3.png` | 87.0 x 43.0 | 174 x 86 | x 0.5, y 0.95 |
+| `dekoracje/plot_4.png` | 75.0 x 39.5 | 150 x 79 | x 0.5, y 0.95 |
+
+### Efekty
+
+| Plik | Rozmiar w grze (jednostki pola) | Rozmiar pliku (px) | Kotwica (ułamek rozmiaru) |
+| --- | --- | --- | --- |
+| `efekty/kupka_sniezek.png` | 32.0 x 27.0 | 64 x 54 | x 0.5, y 0.9 |
+| `efekty/obloczek_sniegu_1.png` | 57.0 x 49.5 | 114 x 99 | x 0.5, y 0.5 |
+| `efekty/obloczek_sniegu_2.png` | 57.0 x 42.5 | 114 x 85 | x 0.5, y 0.5 |
+| `efekty/rozbryzg_1.png` | 47.0 x 43.5 | 94 x 87 | x 0.5, y 0.5 |
+| `efekty/rozbryzg_2.png` | 47.0 x 42.0 | 94 x 84 | x 0.5, y 0.5 |
+| `efekty/rozbryzg_3.png` | 47.0 x 45.5 | 94 x 91 | x 0.5, y 0.5 |
+| `efekty/rozbryzg_4.png` | 47.0 x 43.5 | 94 x 87 | x 0.5, y 0.5 |
+| `efekty/rozbryzg_5.png` | 45.5 x 47.0 | 91 x 94 | x 0.5, y 0.5 |
+| `efekty/rozbryzg_6.png` | 45.5 x 47.0 | 91 x 94 | x 0.5, y 0.5 |
+| `efekty/rozbryzg_7.png` | 47.0 x 44.5 | 94 x 89 | x 0.5, y 0.5 |
+| `efekty/rozbryzg_8.png` | 47.0 x 46.5 | 94 x 93 | x 0.5, y 0.5 |
+| `efekty/sniezka.png` | 13.5 x 14.0 | 27 x 28 | x 0.5, y 0.5 |
+
+## Znane wady i braki
+- **Tył zawodnika to wersja robocza:** kaptur wygląda jak piłka, korpus jest mniejszy niż z przodu.
+- Zawodnik ma śnieżkę w uniesionej ręce, a kod rysuje uniesioną śnieżkę przeciwnika osobno. Trzeba zdecydować, jak to połączyć.
+- Brakuje: leżący wyeliminowany zawodnik, poza z uniesionymi rękami (ostrzeżenie), 3 klatki schylania, pagórki/zaspy, lód, ślady, krzaki, kamienie, pniaki, sanki, latarnia, staw, bonusy.
