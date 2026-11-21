@@ -363,7 +363,7 @@ function aktualizuj(dt) {
 }
 
 // --- Pętla gry ---
-let poprzedniCzas = performance.now();
+let poprzedniCzas = 0;
 
 function klatka(teraz) {
   // Czas od poprzedniej klatki w sekundach (max 0,1 s, gdy karta była w tle)
@@ -375,4 +375,11 @@ function klatka(teraz) {
   requestAnimationFrame(klatka);
 }
 
-requestAnimationFrame(klatka);
+// Start: najpierw napis "Ładowanie...", gra rusza po wczytaniu wszystkich obrazków
+rysujTlo(ctx);
+rysujNapis(ctx, "Ładowanie...");
+wczytajObrazy(() => {
+  zacznijPoziom(stan, 1); // od nowa, gdyby ktoś dotykał ekranu w trakcie ładowania
+  poprzedniCzas = performance.now();
+  requestAnimationFrame(klatka);
+});
