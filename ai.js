@@ -87,7 +87,7 @@ function aktualizujPrzeciwnika(stan, z, dt) {
       const kat = Math.random() * Math.PI * 2;
       const odl = j(CONFIG.wedrowka) * losuj(0.3, 1);
       const cel = { druzyna: z.druzyna, x: z.x + Math.cos(kat) * odl, y: z.y + Math.sin(kat) * odl };
-      ograniczDoPolowy(cel); // cel też musi być na jego połowie
+      ograniczDoSwojejStrony(cel); // cel też musi być po jego stronie przekątnej
       // Punktu w przeszkodzie nie wybiera; spróbuje znowu w następnej klatce
       if (!stopyWPrzeszkodzie(cel.x, cel.y + PROMIEN_POSTACI * 0.85)) ai.cel = { x: cel.x, y: cel.y };
     }
@@ -124,7 +124,7 @@ function odskocz(z, sn) {
   }
   const odl = j(CONFIG.odskok);
   const cel = { druzyna: z.druzyna, x: z.x + px * odl, y: z.y + py * odl };
-  ograniczDoPolowy(cel);
+  ograniczDoSwojejStrony(cel);
   z.ai.cel = { x: cel.x, y: cel.y };
   z.ai.unoszenie = null; // unik ważniejszy niż rzut
 }

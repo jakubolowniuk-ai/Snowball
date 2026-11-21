@@ -58,9 +58,10 @@ const CONFIG = {
   zapasSily: 0.15, // ile sekund dłużej ładuje siłę, żeby na pewno dorzucić
 
   // Pozycje startowe (y też jako ułamek szerokości; wysokość pola to 1 / ASPECT)
-  startGracz: { x: 0.15, y: 0.25 },
-  // Przeciwnicy stoją na zmianę w dwóch kolumnach (x), równo rozłożeni w pionie
-  kolumnyPrzeciwnikow: [0.85, 0.68],
+  startGracz: { x: 0.85, y: 0.38 }, // prawy dolny róg
+  // Przeciwnicy stoją w lewym górnym trójkącie, równo rozłożeni na linii równoległej
+  // do przekątnej. 0 = w samym lewym górnym rogu, 1 = na przekątnej (granicy).
+  liniaPrzeciwnikow: 0.55,
 
   // Niebieskawe przyciemnienie przy brzegach pola: jak głęboko wchodzi
   glebokoscBrzegu: 0.05,
@@ -72,7 +73,7 @@ const CONFIG = {
 
   // Grafiki postaci i mnożnik ich wielkości (1 = rozmiar z sprites.json).
   // Mnożnik zmienia tylko wygląd; okrąg trafień ustawia rozmiarPostaci.
-  grafikaGracza: "assets/gracze/czerwony_przod.png",
+  grafikaGracza: "assets/gracze/czerwony_tyl.png", // gracz na dole, widać go z tyłu
   grafikaPrzeciwnika: "assets/gracze/zielony_przod.png",
   skalaGrafik: 1,
   skalaSniezki: 1.6, // śnieżka rysowana większa niż jej okrąg trafień (lepiej widoczna)
@@ -82,13 +83,14 @@ const CONFIG = {
   // Dekoracje: zatrzymują śnieżki, zawodnicy nie mogą przez nie przejść.
   // plik: nazwa z assets/dekoracje/; x, y: środek podstawy (ułamek szerokości pola)
   dekoracje: [
-    { plik: "choinka_1", x: 0.07, y: 0.115 },
-    { plik: "fort_1", x: 0.32, y: 0.15 },
-    { plik: "balwan_1", x: 0.32, y: 0.42 },
-    { plik: "plot_2", x: 0.57, y: 0.06 },
-    { plik: "choinka_2", x: 0.95, y: 0.165 },
-    { plik: "balwan_3", x: 0.95, y: 0.365 },
+    { plik: "choinka_1", x: 0.06, y: 0.105 }, // róg zielonych
+    { plik: "plot_2", x: 0.33, y: 0.23 }, // osłona przed linią zielonych
+    { plik: "balwan_3", x: 0.09, y: 0.44 }, // lewy dolny róg
+    { plik: "fort_1", x: 0.68, y: 0.3 }, // osłona gracza
+    { plik: "balwan_1", x: 0.56, y: 0.455 }, // strona gracza, u dołu
+    { plik: "choinka_2", x: 0.96, y: 0.14 }, // prawy górny róg
   ],
+
   // Podstawa (owal na ziemi) jako ułamek szerokości grafiki dekoracji
   podstawaSzerokosc: 0.4, // połowa szerokości owalu
   podstawaGlebokosc: 0.15, // połowa głębokości owalu

@@ -36,15 +36,15 @@ function parametryPoziomu(stan) {
   return CONFIG.poziomy[Math.min(stan.poziom, ile) - 1];
 }
 
-// Pozycje startowe n przeciwników: na zmianę w dwóch kolumnach, równo w pionie
+// Pozycje startowe n przeciwników: równo na linii równoległej do przekątnej,
+// w lewym górnym trójkącie (od lewego brzegu do górnego)
 function pozycjePrzeciwnikow(n) {
   const wysokosc = 1 / CONFIG.ASPECT; // wysokość pola jako ułamek szerokości
+  const a = CONFIG.liniaPrzeciwnikow;
   const pozycje = [];
   for (let i = 0; i < n; i++) {
-    pozycje.push({
-      x: CONFIG.kolumnyPrzeciwnikow[i % 2],
-      y: ((i + 0.5) / n) * wysokosc,
-    });
+    const t = (i + 0.5) / n; // od 0 (lewy brzeg) do 1 (górny brzeg)
+    pozycje.push({ x: t * a, y: (1 - t) * a * wysokosc });
   }
   return pozycje;
 }
@@ -55,7 +55,10 @@ function zacznijPoziom(stan, poziom) {
   const param = parametryPoziomu(stan);
   stan.gracz = nowaPostac("czerwoni", CONFIG.startGracz);
   stan.przeciwnicy = pozycjePrzeciwnikow(param.przeciwnicy).map((p) => nowaPostac("zieloni", p));
-  for (const p of stan.przeciwnicy) ograniczDoPolowy(p); // nie za blisko brzegu
+  for (const p of stan.przeciwnicy) {
+    ograniczDoSwojejStrony(p); // nie za blisko brzegu
+    wypchnijZPrzeszkod(p); // nie w środku dekoracji
+  }
   for (const p of stan.przeciwnicy) p.ai = nowyStanAI(param);
   stan.palec = null; // gdzie jest palec trzymający kropkę (null = nikt jej nie trzyma)
   stan.chwyt = null; // zapamiętane przy złapaniu: gdzie był palec i kropka względem zawodnika
@@ -226,13 +229,38 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania) {
 // --- Ruch ---
 
 // Każda drużyna chodzi tylko po swojej połowie pola
-function ograniczDoPolowy(z) {
+// Granica drużyn to przekątna pola od lewego dolnego do prawego górnego rogu.
+// Czerwoni grają w prawym dolnym trójkącie, zieloni w lewym górnym.
+// Zwraca odległość punktu od przekątnej: dodatnia po stronie czerwonych.
+function odlegloscOdPrzekatnej(x, y) {
+  const W = SZEROKOSC_POLA;
+  const H = WYSOKOSC_POLA;
+  // Przekątna to x/W + y/H = 1; dzielimy przez długość wektora (1/W, 1/H)
+  return (x / W + y / H - 1) / Math.hypot(1 / W, 1 / H);
+}
+
+// Każda drużyna zostaje na swojej stronie przekątnej i w polu gry
+function ograniczDoSwojejStrony(z) {
   const r = PROMIEN_POSTACI;
-  const srodek = SZEROKOSC_POLA / 2;
-  const minX = z.druzyna === "czerwoni" ? r : srodek + r;
-  const maxX = z.druzyna === "czerwoni" ? srodek - r : SZEROKOSC_POLA - r;
-  z.x = Math.min(Math.max(z.x, minX), maxX);
-  z.y = Math.min(Math.max(z.y, r), WYSOKOSC_POLA - r);
+  const W = SZEROKOSC_POLA;
+  const H = WYSOKOSC_POLA;
+  const wPolu = () => {
+    z.x = Math.min(Math.max(z.x, r), W - r);
+    z.y = Math.min(Math.max(z.y, r), H - r);
+  };
+  wPolu();
+  // Strona: czerwoni co najmniej r za przekątną (+), zieloni co najmniej r przed nią (-)
+  const znak = z.druzyna === "czerwoni" ? 1 : -1;
+  const d = odlegloscOdPrzekatnej(z.x, z.y) * znak;
+  if (d < r) {
+    // Przesuwamy prostopadle do przekątnej, na jej właściwą stronę
+    const dl = Math.hypot(1 / W, 1 / H);
+    const nx = (1 / W / dl) * znak;
+    const ny = (1 / H / dl) * znak;
+    z.x += nx * (r - d);
+    z.y += ny * (r - d);
+    wPolu();
+  }
 }
 
 // Krok postaci w stronę punktu, z limitem prędkości. Zwraca true, gdy doszła.
@@ -250,8 +278,8 @@ function idzDo(z, celX, celY, dt) {
     z.x += (dx / dystans) * krok;
     z.y += (dy / dystans) * krok;
   }
-  ograniczDoPolowy(z);
-  wypchnijZPrzeszkod(z); // przez przeszkody nie da się przejść (to ważniejsze niż granica połowy)
+  ograniczDoSwojejStrony(z);
+  wypchnijZPrzeszkod(z); // przez przeszkody nie da się przejść (to ważniejsze niż granica)
   return doszla;
 }
 
@@ -287,7 +315,7 @@ function odlegloscKropkiOdSrodka() {
 }
 
 // Gdzie leży kropka: gdy jest trzymana, w stałym miejscu względem zawodnika (sztywno),
-// a w spoczynku zawsze po lewej (za zawodnikiem, bo przeciwnicy są po prawej).
+// a w spoczynku zawsze po prawej (z dala od przeciwników, pod prawym kciukiem).
 // Nigdy nie wychodzi poza widoczny ekran, żeby dało się jej dotknąć.
 function pozycjaKropki(stan) {
   const g = stan.gracz;
@@ -295,7 +323,7 @@ function pozycjaKropki(stan) {
   if (stan.chwyt) {
     k = { x: g.x + stan.chwyt.kropkaX, y: g.y + stan.chwyt.kropkaY };
   } else {
-    k = { x: g.x - odlegloscKropkiOdSrodka(), y: g.y };
+    k = { x: g.x + odlegloscKropkiOdSrodka(), y: g.y };
   }
 
   const r = j(CONFIG.promienKropki);

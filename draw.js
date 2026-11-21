@@ -191,7 +191,11 @@ function rysujUniesionaSniezke(ctx, z) {
   if (!z.ai || !z.ai.unoszenie) return;
   const s = sila(z.ai.unoszenie.czas);
   const { szer, wys } = rozmiarGrafiki(grafikaPostaci(z));
-  const reka = { x: z.x + szer * 0.51, y: stopyY(z) - wys * 0.61 }; // śnieżka w ręce na grafice
+  // Śnieżka w ręce na grafice: z przodu w prawej ręce, z tyłu w lewej
+  const zTylu = grafikaPostaci(z).includes("_tyl");
+  const reka = zTylu
+    ? { x: z.x - szer * 0.48, y: stopyY(z) - wys * 0.5 }
+    : { x: z.x + szer * 0.51, y: stopyY(z) - wys * 0.61 };
   const nadGlowa = { x: z.x, y: stopyY(z) - wys - j(CONFIG.promienKropekZycia) * 5 };
   const x = reka.x + (nadGlowa.x - reka.x) * s;
   const y = reka.y + (nadGlowa.y - reka.y) * s;
