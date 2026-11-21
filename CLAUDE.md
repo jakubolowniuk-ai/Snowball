@@ -1,7 +1,7 @@
 # Snowcraft: instrukcje dla agenta
 
 ## O projekcie
-Snowcraft to gra na telefon (przeglądarka) inspirowana klasyczną grą Flash z 1998 r. od Nicholson NY. Dwie drużyny po 3 zawodników rzucają w siebie śnieżkami. Gracz prowadzi czerwonych, komputer zielonych. Gra jest dla właściciela projektu (Jakub) i jego znajomych. Dokładna specyfikacja jest w `docs/snowcraft-plan.md`. Przeczytaj ją przed rozpoczęciem pracy, a ten plik traktuj jako skrót.
+Snowcraft to gra na telefon (przeglądarka) inspirowana klasyczną grą Flash z 1998 r. od Nicholson NY. Gracz (czerwony zawodnik) rzuca śnieżkami w przeciwników (zieloni, sterowani przez komputer). Gra jest dla właściciela projektu (Jakub) i jego znajomych. Dokładna specyfikacja jest w `docs/snowcraft-plan.md`. Przeczytaj ją przed rozpoczęciem pracy, a ten plik traktuj jako skrót. **Na razie gramy jednym zawodnikiem po stronie gracza.**
 
 ## Jak ze mną pracować (Jakub)
 - Piszemy po polsku. Komentarze w kodzie też po polsku, proste i krótkie.
@@ -16,28 +16,28 @@ Snowcraft to gra na telefon (przeglądarka) inspirowana klasyczną grą Flash z 
 ## Technologia
 - Czysty HTML, CSS i JavaScript. Bez frameworków i bez narzędzi budowania. Rysowanie na `<canvas>` (element HTML do rysowania grafiki 2D).
 - Brak serwera. Hosting: GitHub Pages (darmowy hosting plików statycznych). Gra musi działać po otwarciu `index.html` bez żadnej dodatkowej konfiguracji.
-- Sterowanie dotykiem przez Pointer Events (jedno API na dotyk i mysz, żeby można testować też na komputerze). Wyłącz przewijanie i powiększanie gestem na canvasie (`touch-action: none`).
-- Stała logiczna wielkość planszy, skalowana do ekranu telefonu. Domyślnie orientacja pozioma, widok skośnie z góry jak w oryginale.
-- Wszystkie liczby wpływające na rozgrywkę (czasy, prędkości, limity) trzymaj w jednym pliku `config.js`, żeby dało się je łatwo stroić.
+- Sterowanie dotykiem przez Pointer Events (jedno API na dotyk i mysz). **Obsługuj wiele dotknięć naraz** (każdy palec rozpoznawaj po `pointerId`), bo gracz używa dwóch palców naraz. Wyłącz przewijanie i powiększanie gestem na canvasie (`touch-action: none`).
+- Pole gry ma **stałe proporcje 2:1** (`ASPECT` w `config.js`) i jest skalowane tak, żeby mieściło się w ekranie telefonu w poziomie. Tło śnieżne wychodzi poza pole gry i wypełnia resztę ekranu. Wszystkie rozmiary liczymy względem szerokości pola gry, nie pikseli ekranu. Uwzględnij `devicePixelRatio` (ostrość). Gra tylko w poziomie, w pionie komunikat "Obróć telefon".
+- Wszystkie liczby wpływające na rozgrywkę (czasy, prędkości, zasięgi, limity) trzymaj w jednym pliku `config.js`, żeby dało się je łatwo stroić.
 - Struktura plików ma być prosta, kilka małych plików zamiast jednego wielkiego.
-- Na razie nie robimy: PWA (instalacja jako aplikacja), dźwięku, multiplayera online, zapisu postępów.
+- Na razie nie robimy: PWA (instalacja jako aplikacja), dźwięku, multiplayera online, zapisu postępów, drużyny kilku zawodników.
 
 ## Zasady gry (skrót)
-- Drużyna ma 3 zawodników. Poziom 1: 3 przeciwników, poziom 2: 5, dalej coraz więcej.
-- Trafienia: pierwsze 2 ogłuszają zawodnika na 3 s (nie można nim sterować), trzecie go eliminuje. Liczba trafień liczy się przez cały poziom.
-- Brak przeszkód w oryginale. U nas dojdą zimowe/świąteczne osłony, ale dopiero w późniejszym kroku.
-- Gracz zaznacza jednego zawodnika naraz. Zaznaczony idzie w stronę palca trzymanego w jego pobliżu.
-- **Pole rzutu** leży przed zaznaczonym zawodnikiem na linii zawodnik → cel, w stałej odległości, i porusza się razem z nim. Gest jednym palcem:
-  - dotyk poza polem: zawodnik idzie,
-  - wsunięcie palca na pole bez odrywania: zawodnik się zatrzymuje i ładuje siłę (max 1,5 s),
-  - puszczenie palca na polu: rzut,
-  - zsunięcie palca z pola przed puszczeniem: anulowanie rzutu.
-  Gdy palec jest na polu, jego położenie jest zablokowane.
-- Siła rzutu = prędkość śnieżki. Śnieżka leci przez całą planszę i trafia każdego na drodze, także swojego.
-- Przeładowanie po rzucie: 3 s plus czas ładowania siły. W tym czasie zawodnik może się ruszać. Pole rzutu jest wygaszone i pokazuje odliczanie.
-- Celowanie: dotknięcie przeciwnika lub bonusu zaznacza go jako cel. Limit zaznaczeń = liczba zawodników w drużynie. Rzut leci w najbliższy zaznaczony cel (a bez zaznaczenia w najbliższego przeciwnika). Gdy limit pełny, dotknięcie nowego celu odznacza zaznaczony cel najbliższy zaznaczonemu zawodnikowi. Ponowne dotknięcie zaznaczonego celu odznacza go.
-- Niezaznaczeni zawodnicy gracza sami unikają śnieżek i sami rzucają. Skuteczność uników zależy od poziomu komputera (tak jak u przeciwników).
-- Przeciwnicy mają te same reguły co gracz. Wyższe poziomy: lepsze uniki.
+- Jeden zawodnik gracza, zawsze zaznaczony (niebieski owalny pierścień pod stopami). Przeciwników na poziomie N jest N (poziom 1: 1, poziom 2: 2, itd.).
+- **Ruch:** za zawodnikiem jest **kropka (uchwyt)** w stałej odległości (ok. 1 cm), po stronie przeciwnej niż najbliższy przeciwnik. Dotknięcie kropki i przeciąganie porusza zawodnika (idzie za kropką, z limitem prędkości). Palec dotyka kropki, nie zawodnika, więc go nie zasłania.
+- **Rzut:** drugi palec dotyka dowolnego punktu planszy (poza kropką). Znacznik celu jest dokładnie w miejscu dotyku, cienka linia łączy go z zawodnikiem. Przytrzymanie ładuje siłę (max 1,5 s). Siła zwiększa **prędkość i maksymalny zasięg** śnieżki. Puszczenie palca = rzut.
+- **Lot śnieżki:** leci prosto do celu. Zatrzymuje się w punkcie celu albo na końcu zasięgu, jeśli jest bliżej. Dłuższe przytrzymanie nie sprawia, że leci za cel. Rysuj ją z cieniem na ziemi (efekt łuku), to tylko wygląd.
+- Miernik siły: pionowy, segmentowany zielony pasek po stronie przeciwnej niż palec. Wzdłuż linii do celu rośnie pierścień zasięgu.
+- Rzut można ładować w trakcie ruchu (jeden palec na kropce, drugi na planszy).
+- Puszczenie palca bardzo blisko zawodnika anuluje rzut (promień w `config.js`).
+- **Trafienia:** śnieżka trafia **każdego, kto stoi na jej drodze**. Pierwsze 2 trafienia ogłuszają na 3 s (nie można tym sterować), trzecie eliminuje. Liczba trafień liczy się przez cały poziom. Dotyczy gracza i przeciwników.
+- **Przeładowanie:** po rzucie 3 s plus czas ładowania siły. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pokaż odliczanie.
+- **Przeciwnicy:** te same reguły co gracz. Przed rzutem unoszą śnieżkę nad głowę (ostrzeżenie), im silniejszy rzut, tym dłużej. Wyższe poziomy: lepsze uniki i celność.
+- **Wygrana:** wyeliminowani wszyscy przeciwnicy. **Przegrana:** wyeliminowany zawodnik gracza.
+- **Bonusy** (później): pojawiają się na planszy i aktywują się trafieniem śnieżką.
+
+## Układ planszy
+Wzorowany na oryginale: widok skośnie z góry, biała połać śniegu z delikatnym niebieskawym przyciemnieniem brzegów, cień pod postaciami, dwie dekoracyjne zaspy w stałych miejscach (bez kolizji). Postacie ok. 1/8 szerokości pola gry (większe niż w oryginale, bo palec jest duży). Interfejs minimalny: tylko napis "Level N" na środku przez 1–2 s. Wyeliminowani zostają leżeć na planszy do końca poziomu. Przy trafieniu: biała chmurka śniegu i krótka wibracja telefonu (`navigator.vibrate`, jeśli działa). Grafiki rysujemy własne i nie kopiujemy grafik z oryginału.
 
 ## Styl graficzny
 Kreskówkowy, jak w oryginale, ale dopracowany. Na początku wystarczą proste kształty zastępcze (kółka, kolory). Grafikę dopracujemy dopiero, gdy rozgrywka będzie działać.
