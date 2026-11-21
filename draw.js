@@ -191,36 +191,29 @@ function rysujUniesionaSniezke(ctx, z) {
   if (!z.ai || !z.ai.unoszenie) return;
   const s = sila(z.ai.unoszenie.czas);
   const { szer, wys } = rozmiarGrafiki(grafikaPostaci(z));
-  const rs = j(CONFIG.promienSniezki) * 1.1;
   const reka = { x: z.x + szer * 0.51, y: stopyY(z) - wys * 0.61 }; // śnieżka w ręce na grafice
   const nadGlowa = { x: z.x, y: stopyY(z) - wys - j(CONFIG.promienKropekZycia) * 5 };
   const x = reka.x + (nadGlowa.x - reka.x) * s;
   const y = reka.y + (nadGlowa.y - reka.y) * s;
-  ctx.fillStyle = "#ffffff";
-  ctx.strokeStyle = "rgba(60, 90, 130, 0.7)";
-  ctx.lineWidth = rs * 0.25;
-  ctx.beginPath();
-  ctx.arc(x, y, rs, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
+  rysujJednaSniezke(ctx, x, y);
 }
 
-// Biała chmurka śniegu: kilka kółek rozlatuje się i znika
+// Po trafieniu: obłoczek śniegu i rozbryzg. Rosną i znikają w czasie czasChmurki.
 function rysujChmurki(ctx, stan) {
-  const r = PROMIEN_POSTACI;
   for (const ch of stan.chmurki) {
     const t = ch.czas / CONFIG.czasChmurki; // od 0 do 1
-    ctx.fillStyle = `rgba(255, 255, 255, ${1 - t})`;
-    ctx.strokeStyle = `rgba(150, 180, 210, ${0.6 * (1 - t)})`;
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 7; i++) {
-      const kat = (i / 7) * Math.PI * 2;
-      const odl = r * (0.3 + 0.9 * t);
-      ctx.beginPath();
-      ctx.arc(ch.x + Math.cos(kat) * odl, ch.y + Math.sin(kat) * odl * 0.7, r * (0.35 - 0.15 * t), 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
+    ctx.save();
+    ctx.globalAlpha = 1 - t * t; // na początku wyraźne, pod koniec szybko znikają
+    for (const [sciezka, skala] of [
+      [ch.obloczek, 0.8 + 0.5 * t],
+      [ch.rozbryzg, 0.6 + 0.6 * t],
+    ]) {
+      const obraz = sciezka && OBRAZY[sciezka];
+      if (!obraz) continue;
+      const { szer, wys } = rozmiarGrafiki(sciezka);
+      ctx.drawImage(obraz, ch.x - (szer * skala) / 2, ch.y - (wys * skala) / 2, szer * skala, wys * skala);
     }
+    ctx.restore();
   }
 }
 
@@ -297,28 +290,40 @@ function rysujCelowanie(ctx, stan) {
   }
 }
 
+const GRAFIKA_SNIEZKI = "assets/efekty/sniezka.png";
+
+// Cień śnieżki sunie po ziemi (na wysokości stóp), a śnieżka leci nad nim łukiem
 function rysujCienieSniezek(ctx, stan) {
-  const r = j(CONFIG.promienSniezki);
-  ctx.fillStyle = "rgba(60, 90, 130, 0.3)";
+  const r = j(CONFIG.promienSniezki) * CONFIG.skalaSniezki;
+  ctx.fillStyle = "rgba(50, 80, 120, 0.4)";
   for (const sn of stan.sniezki) {
     const p = pozycjaSniezki(sn);
     ctx.beginPath();
-    ctx.ellipse(p.x, p.y, r, r * 0.45, 0, 0, Math.PI * 2);
+    ctx.ellipse(p.x, p.y + PROMIEN_POSTACI * 0.85, r, r * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// Śnieżka z grafiki (powiększona o skalaSniezki, żeby była lepiej widoczna)
+function rysujJednaSniezke(ctx, x, y) {
+  const obraz = OBRAZY[GRAFIKA_SNIEZKI];
+  const { szer, wys } = rozmiarGrafiki(GRAFIKA_SNIEZKI);
+  const k = CONFIG.skalaSniezki;
+  if (obraz) {
+    ctx.drawImage(obraz, x - (szer * k) / 2, y - (wys * k) / 2, szer * k, wys * k);
+  } else {
+    const r = j(CONFIG.promienSniezki) * k;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
   }
 }
 
 function rysujSniezki(ctx, stan) {
-  const r = j(CONFIG.promienSniezki);
   for (const sn of stan.sniezki) {
     const p = pozycjaSniezki(sn);
-    ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "rgba(60, 90, 130, 0.6)";
-    ctx.lineWidth = r * 0.25;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y - p.wysokosc, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+    rysujJednaSniezke(ctx, p.x, p.y - p.wysokosc);
   }
 }
 
@@ -330,10 +335,16 @@ function rysujScene(ctx, stan) {
   // żeby bliżsi (niżej) zasłaniali dalszych
   const wszyscy = [stan.gracz, ...stan.przeciwnicy];
   const lezacy = wszyscy.filter((z) => z.wyeliminowany);
-  const stojacy = wszyscy.filter((z) => !z.wyeliminowany).sort((a, b) => a.y - b.y);
-  for (const z of [...lezacy, ...stojacy]) {
-    rysujZawodnika(ctx, z, z === stan.gracz);
-  }
+  const stojacy = wszyscy.filter((z) => !z.wyeliminowany);
+  for (const z of lezacy) rysujZawodnika(ctx, z, z === stan.gracz);
+
+  // Stojący zawodnicy i dekoracje razem, od góry do dołu według poziomu stóp/podstawy:
+  // kto stoi niżej na ekranie (bliżej nas), zasłania tego, kto stoi wyżej
+  const obiekty = [
+    ...stojacy.map((z) => ({ y: stopyY(z), rysuj: () => rysujZawodnika(ctx, z, z === stan.gracz) })),
+    ...przeszkody().map((p) => ({ y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
+  ].sort((a, b) => a.y - b.y);
+  for (const o of obiekty) o.rysuj();
   // Kropki z trafieniami na końcu, żeby żadna postać ich nie zasłoniła
   for (const z of stojacy) rysujZycia(ctx, z);
 

@@ -1,5 +1,7 @@
 # Prompt dla Claude Code (wklej w sesji w repozytorium Snowball)
 
+> Uwaga: prompt już wykonany. Jakub zmienił potem jedną decyzję: dekoracje są przeszkodami (zatrzymują śnieżki i postacie), a nie samą ozdobą. Aktualne zasady są w CLAUDE.md.
+
 Przeczytaj CLAUDE.md i docs/snowcraft-plan.md. Dodaję do repo gotowe grafiki. Są w folderze `assets/` w paczce snowcraft_assets.zip, a rozmiary i kotwice opisują `sprites.json` i `README_GRAFIKI.md`. WAŻNE: grafiki są zmniejszone względem obecnych rozmiarów gry. W kroku 3 zmień w `config.js` `rozmiarPostaci` na `1 / 16` i `promienSniezki` na `0.0065`, żeby hitbox i śnieżka pasowały do grafik (sprawdź też `odlegloscKropki`, `promienDotykuKropki` i inne wartości zależne od rozmiaru postaci i zaproponuj korekty).
 
 Pracuj małymi krokami według CLAUDE.md: najpierw pokaż krótki plan i poczekaj na moją zgodę, potem jeden krok = jedna rzecz do sprawdzenia na telefonie, commit po każdym kroku, numer `?v=` w index.html podbijaj przy każdym kroku.

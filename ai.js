@@ -72,7 +72,12 @@ function aktualizujPrzeciwnika(stan, z, dt) {
 
   // Losowe chodzenie: idzie do punktu, stoi chwilę, wybiera następny
   if (ai.cel) {
-    if (idzDo(z, ai.cel.x, ai.cel.y, dt)) {
+    const przedX = z.x;
+    const przedY = z.y;
+    const doszedl = idzDo(z, ai.cel.x, ai.cel.y, dt);
+    // Prawie stoi w miejscu (np. opiera się o przeszkodę): odpuszcza ten cel
+    const ruszyl = Math.hypot(z.x - przedX, z.y - przedY) > j(CONFIG.predkoscZawodnika) * dt * 0.2;
+    if (doszedl || !ruszyl) {
       ai.cel = null;
       ai.postoj = losuj(CONFIG.postojMin, CONFIG.postojMax);
     }
@@ -83,7 +88,8 @@ function aktualizujPrzeciwnika(stan, z, dt) {
       const odl = j(CONFIG.wedrowka) * losuj(0.3, 1);
       const cel = { druzyna: z.druzyna, x: z.x + Math.cos(kat) * odl, y: z.y + Math.sin(kat) * odl };
       ograniczDoPolowy(cel); // cel też musi być na jego połowie
-      ai.cel = { x: cel.x, y: cel.y };
+      // Punktu w przeszkodzie nie wybiera; spróbuje znowu w następnej klatce
+      if (!stopyWPrzeszkodzie(cel.x, cel.y + PROMIEN_POSTACI * 0.85)) ai.cel = { x: cel.x, y: cel.y };
     }
   }
 }

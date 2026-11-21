@@ -33,7 +33,7 @@ const CONFIG = {
   trafieniaDoEliminacji: 3, // wcześniejsze trafienia tylko ogłuszają
   czasOgluszenia: 1, // sekundy bez ruchu i bez rzutu
   wibracjaTrafienia: 60, // milisekundy wibracji telefonu przy trafieniu (Android)
-  czasChmurki: 0.4, // jak długo widać białą chmurkę śniegu po trafieniu
+  czasChmurki: 0.5, // jak długo widać obłoczek i rozbryzg po trafieniu
   czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem
 
   // Poziomy: ilu przeciwników i jak dobrze grają.
@@ -75,8 +75,23 @@ const CONFIG = {
   grafikaGracza: "assets/gracze/czerwony_przod.png",
   grafikaPrzeciwnika: "assets/gracze/zielony_przod.png",
   skalaGrafik: 1,
+  skalaSniezki: 1.6, // śnieżka rysowana większa niż jej okrąg trafień (lepiej widoczna)
   promienKropekZycia: 0.006, // kropki z trafieniami nad głową
   gruboscPierscienia: 0.004, // linia pierścienia pod stopami gracza
+
+  // Dekoracje: zatrzymują śnieżki, zawodnicy nie mogą przez nie przejść.
+  // plik: nazwa z assets/dekoracje/; x, y: środek podstawy (ułamek szerokości pola)
+  dekoracje: [
+    { plik: "choinka_1", x: 0.07, y: 0.115 },
+    { plik: "fort_1", x: 0.32, y: 0.15 },
+    { plik: "balwan_1", x: 0.32, y: 0.42 },
+    { plik: "plot_2", x: 0.57, y: 0.06 },
+    { plik: "choinka_2", x: 0.95, y: 0.165 },
+    { plik: "balwan_3", x: 0.95, y: 0.365 },
+  ],
+  // Podstawa (owal na ziemi) jako ułamek szerokości grafiki dekoracji
+  podstawaSzerokosc: 0.4, // połowa szerokości owalu
+  podstawaGlebokosc: 0.15, // połowa głębokości owalu
 
   // Kolory
   kolorCzerwony: "#d93a3a",
