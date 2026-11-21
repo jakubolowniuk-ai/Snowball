@@ -4,7 +4,7 @@ html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #cfe3f2; /* kolor pasów obok planszy */
+  background: #cfe1f1; /* kolor pasów obok planszy */
   /* bez zaznaczania tekstu i szarego błysku przy dotyku */
   user-select: none;
   -webkit-user-select: none;
@@ -26,7 +26,7 @@ html, body {
   inset: 0;
   align-items: center;
   justify-content: center;
-  background: #cfe3f2;
+  background: #cfe1f1;
   color: #2a4a66;
   font: bold 24px sans-serif;
   text-align: center;
