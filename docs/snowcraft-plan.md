@@ -63,7 +63,7 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 ### Układ i wygląd (na podstawie analizy rozgrywki z nagrania)
 - **Pole gry:** stałe proporcje 2:1, skalowane tak, żeby mieściło się w ekranie w całości. Tło śnieżne wychodzi poza pole i wypełnia resztę ekranu, bez pustych pasów. Zawodnicy nie wychodzą poza pole, ale kropka może leżeć w marginesie. Wszyscy mają to samo pole gry niezależnie od telefonu.
 - **Orientacja:** tylko pozioma. W pionie komunikat "Obróć telefon".
-- **Wygląd:** biała połać śniegu z niebieskawym przyciemnieniem brzegów, widok skośnie z góry, cień pod postaciami. Dwie dekoracyjne zaspy w stałych miejscach (bez kolizji).
+- **Wygląd:** tło z grafiki (śnieżna tekstura) z niebieskawym przyciemnieniem poza polem i przy jego brzegach, widok skośnie z góry, cień pod postaciami. Dekoracje (choinki, bałwany, płotki, forty) bez kolizji. Rysowanych zasp już nie ma.
 - **Postacie:** większe niż w oryginale (ok. 1/8 szerokości pola gry zamiast ok. 1/12). Czerwony to gracz, zieloni to przeciwnicy.
 - **Interfejs:** minimalny. Tylko napis "Level N" na środku przez 1–2 s na początku poziomu.
 - **Efekty:** biała chmurka śniegu przy trafieniu, wyeliminowani leżą na ziemi do końca poziomu, krótka wibracja telefonu przy trafieniu.

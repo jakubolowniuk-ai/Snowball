@@ -1,20 +1,41 @@
-// Rysowanie pola gry, zasp, zawodników, kropki i napisu.
+// Rysowanie tła, zawodników, śnieżek, kropki i napisów.
 // Rysujemy w jednostkach pola (szerokość 1000), skalowanie robi game.js.
+
+const TLO = "assets/tlo/tlo_plansza.png";
 
 function rysujTlo(ctx) {
   const W = SZEROKOSC_POLA;
   const H = WYSOKOSC_POLA;
   const g = j(CONFIG.glebokoscBrzegu);
+  const ekranX = widoczny.x0;
+  const ekranY = widoczny.y0;
+  const ekranW = widoczny.x1 - widoczny.x0;
+  const ekranH = widoczny.y1 - widoczny.y0;
 
-  // Cały ekran (także margines poza polem) w kolorze brzegu
+  // Kolor pod spodem (widać go tylko przed wczytaniem grafik albo na bardzo
+  // nietypowym ekranie, gdzie obrazek tła nie sięga do krawędzi)
   ctx.fillStyle = CONFIG.kolorBrzegu;
-  ctx.fillRect(widoczny.x0, widoczny.y0, widoczny.x1 - widoczny.x0, widoczny.y1 - widoczny.y0);
+  ctx.fillRect(ekranX, ekranY, ekranW, ekranH);
 
-  // Biała połać śniegu na polu gry
-  ctx.fillStyle = CONFIG.kolorSniegu;
-  ctx.fillRect(0, 0, W, H);
+  const obraz = OBRAZY[TLO];
+  if (obraz) {
+    // Obrazek tła tak, żeby pole gry leżało dokładnie w miejscu z sprites.json
+    const s = SPRITY[TLO];
+    ctx.drawImage(obraz, -s.poleX, -s.poleY, s.szer, s.wys);
+  } else {
+    ctx.fillStyle = CONFIG.kolorSniegu;
+    ctx.fillRect(0, 0, W, H);
+  }
 
-  // Przyciemnienie przy brzegach pola: gradient od koloru brzegu do przezroczystości
+  // Przyciemnienie: poza polem półprzezroczysty niebieskawy kolor,
+  // a przy brzegach pola płynne przejście do przezroczystości
+  ctx.save();
+  ctx.globalAlpha = CONFIG.silaPrzyciemnienia;
+  ctx.fillStyle = CONFIG.kolorBrzegu;
+  ctx.fillRect(ekranX, ekranY, ekranW, -ekranY); // nad polem
+  ctx.fillRect(ekranX, H, ekranW, ekranY + ekranH - H); // pod polem
+  ctx.fillRect(ekranX, 0, -ekranX, H); // na lewo od pola
+  ctx.fillRect(W, 0, ekranX + ekranW - W, H); // na prawo od pola
   const brzegi = [
     [0, 0, 0, g, 0, 0, W, g], // góra
     [0, H, 0, H - g, 0, H - g, W, g], // dół
@@ -24,34 +45,11 @@ function rysujTlo(ctx) {
   for (const [x1, y1, x2, y2, rx, ry, rw, rh] of brzegi) {
     const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
     gradient.addColorStop(0, CONFIG.kolorBrzegu);
-    gradient.addColorStop(1, "rgba(207, 225, 241, 0)");
+    gradient.addColorStop(1, "rgba(185, 208, 230, 0)");
     ctx.fillStyle = gradient;
     ctx.fillRect(rx, ry, rw, rh);
   }
-}
-
-function rysujZaspy(ctx) {
-  for (const z of CONFIG.zaspy) {
-    const x = j(z.x);
-    const y = j(z.y);
-    const rx = j(z.szer) / 2;
-    const ry = j(z.wys) / 2;
-
-    // Niebieskawy cień pod zaspą
-    ctx.fillStyle = "rgba(120, 160, 205, 0.35)";
-    ctx.beginPath();
-    ctx.ellipse(x + rx * 0.08, y + ry * 0.35, rx, ry, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Sama zaspa: owal biały u góry, lekko niebieskawy na dole (wygląda na wypukły)
-    const gradient = ctx.createLinearGradient(0, y - ry, 0, y + ry);
-    gradient.addColorStop(0, CONFIG.kolorSniegu);
-    gradient.addColorStop(1, "#dde9f5");
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.ellipse(x, y, rx * 0.95, ry * 0.9, 0, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  ctx.restore();
 }
 
 function kolorDruzyny(z) {
@@ -289,7 +287,6 @@ function rysujSniezki(ctx, stan) {
 
 function rysujScene(ctx, stan) {
   rysujTlo(ctx);
-  rysujZaspy(ctx);
   rysujCienieSniezek(ctx, stan);
 
   // Najpierw leżący (są na ziemi), potem stojący od góry do dołu,

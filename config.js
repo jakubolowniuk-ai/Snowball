@@ -62,14 +62,9 @@ const CONFIG = {
   // Przeciwnicy stoją na zmianę w dwóch kolumnach (x), równo rozłożeni w pionie
   kolumnyPrzeciwnikow: [0.85, 0.68],
 
-  // Dwie dekoracyjne zaspy (bez kolizji): środek, szerokość i wysokość owalu
-  zaspy: [
-    { x: 0.35, y: 0.1, szer: 0.16, wys: 0.045 },
-    { x: 0.62, y: 0.41, szer: 0.2, wys: 0.05 },
-  ],
-
   // Niebieskawe przyciemnienie przy brzegach pola: jak głęboko wchodzi
   glebokoscBrzegu: 0.05,
+  silaPrzyciemnienia: 0.6, // 0 = brak przyciemnienia, 1 = pełny kolor brzegu
 
   // Napis "Level N" na początku poziomu
   czasNapisuLevel: 1.5,
@@ -81,7 +76,7 @@ const CONFIG = {
   kolorPierscienia: "#2a6fd6",
   kolorKropki: "#2a6fd6",
   kolorSniegu: "#ffffff",
-  kolorBrzegu: "#cfe1f1", // przyciemnienie brzegów i tło poza polem
+  kolorBrzegu: "#b9d0e6", // przyciemnienie poza polem i przy jego brzegach
   kolorNapisu: "#8cc4ee",
   kolorCelu: "#2a6fd6",
   kolorZasiegu: "#e0902a", // pierścień zasięgu, gdy śnieżka jeszcze nie doleci
