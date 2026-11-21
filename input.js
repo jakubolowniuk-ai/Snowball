@@ -17,7 +17,7 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
     const k = pozycjaKropki(stan);
     if (odleglosc(p.x, p.y, k.x, k.y) <= CONFIG.promienDotykuKropki) {
       palecKropki = e.pointerId;
-      stan.palec = p;
+      zlapKropke(stan, p);
       // Dalej dostajemy ruchy palca, nawet gdy wyjedzie poza canvas
       canvas.setPointerCapture(e.pointerId);
     }
@@ -31,7 +31,7 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
   function puszczenie(e) {
     if (e.pointerId !== palecKropki) return;
     palecKropki = null;
-    stan.palec = null;
+    pusc(stan);
   }
   canvas.addEventListener("pointerup", puszczenie);
   canvas.addEventListener("pointercancel", puszczenie);

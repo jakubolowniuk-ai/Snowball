@@ -8,18 +8,35 @@ const stan = {
   gracz: { druzyna: "czerwoni", x: CONFIG.startGracz.x, y: CONFIG.startGracz.y },
   przeciwnicy: CONFIG.startPrzeciwnicy.map((p) => ({ druzyna: "zieloni", x: p.x, y: p.y })),
   palec: null, // gdzie jest palec trzymający kropkę (null = nikt jej nie trzyma)
+  chwyt: null, // zapamiętane przy złapaniu: gdzie był palec i kropka względem zawodnika
 };
 
+// Wywoływane, gdy palec złapie kropkę: zapamiętujemy sztywne przesunięcia
+function zlapKropke(stan, palec) {
+  const g = stan.gracz;
+  const k = pozycjaKropki(stan);
+  stan.chwyt = {
+    palecX: palec.x - g.x, palecY: palec.y - g.y, // palec względem zawodnika
+    kropkaX: k.x - g.x, kropkaY: k.y - g.y, // kropka względem zawodnika
+  };
+  stan.palec = palec;
+}
+
+function pusc(stan) {
+  stan.palec = null;
+  stan.chwyt = null;
+}
+
 // Odległość środka kropki od środka zawodnika
-function dlugoscSmyczy() {
+function odlegloscKropkiOdSrodka() {
   return CONFIG.promienZawodnika + CONFIG.odlegloscKropki;
 }
 
-// Gdzie leży kropka: pod palcem, gdy jest trzymana,
+// Gdzie leży kropka: gdy jest trzymana, w stałym miejscu względem zawodnika (sztywno),
 // a w spoczynku za zawodnikiem, po przeciwnej stronie niż najbliższy przeciwnik.
 function pozycjaKropki(stan) {
-  if (stan.palec) return stan.palec;
   const g = stan.gracz;
+  if (stan.chwyt) return { x: g.x + stan.chwyt.kropkaX, y: g.y + stan.chwyt.kropkaY };
 
   let najblizszy = null;
   let najmniej = Infinity;
@@ -38,7 +55,7 @@ function pozycjaKropki(stan) {
     kx = (g.x - najblizszy.x) / najmniej;
     ky = (g.y - najblizszy.y) / najmniej;
   }
-  return { x: g.x + kx * dlugoscSmyczy(), y: g.y + ky * dlugoscSmyczy() };
+  return { x: g.x + kx * odlegloscKropkiOdSrodka(), y: g.y + ky * odlegloscKropkiOdSrodka() };
 }
 
 // --- Skalowanie planszy do ekranu ---
@@ -80,14 +97,10 @@ function aktualizuj(dt) {
   const palec = stan.palec;
   if (!palec) return;
 
-  // "Smycz": zawodnik chce stać w stałej odległości od palca,
-  // na linii palec -> zawodnik. Ciągniesz: idzie za palcem. Pchasz: cofa się.
-  const odPalcaX = g.x - palec.x;
-  const odPalcaY = g.y - palec.y;
-  const d = Math.hypot(odPalcaX, odPalcaY);
-  if (d === 0) return;
-  const celX = palec.x + (odPalcaX / d) * dlugoscSmyczy();
-  const celY = palec.y + (odPalcaY / d) * dlugoscSmyczy();
+  // Kropka jest sztywno przyczepiona: zawodnik chce stanąć tak,
+  // żeby palec był w tym samym miejscu względem niego co przy złapaniu.
+  const celX = palec.x - stan.chwyt.palecX;
+  const celY = palec.y - stan.chwyt.palecY;
 
   // Krok w stronę celu, z limitem prędkości
   const dx = celX - g.x;
