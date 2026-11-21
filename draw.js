@@ -56,32 +56,67 @@ function kolorDruzyny(z) {
   return z.druzyna === "czerwoni" ? CONFIG.kolorCzerwony : CONFIG.kolorZielony;
 }
 
-// Wyeliminowany leży na ziemi: spłaszczony owal w kolorze drużyny
+// Ścieżka grafiki postaci
+function grafikaPostaci(z) {
+  return z.druzyna === "czerwoni" ? CONFIG.grafikaGracza : CONFIG.grafikaPrzeciwnika;
+}
+
+// Rozmiar grafiki w jednostkach pola (z mnożnikiem skali z config.js)
+function rozmiarGrafiki(sciezka) {
+  const s = SPRITY[sciezka];
+  return { szer: s.szer * CONFIG.skalaGrafik, wys: s.wys * CONFIG.skalaGrafik };
+}
+
+// Rysuje obrazek tak, żeby jego kotwica (z sprites.json) wypadła w punkcie (x, y).
+// Zwraca false, gdy obrazek się nie wczytał (wtedy rysujemy kształt zastępczy).
+function rysujSprite(ctx, sciezka, x, y) {
+  const obraz = OBRAZY[sciezka];
+  if (!obraz) return false;
+  const s = SPRITY[sciezka];
+  const { szer, wys } = rozmiarGrafiki(sciezka);
+  ctx.drawImage(obraz, x - s.kotwicaX * szer, y - s.kotwicaY * wys, szer, wys);
+  return true;
+}
+
+// Wysokość "stóp" postaci: tu stoją podeszwy, cień i pierścień
+function stopyY(z) {
+  return z.y + PROMIEN_POSTACI * 0.85;
+}
+
+// Wyeliminowany leży na ziemi: grafika postaci obrócona o 90 stopni
+// i lekko spłaszczona (widok skośnie z góry). Docelowo dojdzie osobna grafika.
 function rysujLezacego(ctx, z) {
-  const r = PROMIEN_POSTACI;
-  const stopyY = z.y + r * 0.85;
+  const sciezka = grafikaPostaci(z);
+  const { szer, wys } = rozmiarGrafiki(sciezka);
+  const y = stopyY(z);
+  const splaszczenie = 0.7;
+
+  // Cień pod leżącym
   ctx.fillStyle = "rgba(60, 90, 130, 0.25)";
   ctx.beginPath();
-  ctx.ellipse(z.x, stopyY + r * 0.05, r * 1.25, r * 0.45, 0, 0, Math.PI * 2);
+  ctx.ellipse(z.x, y, wys * 0.5, szer * 0.3, 0, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = kolorDruzyny(z);
-  ctx.beginPath();
-  ctx.ellipse(z.x, stopyY - r * 0.1, r * 1.1, r * 0.38, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
-  ctx.lineWidth = r * 0.06;
-  ctx.stroke();
+
+  const obraz = OBRAZY[sciezka];
+  if (!obraz) return;
+  ctx.save();
+  ctx.translate(z.x, y - (szer / 2) * splaszczenie);
+  ctx.scale(1, splaszczenie);
+  // Czerwony leży głową w lewo, zielony głową w prawo
+  ctx.rotate(z.druzyna === "czerwoni" ? -Math.PI / 2 : Math.PI / 2);
+  ctx.drawImage(obraz, -szer / 2, -wys / 2, szer, wys);
+  ctx.restore();
 }
 
 // Trzy małe kropki nad głową: pełne = trafienia, które zostały
 function rysujZycia(ctx, z) {
-  const r = PROMIEN_POSTACI;
   const ile = CONFIG.trafieniaDoEliminacji;
   const zostalo = ile - z.trafienia;
-  const rk = r * 0.12;
+  const rk = j(CONFIG.promienKropekZycia);
   const odstep = rk * 3;
+  const { wys } = rozmiarGrafiki(grafikaPostaci(z));
   // Nad głową, ale nie wyżej niż górna krawędź ekranu
-  const y = Math.max(z.y - r - rk * 2.5, widoczny.y0 + rk * 1.5);
+  const y = Math.max(stopyY(z) - wys - rk * 2, widoczny.y0 + rk * 1.5);
   for (let i = 0; i < ile; i++) {
     const x = z.x + (i - (ile - 1) / 2) * odstep;
     ctx.beginPath();
@@ -102,7 +137,7 @@ function rysujZawodnika(ctx, z, toGracz) {
     return;
   }
   const r = PROMIEN_POSTACI;
-  const stopyY = z.y + r * 0.85; // wysokość "stóp" (dół postaci)
+  const y = stopyY(z);
 
   ctx.save();
   // Ogłuszony jest wyblakły
@@ -111,7 +146,7 @@ function rysujZawodnika(ctx, z, toGracz) {
   // Cień: spłaszczony owal pod postacią
   ctx.fillStyle = "rgba(60, 90, 130, 0.25)";
   ctx.beginPath();
-  ctx.ellipse(z.x, stopyY, r * 0.9, r * 0.32, 0, 0, Math.PI * 2);
+  ctx.ellipse(z.x, y, r * 0.9, r * 0.32, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Niebieski owalny pierścień pod stopami gracza.
@@ -119,13 +154,13 @@ function rysujZawodnika(ctx, z, toGracz) {
   if (toGracz) {
     const rx = r * 1.15;
     const ry = r * 0.42;
-    ctx.lineWidth = r * 0.1;
+    ctx.lineWidth = j(CONFIG.gruboscPierscienia);
     let postep = 1;
     if (z.przeladowanie > 0) {
       postep = 1 - z.przeladowanie / z.przeladowanieCalosc;
       ctx.strokeStyle = CONFIG.kolorPrzeladowania;
       ctx.beginPath();
-      ctx.ellipse(z.x, stopyY, rx, ry, 0, 0, Math.PI * 2);
+      ctx.ellipse(z.x, y, rx, ry, 0, 0, Math.PI * 2);
       ctx.stroke();
     }
     if (postep > 0) {
@@ -133,35 +168,37 @@ function rysujZawodnika(ctx, z, toGracz) {
       const start = Math.PI / 2;
       ctx.strokeStyle = CONFIG.kolorPierscienia;
       ctx.beginPath();
-      ctx.ellipse(z.x, stopyY, rx, ry, 0, start, start + postep * Math.PI * 2);
+      ctx.ellipse(z.x, y, rx, ry, 0, start, start + postep * Math.PI * 2);
       ctx.stroke();
     }
   }
 
-  // Ciało zawodnika
-  ctx.fillStyle = kolorDruzyny(z);
-  ctx.beginPath();
-  ctx.arc(z.x, z.y, r, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
-  ctx.lineWidth = r * 0.06;
-  ctx.stroke();
+  // Postać z grafiki (podeszwy w punkcie stóp); gdy grafiki brak, kółko jak dawniej
+  if (!rysujSprite(ctx, grafikaPostaci(z), z.x, y)) {
+    ctx.fillStyle = kolorDruzyny(z);
+    ctx.beginPath();
+    ctx.arc(z.x, z.y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
   ctx.restore();
 
   rysujUniesionaSniezke(ctx, z);
 }
 
-// Przeciwnik przed rzutem unosi śnieżkę: od ramienia aż nad głowę, im większa siła, tym wyżej
+// Przeciwnik przed rzutem unosi śnieżkę: od ręki aż nad głowę, im większa siła, tym wyżej.
+// (Grafika ma też śnieżkę w ręce; osobna grafika rzutu dojdzie później.)
 function rysujUniesionaSniezke(ctx, z) {
   if (!z.ai || !z.ai.unoszenie) return;
-  const r = PROMIEN_POSTACI;
   const s = sila(z.ai.unoszenie.czas);
-  const x = z.x + r * 0.6 * (1 - s); // z boku przesuwa się nad środek głowy
-  const y = z.y - r * 0.2 - r * 1.9 * s; // na końcu nad kropkami z trafieniami
-  const rs = r * 0.24;
+  const { szer, wys } = rozmiarGrafiki(grafikaPostaci(z));
+  const rs = j(CONFIG.promienSniezki) * 1.1;
+  const reka = { x: z.x + szer * 0.51, y: stopyY(z) - wys * 0.61 }; // śnieżka w ręce na grafice
+  const nadGlowa = { x: z.x, y: stopyY(z) - wys - j(CONFIG.promienKropekZycia) * 5 };
+  const x = reka.x + (nadGlowa.x - reka.x) * s;
+  const y = reka.y + (nadGlowa.y - reka.y) * s;
   ctx.fillStyle = "#ffffff";
   ctx.strokeStyle = "rgba(60, 90, 130, 0.7)";
-  ctx.lineWidth = rs * 0.2;
+  ctx.lineWidth = rs * 0.25;
   ctx.beginPath();
   ctx.arc(x, y, rs, 0, Math.PI * 2);
   ctx.fill();
