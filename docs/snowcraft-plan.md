@@ -50,7 +50,7 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 5. **Lot śnieżki:** leci prosto w stronę celu. Zatrzymuje się w dotkniętym punkcie albo na końcu zasięgu, jeśli ten jest bliżej. Długie przytrzymanie nie sprawia, że leci za cel. Rysujemy ją z cieniem na ziemi (efekt łuku), to tylko wygląd.
 6. **Trafienia:** śnieżka **trafia każdego, kto stoi na jej drodze** (przeciwnika, nie samego rzucającego). Dwa trafienia ogłuszają na 3 s, trzecie eliminuje. Liczba trafień liczy się przez cały poziom.
 7. **Ruch w trakcie ładowania** jest dozwolony (dwa kciuki: jeden na kropce, drugi na planszy).
-8. **Przeładowanie:** po rzucie 3 s plus czas, który przytrzymaliśmy siłę. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Kropka lub pierścień pokazuje odliczanie.
+8. **Przeładowanie:** po rzucie 1 s plus czas, który przytrzymaliśmy siłę. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pierścień pod stopami pokazuje odliczanie.
 9. **Przeciwnicy:** te same reguły co gracz. Przed rzutem **unoszą śnieżkę nad głowę** (ostrzeżenie): im silniejszy rzut, tym dłużej unoszenie. Poziom 1: 1 przeciwnik, poziom 2: 2, poziom 3: 3 itd. Wyższe poziomy: lepsze uniki i celność.
 10. **Bonusy:** pojawiają się na planszy i aktywują się trafieniem śnieżką (rzut w ich miejsce).
 11. **Wygrana:** wyeliminowanie wszystkich przeciwników. **Przegrana:** wyeliminowanie zawodnika.

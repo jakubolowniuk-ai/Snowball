@@ -31,7 +31,7 @@ Snowcraft to gra na telefon (przeglądarka) inspirowana klasyczną grą Flash z 
 - Rzut można ładować w trakcie ruchu (jeden palec na kropce, drugi na planszy).
 - Puszczenie palca bardzo blisko zawodnika anuluje rzut (promień w `config.js`).
 - **Trafienia:** śnieżka trafia **każdego, kto stoi na jej drodze**. Pierwsze 2 trafienia ogłuszają na 3 s (nie można tym sterować), trzecie eliminuje. Liczba trafień liczy się przez cały poziom. Dotyczy gracza i przeciwników.
-- **Przeładowanie:** po rzucie 3 s plus czas ładowania siły. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pokaż odliczanie.
+- **Przeładowanie:** po rzucie 1 s plus czas ładowania siły (`czasPrzeladowania` w `config.js`). W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pokaż odliczanie.
 - **Przeciwnicy:** te same reguły co gracz. Przed rzutem unoszą śnieżkę nad głowę (ostrzeżenie), im silniejszy rzut, tym dłużej. Wyższe poziomy: lepsze uniki i celność.
 - **Wygrana:** wyeliminowani wszyscy przeciwnicy. **Przegrana:** wyeliminowany zawodnik gracza.
 - **Bonusy** (później): pojawiają się na planszy i aktywują się trafieniem śnieżką.
