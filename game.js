@@ -30,13 +30,22 @@ function nowaPostac(druzyna, start) {
 // Stan gry (wypełnia go zacznijPoziom)
 const stan = {};
 
+// Parametry obecnego poziomu z config.js
+function parametryPoziomu(stan) {
+  return CONFIG.poziomy[stan.poziom - 1];
+}
+
 // Ustawia wszystko od nowa na początek poziomu
 function zacznijPoziom(stan) {
+  stan.poziom = 1;
+  const param = parametryPoziomu(stan);
   stan.gracz = nowaPostac("czerwoni", CONFIG.startGracz);
-  stan.przeciwnicy = CONFIG.startPrzeciwnicy.map((p) => nowaPostac("zieloni", p));
+  stan.przeciwnicy = CONFIG.startPrzeciwnicy
+    .slice(0, param.przeciwnicy)
+    .map((p) => nowaPostac("zieloni", p));
+  for (const p of stan.przeciwnicy) p.ai = nowyStanAI(param);
   stan.palec = null; // gdzie jest palec trzymający kropkę (null = nikt jej nie trzyma)
   stan.chwyt = null; // zapamiętane przy złapaniu: gdzie był palec i kropka względem zawodnika
-  stan.poziom = 1;
   stan.czasPoziomu = 0; // ile sekund trwa obecny poziom
   stan.celowanie = null; // { x, y, czas } gdy palec celuje; czas = ile sekund ładuje się siła
   stan.sniezki = []; // śnieżki w locie
@@ -65,11 +74,12 @@ function trafienie(stan, z) {
   // Krótka wibracja (działa na Androidzie; iPhone tego nie obsługuje)
   if (navigator.vibrate) navigator.vibrate(CONFIG.wibracjaTrafienia);
 
-  // Trafiony gracz traci kropkę i celowanie
+  // Trafiony gracz traci kropkę i celowanie, trafiony przeciwnik traci uniesiony rzut
   if (z === stan.gracz) {
     pusc(stan);
     stan.celowanie = null;
   }
+  if (z.ai) z.ai.unoszenie = null;
 }
 
 // Najmniejsza odległość punktu (px, py) od odcinka (ax, ay)-(bx, by)
@@ -153,22 +163,60 @@ function rzuc(stan, p) {
   const g = stan.gracz;
   const d = odleglosc(g.x, g.y, p.x, p.y);
   if (d < j(CONFIG.promienAnulowania)) return; // za blisko zawodnika: anulowane
+  wykonajRzut(stan, g, p.x, p.y, c.czas);
+}
 
-  const s = sila(c.czas);
+// Rzut postaci z w punkt (celX, celY) po ładowaniu siły przez czasLadowania sekund.
+// Te same reguły dla gracza i przeciwników.
+function wykonajRzut(stan, z, celX, celY, czasLadowania) {
+  const d = odleglosc(z.x, z.y, celX, celY);
+  if (d === 0) return;
+  const s = sila(czasLadowania);
   stan.sniezki.push({
-    rzucajacy: g, // rzucającego śnieżka nie trafia
-    startX: g.x,
-    startY: g.y,
-    kierX: (p.x - g.x) / d,
-    kierY: (p.y - g.y) / d,
+    rzucajacy: z, // rzucającego śnieżka nie trafia
+    startX: z.x,
+    startY: z.y,
+    kierX: (celX - z.x) / d,
+    kierY: (celY - z.y) / d,
     dlugosc: Math.min(d, zasieg(s)), // leci do celu albo do końca zasięgu
     predkosc: j(pomiedzy(CONFIG.predkoscSniezkiMin, CONFIG.predkoscSniezkiMax, s)),
     przebyte: 0,
   });
 
   // Przeładowanie: stały czas plus czas ładowania siły
-  g.przeladowanie = CONFIG.czasPrzeladowania + Math.min(c.czas, CONFIG.MAX_CHARGE);
-  g.przeladowanieCalosc = g.przeladowanie;
+  z.przeladowanie = CONFIG.czasPrzeladowania + Math.min(czasLadowania, CONFIG.MAX_CHARGE);
+  z.przeladowanieCalosc = z.przeladowanie;
+}
+
+// --- Ruch ---
+
+// Każda drużyna chodzi tylko po swojej połowie pola
+function ograniczDoPolowy(z) {
+  const r = PROMIEN_POSTACI;
+  const srodek = SZEROKOSC_POLA / 2;
+  const minX = z.druzyna === "czerwoni" ? r : srodek + r;
+  const maxX = z.druzyna === "czerwoni" ? srodek - r : SZEROKOSC_POLA - r;
+  z.x = Math.min(Math.max(z.x, minX), maxX);
+  z.y = Math.min(Math.max(z.y, r), WYSOKOSC_POLA - r);
+}
+
+// Krok postaci w stronę punktu, z limitem prędkości. Zwraca true, gdy doszła.
+function idzDo(z, celX, celY, dt) {
+  const dx = celX - z.x;
+  const dy = celY - z.y;
+  const dystans = Math.hypot(dx, dy);
+  const krok = j(CONFIG.predkoscZawodnika) * dt;
+  let doszla = false;
+  if (dystans <= krok) {
+    z.x = celX;
+    z.y = celY;
+    doszla = true;
+  } else {
+    z.x += (dx / dystans) * krok;
+    z.y += (dy / dystans) * krok;
+  }
+  ograniczDoPolowy(z);
+  return doszla;
 }
 
 // Pozycja śnieżki na ziemi (cień) i wysokość nad ziemią (łuk, tylko wygląd)
@@ -203,7 +251,7 @@ function odlegloscKropkiOdSrodka() {
 }
 
 // Gdzie leży kropka: gdy jest trzymana, w stałym miejscu względem zawodnika (sztywno),
-// a w spoczynku za zawodnikiem, po przeciwnej stronie niż najbliższy przeciwnik.
+// a w spoczynku zawsze po lewej (za zawodnikiem, bo przeciwnicy są po prawej).
 // Nigdy nie wychodzi poza widoczny ekran, żeby dało się jej dotknąć.
 function pozycjaKropki(stan) {
   const g = stan.gracz;
@@ -211,24 +259,7 @@ function pozycjaKropki(stan) {
   if (stan.chwyt) {
     k = { x: g.x + stan.chwyt.kropkaX, y: g.y + stan.chwyt.kropkaY };
   } else {
-    let najblizszy = null;
-    let najmniej = Infinity;
-    for (const p of stan.przeciwnicy) {
-      if (p.wyeliminowany) continue;
-      const d = Math.hypot(p.x - g.x, p.y - g.y);
-      if (d < najmniej) {
-        najmniej = d;
-        najblizszy = p;
-      }
-    }
-    // Kierunek od przeciwnika do gracza (domyślnie w lewo)
-    let kx = -1;
-    let ky = 0;
-    if (najblizszy && najmniej > 0) {
-      kx = (g.x - najblizszy.x) / najmniej;
-      ky = (g.y - najblizszy.y) / najmniej;
-    }
-    k = { x: g.x + kx * odlegloscKropkiOdSrodka(), y: g.y + ky * odlegloscKropkiOdSrodka() };
+    k = { x: g.x - odlegloscKropkiOdSrodka(), y: g.y };
   }
 
   const r = j(CONFIG.promienKropki);
@@ -305,32 +336,13 @@ function aktualizuj(dt) {
     return;
   }
 
-  const g = stan.gracz;
-  const palec = stan.palec;
-  if (!palec) return;
+  // Przeciwnicy (ruch, uniki, rzuty) - logika w ai.js
+  for (const p of stan.przeciwnicy) aktualizujPrzeciwnika(stan, p, dt);
 
-  // Kropka jest sztywno przyczepiona: zawodnik chce stanąć tak,
+  // Gracz: kropka jest sztywno przyczepiona, więc zawodnik chce stanąć tak,
   // żeby palec był w tym samym miejscu względem niego co przy złapaniu.
-  const celX = palec.x - stan.chwyt.palecX;
-  const celY = palec.y - stan.chwyt.palecY;
-
-  // Krok w stronę celu, z limitem prędkości
-  const dx = celX - g.x;
-  const dy = celY - g.y;
-  const dystans = Math.hypot(dx, dy);
-  const krok = j(CONFIG.predkoscZawodnika) * dt;
-  if (dystans <= krok) {
-    g.x = celX;
-    g.y = celY;
-  } else {
-    g.x += (dx / dystans) * krok;
-    g.y += (dy / dystans) * krok;
-  }
-
-  // Nie wychodzi poza pole gry
-  const r = PROMIEN_POSTACI;
-  g.x = Math.min(Math.max(g.x, r), SZEROKOSC_POLA - r);
-  g.y = Math.min(Math.max(g.y, r), WYSOKOSC_POLA - r);
+  const palec = stan.palec;
+  if (palec) idzDo(stan.gracz, palec.x - stan.chwyt.palecX, palec.y - stan.chwyt.palecY, dt);
 }
 
 // --- Pętla gry ---

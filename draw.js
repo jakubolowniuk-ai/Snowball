@@ -150,6 +150,24 @@ function rysujZawodnika(ctx, z, toGracz) {
   ctx.restore();
 
   rysujZycia(ctx, z);
+  rysujUniesionaSniezke(ctx, z);
+}
+
+// Przeciwnik przed rzutem unosi śnieżkę: od ramienia aż nad głowę, im większa siła, tym wyżej
+function rysujUniesionaSniezke(ctx, z) {
+  if (!z.ai || !z.ai.unoszenie) return;
+  const r = PROMIEN_POSTACI;
+  const s = sila(z.ai.unoszenie.czas);
+  const x = z.x + r * 0.6 * (1 - s); // z boku przesuwa się nad środek głowy
+  const y = z.y - r * 0.2 - r * 1.9 * s; // na końcu nad kropkami z trafieniami
+  const rs = r * 0.24;
+  ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = "rgba(60, 90, 130, 0.7)";
+  ctx.lineWidth = rs * 0.2;
+  ctx.beginPath();
+  ctx.arc(x, y, rs, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
 }
 
 // Biała chmurka śniegu: kilka kółek rozlatuje się i znika
