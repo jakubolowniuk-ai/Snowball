@@ -3,12 +3,24 @@
 const canvas = document.getElementById("plansza");
 const ctx = canvas.getContext("2d");
 
+// Wewnątrz kodu pole gry ma 1000 jednostek szerokości.
+// Funkcja j() zamienia ułamek szerokości z config.js na te jednostki.
+const SZEROKOSC_POLA = 1000;
+const WYSOKOSC_POLA = SZEROKOSC_POLA / CONFIG.ASPECT;
+function j(ulamek) {
+  return ulamek * SZEROKOSC_POLA;
+}
+
+const PROMIEN_POSTACI = j(CONFIG.rozmiarPostaci) / 2;
+
 // Stan gry
 const stan = {
-  gracz: { druzyna: "czerwoni", x: CONFIG.startGracz.x, y: CONFIG.startGracz.y },
-  przeciwnicy: CONFIG.startPrzeciwnicy.map((p) => ({ druzyna: "zieloni", x: p.x, y: p.y })),
+  gracz: { druzyna: "czerwoni", x: j(CONFIG.startGracz.x), y: j(CONFIG.startGracz.y) },
+  przeciwnicy: CONFIG.startPrzeciwnicy.map((p) => ({ druzyna: "zieloni", x: j(p.x), y: j(p.y) })),
   palec: null, // gdzie jest palec trzymający kropkę (null = nikt jej nie trzyma)
   chwyt: null, // zapamiętane przy złapaniu: gdzie był palec i kropka względem zawodnika
+  poziom: 1,
+  czasPoziomu: 0, // ile sekund trwa obecny poziom
 };
 
 // Wywoływane, gdy palec złapie kropkę: zapamiętujemy sztywne przesunięcia
@@ -29,39 +41,49 @@ function pusc(stan) {
 
 // Odległość środka kropki od środka zawodnika
 function odlegloscKropkiOdSrodka() {
-  return CONFIG.promienZawodnika + CONFIG.odlegloscKropki;
+  return PROMIEN_POSTACI + j(CONFIG.odlegloscKropki);
 }
 
 // Gdzie leży kropka: gdy jest trzymana, w stałym miejscu względem zawodnika (sztywno),
 // a w spoczynku za zawodnikiem, po przeciwnej stronie niż najbliższy przeciwnik.
+// Nigdy nie wychodzi poza widoczny ekran, żeby dało się jej dotknąć.
 function pozycjaKropki(stan) {
   const g = stan.gracz;
-  if (stan.chwyt) return { x: g.x + stan.chwyt.kropkaX, y: g.y + stan.chwyt.kropkaY };
-
-  let najblizszy = null;
-  let najmniej = Infinity;
-  for (const p of stan.przeciwnicy) {
-    const d = Math.hypot(p.x - g.x, p.y - g.y);
-    if (d < najmniej) {
-      najmniej = d;
-      najblizszy = p;
+  let k;
+  if (stan.chwyt) {
+    k = { x: g.x + stan.chwyt.kropkaX, y: g.y + stan.chwyt.kropkaY };
+  } else {
+    let najblizszy = null;
+    let najmniej = Infinity;
+    for (const p of stan.przeciwnicy) {
+      const d = Math.hypot(p.x - g.x, p.y - g.y);
+      if (d < najmniej) {
+        najmniej = d;
+        najblizszy = p;
+      }
     }
+    // Kierunek od przeciwnika do gracza (domyślnie w lewo)
+    let kx = -1;
+    let ky = 0;
+    if (najblizszy && najmniej > 0) {
+      kx = (g.x - najblizszy.x) / najmniej;
+      ky = (g.y - najblizszy.y) / najmniej;
+    }
+    k = { x: g.x + kx * odlegloscKropkiOdSrodka(), y: g.y + ky * odlegloscKropkiOdSrodka() };
   }
 
-  // Kierunek od przeciwnika do gracza (domyślnie w lewo)
-  let kx = -1;
-  let ky = 0;
-  if (najblizszy && najmniej > 0) {
-    kx = (g.x - najblizszy.x) / najmniej;
-    ky = (g.y - najblizszy.y) / najmniej;
-  }
-  return { x: g.x + kx * odlegloscKropkiOdSrodka(), y: g.y + ky * odlegloscKropkiOdSrodka() };
+  const r = j(CONFIG.promienKropki);
+  k.x = Math.min(Math.max(k.x, widoczny.x0 + r), widoczny.x1 - r);
+  k.y = Math.min(Math.max(k.y, widoczny.y0 + r), widoczny.y1 - r);
+  return k;
 }
 
-// --- Skalowanie planszy do ekranu ---
+// --- Skalowanie pola gry do ekranu ---
 let skala = 1;
 let przesuniecieX = 0;
 let przesuniecieY = 0;
+// Widoczny fragment ekranu w jednostkach pola (razem z marginesami poza polem)
+const widoczny = { x0: 0, y0: 0, x1: SZEROKOSC_POLA, y1: WYSOKOSC_POLA };
 
 function dopasujDoEkranu() {
   const dpr = window.devicePixelRatio || 1; // ile pikseli ekranu na jeden piksel CSS
@@ -70,12 +92,17 @@ function dopasujDoEkranu() {
   canvas.width = Math.round(w * dpr);
   canvas.height = Math.round(h * dpr);
 
-  // Cała plansza ma się zmieścić, wyśrodkowana
-  skala = Math.min(w / CONFIG.szerokoscPlanszy, h / CONFIG.wysokoscPlanszy);
-  przesuniecieX = (w - CONFIG.szerokoscPlanszy * skala) / 2;
-  przesuniecieY = (h - CONFIG.wysokoscPlanszy * skala) / 2;
+  // Całe pole ma się zmieścić, wyśrodkowane
+  skala = Math.min(w / SZEROKOSC_POLA, h / WYSOKOSC_POLA);
+  przesuniecieX = (w - SZEROKOSC_POLA * skala) / 2;
+  przesuniecieY = (h - WYSOKOSC_POLA * skala) / 2;
 
-  // Od teraz rysujemy w jednostkach planszy
+  widoczny.x0 = -przesuniecieX / skala;
+  widoczny.y0 = -przesuniecieY / skala;
+  widoczny.x1 = (w - przesuniecieX) / skala;
+  widoczny.y1 = (h - przesuniecieY) / skala;
+
+  // Od teraz rysujemy w jednostkach pola
   ctx.setTransform(dpr * skala, 0, 0, dpr * skala, dpr * przesuniecieX, dpr * przesuniecieY);
 }
 
@@ -93,6 +120,8 @@ podepnijSterowanie(canvas, stan, ekranNaPlansze);
 
 // --- Aktualizacja świata ---
 function aktualizuj(dt) {
+  stan.czasPoziomu += dt;
+
   const g = stan.gracz;
   const palec = stan.palec;
   if (!palec) return;
@@ -106,7 +135,7 @@ function aktualizuj(dt) {
   const dx = celX - g.x;
   const dy = celY - g.y;
   const dystans = Math.hypot(dx, dy);
-  const krok = CONFIG.predkoscZawodnika * dt;
+  const krok = j(CONFIG.predkoscZawodnika) * dt;
   if (dystans <= krok) {
     g.x = celX;
     g.y = celY;
@@ -115,10 +144,10 @@ function aktualizuj(dt) {
     g.y += (dy / dystans) * krok;
   }
 
-  // Nie wychodzi poza planszę
-  const r = CONFIG.promienZawodnika;
-  g.x = Math.min(Math.max(g.x, r), CONFIG.szerokoscPlanszy - r);
-  g.y = Math.min(Math.max(g.y, r), CONFIG.wysokoscPlanszy - r);
+  // Nie wychodzi poza pole gry
+  const r = PROMIEN_POSTACI;
+  g.x = Math.min(Math.max(g.x, r), SZEROKOSC_POLA - r);
+  g.y = Math.min(Math.max(g.y, r), WYSOKOSC_POLA - r);
 }
 
 // --- Pętla gry ---
@@ -130,13 +159,6 @@ function klatka(teraz) {
   poprzedniCzas = teraz;
 
   aktualizuj(dt);
-
-  // Czyścimy cały canvas (także pasy poza planszą)
-  ctx.save();
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.restore();
-
   rysujScene(ctx, stan);
   requestAnimationFrame(klatka);
 }
