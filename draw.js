@@ -115,13 +115,28 @@ function rysujZawodnika(ctx, z, toGracz) {
   ctx.ellipse(z.x, stopyY, r * 0.9, r * 0.32, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Niebieski owalny pierścień pod stopami gracza
+  // Niebieski owalny pierścień pod stopami gracza.
+  // W trakcie przeładowania jest szary, a niebieski łuk dorysowuje się jak wskazówka zegara.
   if (toGracz) {
-    ctx.strokeStyle = CONFIG.kolorPierscienia;
+    const rx = r * 1.15;
+    const ry = r * 0.42;
     ctx.lineWidth = r * 0.1;
-    ctx.beginPath();
-    ctx.ellipse(z.x, stopyY, r * 1.15, r * 0.42, 0, 0, Math.PI * 2);
-    ctx.stroke();
+    let postep = 1;
+    if (z.przeladowanie > 0) {
+      postep = 1 - z.przeladowanie / z.przeladowanieCalosc;
+      ctx.strokeStyle = CONFIG.kolorPrzeladowania;
+      ctx.beginPath();
+      ctx.ellipse(z.x, stopyY, rx, ry, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    if (postep > 0) {
+      // Zaczyna się z przodu (na dole), żeby postać nie zasłaniała początku łuku
+      const start = Math.PI / 2;
+      ctx.strokeStyle = CONFIG.kolorPierscienia;
+      ctx.beginPath();
+      ctx.ellipse(z.x, stopyY, rx, ry, 0, start, start + postep * Math.PI * 2);
+      ctx.stroke();
+    }
   }
 
   // Ciało zawodnika
