@@ -1,0 +1,636 @@
+{
+ "px_na_jednostke": 2.0,
+ "kolory": {
+  "czerwony": "#E02020",
+  "zielony": "#2E9E3F",
+  "niebieski": "#2A6FD6",
+  "zolty": "#F2C417",
+  "pomaranczowy": "#F28A1C",
+  "fioletowy": "#8E44C9",
+  "rozowy": "#F06BA8",
+  "blekitny": "#4FC3F7",
+  "limonkowy": "#9ACD32",
+  "brazowy": "#8B5A2B",
+  "turkusowy": "#1ABC9C",
+  "granatowy": "#1F3A7A",
+  "magenta": "#D81B8C",
+  "szary": "#7F8C8D",
+  "bordowy": "#8B1E3F",
+  "zloty": "#D4A017"
+ },
+ "sprity": {
+  "assets/dekoracje/choinka_1.png": {
+   "szer_px": 144,
+   "wys_px": 204,
+   "szer_jedn": 72.0,
+   "wys_jedn": 102.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.97
+   }
+  },
+  "assets/dekoracje/choinka_2.png": {
+   "szer_px": 116,
+   "wys_px": 175,
+   "szer_jedn": 58.0,
+   "wys_jedn": 87.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.97
+   }
+  },
+  "assets/dekoracje/choinka_3.png": {
+   "szer_px": 101,
+   "wys_px": 129,
+   "szer_jedn": 50.5,
+   "wys_jedn": 64.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.97
+   }
+  },
+  "assets/dekoracje/choinka_4.png": {
+   "szer_px": 89,
+   "wys_px": 103,
+   "szer_jedn": 44.5,
+   "wys_jedn": 51.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.97
+   }
+  },
+  "assets/dekoracje/balwan_1.png": {
+   "szer_px": 154,
+   "wys_px": 167,
+   "szer_jedn": 77.0,
+   "wys_jedn": 83.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/balwan_2.png": {
+   "szer_px": 152,
+   "wys_px": 171,
+   "szer_jedn": 76.0,
+   "wys_jedn": 85.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/balwan_3.png": {
+   "szer_px": 143,
+   "wys_px": 162,
+   "szer_jedn": 71.5,
+   "wys_jedn": 81.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/balwan_4.png": {
+   "szer_px": 142,
+   "wys_px": 162,
+   "szer_jedn": 71.0,
+   "wys_jedn": 81.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/plot_1.png": {
+   "szer_px": 156,
+   "wys_px": 91,
+   "szer_jedn": 78.0,
+   "wys_jedn": 45.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/plot_2.png": {
+   "szer_px": 177,
+   "wys_px": 85,
+   "szer_jedn": 88.5,
+   "wys_jedn": 42.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/plot_3.png": {
+   "szer_px": 174,
+   "wys_px": 86,
+   "szer_jedn": 87.0,
+   "wys_jedn": 43.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/plot_4.png": {
+   "szer_px": 150,
+   "wys_px": 79,
+   "szer_jedn": 75.0,
+   "wys_jedn": 39.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/fort_1.png": {
+   "szer_px": 204,
+   "wys_px": 102,
+   "szer_jedn": 102.0,
+   "wys_jedn": 51.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/fort_2.png": {
+   "szer_px": 199,
+   "wys_px": 86,
+   "szer_jedn": 99.5,
+   "wys_jedn": 43.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/fort_3.png": {
+   "szer_px": 198,
+   "wys_px": 110,
+   "szer_jedn": 99.0,
+   "wys_jedn": 55.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/dekoracje/fort_4.png": {
+   "szer_px": 199,
+   "wys_px": 95,
+   "szer_jedn": 99.5,
+   "wys_jedn": 47.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.95
+   }
+  },
+  "assets/efekty/rozbryzg_1.png": {
+   "szer_px": 94,
+   "wys_px": 87,
+   "szer_jedn": 47.0,
+   "wys_jedn": 43.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/rozbryzg_2.png": {
+   "szer_px": 94,
+   "wys_px": 84,
+   "szer_jedn": 47.0,
+   "wys_jedn": 42.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/rozbryzg_3.png": {
+   "szer_px": 94,
+   "wys_px": 91,
+   "szer_jedn": 47.0,
+   "wys_jedn": 45.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/rozbryzg_4.png": {
+   "szer_px": 94,
+   "wys_px": 87,
+   "szer_jedn": 47.0,
+   "wys_jedn": 43.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/rozbryzg_5.png": {
+   "szer_px": 91,
+   "wys_px": 94,
+   "szer_jedn": 45.5,
+   "wys_jedn": 47.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/rozbryzg_6.png": {
+   "szer_px": 91,
+   "wys_px": 94,
+   "szer_jedn": 45.5,
+   "wys_jedn": 47.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/rozbryzg_7.png": {
+   "szer_px": 94,
+   "wys_px": 89,
+   "szer_jedn": 47.0,
+   "wys_jedn": 44.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/rozbryzg_8.png": {
+   "szer_px": 94,
+   "wys_px": 93,
+   "szer_jedn": 47.0,
+   "wys_jedn": 46.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/obloczek_sniegu_1.png": {
+   "szer_px": 114,
+   "wys_px": 99,
+   "szer_jedn": 57.0,
+   "wys_jedn": 49.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/obloczek_sniegu_2.png": {
+   "szer_px": 114,
+   "wys_px": 85,
+   "szer_jedn": 57.0,
+   "wys_jedn": 42.5,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/sniezka.png": {
+   "szer_px": 27,
+   "wys_px": 28,
+   "szer_jedn": 13.5,
+   "wys_jedn": 14.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/efekty/kupka_sniezek.png": {
+   "szer_px": 64,
+   "wys_px": 54,
+   "szer_jedn": 32.0,
+   "wys_jedn": 27.0,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.9
+   }
+  },
+  "assets/gracze/czerwony_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/zielony_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/niebieski_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/zolty_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/pomaranczowy_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/fioletowy_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/rozowy_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/blekitny_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/limonkowy_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/brazowy_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/turkusowy_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/granatowy_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/magenta_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/szary_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/bordowy_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/zloty_przod.png": {
+   "szer_px": 114,
+   "wys_px": 144,
+   "szer_jedn": 57.0,
+   "wys_jedn": 72.0,
+   "kotwica": {
+    "x": 0.367,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/czerwony_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/zielony_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/niebieski_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/zolty_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/pomaranczowy_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/fioletowy_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/rozowy_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/blekitny_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/limonkowy_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/brazowy_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/turkusowy_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/granatowy_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/magenta_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/szary_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/bordowy_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/gracze/zloty_tyl.png": {
+   "szer_px": 110,
+   "wys_px": 143,
+   "szer_jedn": 55.0,
+   "wys_jedn": 71.5,
+   "kotwica": {
+    "x": 0.563,
+    "y": 0.98
+   }
+  },
+  "assets/tlo/tlo_plansza.png": {
+   "szer_px": 2400,
+   "wys_px": 1500,
+   "szer_jedn": 1200.0,
+   "wys_jedn": 750.0,
+   "pole_gry_px": {
+    "x": 200,
+    "y": 250,
+    "szer": 2000,
+    "wys": 1000
+   },
+   "uwaga": "pole gry 1000x500 jedn. leży na środku; zapas 100 jedn. po bokach i 125 jedn. u góry i u dołu"
+  }
+ }
+}

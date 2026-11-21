@@ -36,16 +36,18 @@ const CONFIG = {
   czasChmurki: 0.4, // jak długo widać białą chmurkę śniegu po trafieniu
   czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem
 
-  // Poziomy: ilu przeciwników i jak dobrze grają
+  // Poziomy: ilu przeciwników i jak dobrze grają.
+  // Po ostatnim poziomie gra idzie dalej (Level 6, 7...) z ustawieniami ostatniego.
+  //  czasReakcji: ile sekund mija, zanim zauważy lecącą śnieżkę i zacznie unik
+  //  szansaUniku: szansa (0-1), że w ogóle spróbuje uniknąć śnieżki
+  //  rozrzut: jak bardzo chybia (promień losowego błędu celowania)
+  //  przerwaMin/Max: przerwa między rzutami jednego przeciwnika (sekundy, losowo)
   poziomy: [
-    {
-      przeciwnicy: 1,
-      czasReakcji: 0.8, // ile sekund mija, zanim zauważy lecącą śnieżkę i zacznie unik
-      szansaUniku: 0.3, // szansa (0-1), że w ogóle spróbuje uniknąć śnieżki
-      rozrzut: 0.08, // jak bardzo chybia: promień losowego błędu celowania
-      przerwaMin: 1.5, // przerwa między rzutami (sekundy, losowo od min do max)
-      przerwaMax: 3,
-    },
+    { przeciwnicy: 1, czasReakcji: 0.8, szansaUniku: 0.3, rozrzut: 0.08, przerwaMin: 1.5, przerwaMax: 3 },
+    { przeciwnicy: 2, czasReakcji: 0.7, szansaUniku: 0.4, rozrzut: 0.07, przerwaMin: 2, przerwaMax: 3.5 },
+    { przeciwnicy: 3, czasReakcji: 0.6, szansaUniku: 0.5, rozrzut: 0.06, przerwaMin: 2.5, przerwaMax: 4 },
+    { przeciwnicy: 4, czasReakcji: 0.5, szansaUniku: 0.6, rozrzut: 0.05, przerwaMin: 3, przerwaMax: 4.5 },
+    { przeciwnicy: 5, czasReakcji: 0.4, szansaUniku: 0.7, rozrzut: 0.04, przerwaMin: 3.5, przerwaMax: 5 },
   ],
 
   // Zachowanie przeciwnika (na każdym poziomie takie samo)
@@ -57,7 +59,8 @@ const CONFIG = {
 
   // Pozycje startowe (y też jako ułamek szerokości; wysokość pola to 1 / ASPECT)
   startGracz: { x: 0.15, y: 0.25 },
-  startPrzeciwnicy: [{ x: 0.85, y: 0.25 }],
+  // Przeciwnicy stoją na zmianę w dwóch kolumnach (x), równo rozłożeni w pionie
+  kolumnyPrzeciwnikow: [0.85, 0.68],
 
   // Dwie dekoracyjne zaspy (bez kolizji): środek, szerokość i wysokość owalu
   zaspy: [

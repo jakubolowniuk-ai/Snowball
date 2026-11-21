@@ -30,19 +30,32 @@ function nowaPostac(druzyna, start) {
 // Stan gry (wypełnia go zacznijPoziom)
 const stan = {};
 
-// Parametry obecnego poziomu z config.js
+// Parametry obecnego poziomu z config.js (po ostatnim zostają ustawienia ostatniego)
 function parametryPoziomu(stan) {
-  return CONFIG.poziomy[stan.poziom - 1];
+  const ile = CONFIG.poziomy.length;
+  return CONFIG.poziomy[Math.min(stan.poziom, ile) - 1];
 }
 
-// Ustawia wszystko od nowa na początek poziomu
-function zacznijPoziom(stan) {
-  stan.poziom = 1;
+// Pozycje startowe n przeciwników: na zmianę w dwóch kolumnach, równo w pionie
+function pozycjePrzeciwnikow(n) {
+  const wysokosc = 1 / CONFIG.ASPECT; // wysokość pola jako ułamek szerokości
+  const pozycje = [];
+  for (let i = 0; i < n; i++) {
+    pozycje.push({
+      x: CONFIG.kolumnyPrzeciwnikow[i % 2],
+      y: ((i + 0.5) / n) * wysokosc,
+    });
+  }
+  return pozycje;
+}
+
+// Ustawia wszystko od nowa na początek poziomu o numerze "poziom"
+function zacznijPoziom(stan, poziom) {
+  stan.poziom = poziom;
   const param = parametryPoziomu(stan);
   stan.gracz = nowaPostac("czerwoni", CONFIG.startGracz);
-  stan.przeciwnicy = CONFIG.startPrzeciwnicy
-    .slice(0, param.przeciwnicy)
-    .map((p) => nowaPostac("zieloni", p));
+  stan.przeciwnicy = pozycjePrzeciwnikow(param.przeciwnicy).map((p) => nowaPostac("zieloni", p));
+  for (const p of stan.przeciwnicy) ograniczDoPolowy(p); // nie za blisko brzegu
   for (const p of stan.przeciwnicy) p.ai = nowyStanAI(param);
   stan.palec = null; // gdzie jest palec trzymający kropkę (null = nikt jej nie trzyma)
   stan.chwyt = null; // zapamiętane przy złapaniu: gdzie był palec i kropka względem zawodnika
@@ -52,7 +65,7 @@ function zacznijPoziom(stan) {
   stan.chmurki = []; // białe chmurki po trafieniach
   stan.koniec = null; // { wynik: "wygrana" | "przegrana", czas } po końcu poziomu
 }
-zacznijPoziom(stan);
+zacznijPoziom(stan, 1);
 
 // Czy gracz może teraz sterować (ruch i rzut)
 function graczMozeSterowac(stan) {
@@ -332,7 +345,11 @@ function aktualizuj(dt) {
   sprawdzKoniec(stan);
   if (stan.koniec) {
     stan.koniec.czas += dt;
-    if (stan.koniec.czas >= CONFIG.czasNapisuKonca) zacznijPoziom(stan);
+    if (stan.koniec.czas >= CONFIG.czasNapisuKonca) {
+      // Wygrana: następny poziom. Przegrana: ten sam poziom od nowa.
+      const nastepny = stan.koniec.wynik === "wygrana" ? stan.poziom + 1 : stan.poziom;
+      zacznijPoziom(stan, nastepny);
+    }
     return;
   }
 
@@ -346,7 +363,7 @@ function aktualizuj(dt) {
 }
 
 // --- Pętla gry ---
-let poprzedniCzas = performance.now();
+let poprzedniCzas = 0;
 
 function klatka(teraz) {
   // Czas od poprzedniej klatki w sekundach (max 0,1 s, gdy karta była w tle)
@@ -358,4 +375,11 @@ function klatka(teraz) {
   requestAnimationFrame(klatka);
 }
 
-requestAnimationFrame(klatka);
+// Start: najpierw napis "Ładowanie...", gra rusza po wczytaniu wszystkich obrazków
+rysujTlo(ctx);
+rysujNapis(ctx, "Ładowanie...");
+wczytajObrazy(() => {
+  zacznijPoziom(stan, 1); // od nowa, gdyby ktoś dotykał ekranu w trakcie ładowania
+  poprzedniCzas = performance.now();
+  requestAnimationFrame(klatka);
+});

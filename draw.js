@@ -82,7 +82,8 @@ function rysujZycia(ctx, z) {
   const zostalo = ile - z.trafienia;
   const rk = r * 0.12;
   const odstep = rk * 3;
-  const y = z.y - r - rk * 2.5;
+  // Nad głową, ale nie wyżej niż górna krawędź ekranu
+  const y = Math.max(z.y - r - rk * 2.5, widoczny.y0 + rk * 1.5);
   for (let i = 0; i < ile; i++) {
     const x = z.x + (i - (ile - 1) / 2) * odstep;
     ctx.beginPath();
@@ -149,7 +150,6 @@ function rysujZawodnika(ctx, z, toGracz) {
   ctx.stroke();
   ctx.restore();
 
-  rysujZycia(ctx, z);
   rysujUniesionaSniezke(ctx, z);
 }
 
@@ -300,6 +300,8 @@ function rysujScene(ctx, stan) {
   for (const z of [...lezacy, ...stojacy]) {
     rysujZawodnika(ctx, z, z === stan.gracz);
   }
+  // Kropki z trafieniami na końcu, żeby żadna postać ich nie zasłoniła
+  for (const z of stojacy) rysujZycia(ctx, z);
 
   rysujCelowanie(ctx, stan); // nad postaciami, żeby cel na przeciwniku był widoczny
   rysujSniezki(ctx, stan); // śnieżki są w powietrzu, więc nad postaciami
