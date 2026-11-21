@@ -36,6 +36,25 @@ const CONFIG = {
   czasChmurki: 0.4, // jak długo widać białą chmurkę śniegu po trafieniu
   czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem
 
+  // Poziomy: ilu przeciwników i jak dobrze grają
+  poziomy: [
+    {
+      przeciwnicy: 1,
+      czasReakcji: 0.8, // ile sekund mija, zanim zauważy lecącą śnieżkę i zacznie unik
+      szansaUniku: 0.3, // szansa (0-1), że w ogóle spróbuje uniknąć śnieżki
+      rozrzut: 0.08, // jak bardzo chybia: promień losowego błędu celowania
+      przerwaMin: 1.5, // przerwa między rzutami (sekundy, losowo od min do max)
+      przerwaMax: 3,
+    },
+  ],
+
+  // Zachowanie przeciwnika (na każdym poziomie takie samo)
+  wedrowka: 0.12, // jak daleko odchodzi przy losowym chodzeniu
+  postojMin: 0.4, // ile stoi między krokami (sekundy, losowo od min do max)
+  postojMax: 1.2,
+  odskok: 0.12, // jak daleko odskakuje w bok przy uniku
+  zapasSily: 0.15, // ile sekund dłużej ładuje siłę, żeby na pewno dorzucić
+
   // Pozycje startowe (y też jako ułamek szerokości; wysokość pola to 1 / ASPECT)
   startGracz: { x: 0.15, y: 0.25 },
   startPrzeciwnicy: [{ x: 0.85, y: 0.25 }],
