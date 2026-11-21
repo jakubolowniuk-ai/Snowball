@@ -58,9 +58,10 @@ const CONFIG = {
   zapasSily: 0.15, // ile sekund dłużej ładuje siłę, żeby na pewno dorzucić
 
   // Pozycje startowe (y też jako ułamek szerokości; wysokość pola to 1 / ASPECT)
-  startGracz: { x: 0.15, y: 0.25 },
-  // Przeciwnicy stoją na zmianę w dwóch kolumnach (x), równo rozłożeni w pionie
-  kolumnyPrzeciwnikow: [0.85, 0.68],
+  startGracz: { x: 0.85, y: 0.38 }, // prawy dolny róg
+  // Przeciwnicy stoją w lewym górnym trójkącie, równo rozłożeni na linii równoległej
+  // do przekątnej. 0 = w samym lewym górnym rogu, 1 = na przekątnej (granicy).
+  liniaPrzeciwnikow: 0.55,
 
   // Niebieskawe przyciemnienie przy brzegach pola: jak głęboko wchodzi
   glebokoscBrzegu: 0.05,
@@ -72,7 +73,7 @@ const CONFIG = {
 
   // Grafiki postaci i mnożnik ich wielkości (1 = rozmiar z sprites.json).
   // Mnożnik zmienia tylko wygląd; okrąg trafień ustawia rozmiarPostaci.
-  grafikaGracza: "assets/gracze/czerwony_przod.png",
+  grafikaGracza: "assets/gracze/czerwony_tyl.png", // gracz na dole, widać go z tyłu
   grafikaPrzeciwnika: "assets/gracze/zielony_przod.png",
   skalaGrafik: 1,
   skalaSniezki: 1.6, // śnieżka rysowana większa niż jej okrąg trafień (lepiej widoczna)

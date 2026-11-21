@@ -24,11 +24,11 @@ Snowcraft to gra na telefon (przeglądarka) inspirowana klasyczną grą Flash z 
 
 ## Zasady gry (skrót)
 - Jeden zawodnik gracza, zawsze zaznaczony (niebieski owalny pierścień pod stopami). Przeciwników na poziomie N jest N (poziom 1: 1, poziom 2: 2, itd.).
-- **Ruch:** za zawodnikiem jest **kropka (uchwyt)** w stałej odległości (ok. 1 cm), zawsze po lewej stronie (z tyłu, bo przeciwnicy są po prawej). Podczas przeciągania jest sztywno przyczepiona i się nie obraca. Dotknięcie kropki i przeciąganie porusza zawodnika (idzie za kropką, z limitem prędkości). Palec dotyka kropki, nie zawodnika, więc go nie zasłania.
+- **Ruch:** za zawodnikiem jest **kropka (uchwyt)** w stałej odległości (ok. 1 cm), zawsze po prawej stronie (z dala od przeciwników, pod prawym kciukiem). Podczas przeciągania jest sztywno przyczepiona i się nie obraca. Dotknięcie kropki i przeciąganie porusza zawodnika (idzie za kropką, z limitem prędkości). Palec dotyka kropki, nie zawodnika, więc go nie zasłania.
 - **Rzut:** drugi palec dotyka dowolnego punktu planszy (poza kropką). Znacznik celu jest dokładnie w miejscu dotyku, cienka linia łączy go z zawodnikiem. Przytrzymanie ładuje siłę (max 1,5 s). Siła zwiększa **prędkość i maksymalny zasięg** śnieżki. Puszczenie palca = rzut.
 - **Lot śnieżki:** leci prosto do celu. Zatrzymuje się w punkcie celu albo na końcu zasięgu, jeśli jest bliżej. Dłuższe przytrzymanie nie sprawia, że leci za cel. Rysuj ją z cieniem na ziemi (efekt łuku), to tylko wygląd.
 - Bez paska siły. Wzdłuż linii do celu rośnie pierścień zasięgu, a gdy sięga celu, zmienia kolor na zielony.
-- **Połowy pola:** gracz chodzi tylko po lewej połowie, przeciwnicy tylko po prawej.
+- **Strony pola:** granica drużyn to przekątna pola (od lewego dolnego do prawego górnego rogu). Gracz gra w prawym dolnym trójkącie i jest pokazany z tyłu (`czerwony_tyl.png`), przeciwnicy w lewym górnym trójkącie, przodem. Nikt nie przechodzi przez przekątną.
 - Rzut można ładować w trakcie ruchu (jeden palec na kropce, drugi na planszy).
 - Puszczenie palca bardzo blisko zawodnika anuluje rzut (promień w `config.js`).
 - **Trafienia:** śnieżka trafia **każdego, kto stoi na jej drodze**. Pierwsze 2 trafienia ogłuszają na 1 s (`czasOgluszenia` w `config.js`, nie można wtedy ruszać się ani rzucać), trzecie eliminuje. Liczba trafień liczy się przez cały poziom. Dotyczy gracza i przeciwników.
