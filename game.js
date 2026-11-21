@@ -21,7 +21,61 @@ const stan = {
   chwyt: null, // zapamiętane przy złapaniu: gdzie był palec i kropka względem zawodnika
   poziom: 1,
   czasPoziomu: 0, // ile sekund trwa obecny poziom
+  celowanie: null, // { x, y, czas } gdy palec celuje; czas = ile sekund ładuje się siła
+  sniezki: [], // śnieżki w locie
 };
+
+// --- Rzut ---
+
+// Liniowe przejście od a do b, gdy t idzie od 0 do 1
+function pomiedzy(a, b, t) {
+  return a + (b - a) * t;
+}
+
+// Siła od 0 do 1 zależnie od czasu przytrzymania
+function sila(czas) {
+  return Math.min(czas / CONFIG.MAX_CHARGE, 1);
+}
+
+function zasieg(s) {
+  return j(pomiedzy(CONFIG.zasiegMin, CONFIG.zasiegMax, s));
+}
+
+function zacznijCelowanie(stan, p) {
+  stan.celowanie = { x: p.x, y: p.y, czas: 0 };
+}
+
+// Puszczenie palca celującego: rzut w miejsce palca albo anulowanie
+function rzuc(stan, p) {
+  const c = stan.celowanie;
+  stan.celowanie = null;
+  if (!c) return;
+
+  const g = stan.gracz;
+  const d = odleglosc(g.x, g.y, p.x, p.y);
+  if (d < j(CONFIG.promienAnulowania)) return; // za blisko zawodnika: anulowane
+
+  const s = sila(c.czas);
+  stan.sniezki.push({
+    startX: g.x,
+    startY: g.y,
+    kierX: (p.x - g.x) / d,
+    kierY: (p.y - g.y) / d,
+    dlugosc: Math.min(d, zasieg(s)), // leci do celu albo do końca zasięgu
+    predkosc: j(pomiedzy(CONFIG.predkoscSniezkiMin, CONFIG.predkoscSniezkiMax, s)),
+    przebyte: 0,
+  });
+}
+
+// Pozycja śnieżki na ziemi (cień) i wysokość nad ziemią (łuk, tylko wygląd)
+function pozycjaSniezki(sn) {
+  const t = sn.przebyte / sn.dlugosc;
+  return {
+    x: sn.startX + sn.kierX * sn.przebyte,
+    y: sn.startY + sn.kierY * sn.przebyte,
+    wysokosc: 4 * t * (1 - t) * CONFIG.wysokoscLuku * sn.dlugosc,
+  };
+}
 
 // Wywoływane, gdy palec złapie kropkę: zapamiętujemy sztywne przesunięcia
 function zlapKropke(stan, palec) {
@@ -121,6 +175,13 @@ podepnijSterowanie(canvas, stan, ekranNaPlansze);
 // --- Aktualizacja świata ---
 function aktualizuj(dt) {
   stan.czasPoziomu += dt;
+
+  // Ładowanie siły, dopóki palec celuje
+  if (stan.celowanie) stan.celowanie.czas += dt;
+
+  // Lot śnieżek; po dotarciu do końca znikają (trafień jeszcze nie ma)
+  for (const sn of stan.sniezki) sn.przebyte += sn.predkosc * dt;
+  stan.sniezki = stan.sniezki.filter((sn) => sn.przebyte < sn.dlugosc);
 
   const g = stan.gracz;
   const palec = stan.palec;
