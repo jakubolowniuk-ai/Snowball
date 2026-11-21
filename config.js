@@ -33,7 +33,7 @@ const CONFIG = {
   trafieniaDoEliminacji: 3, // wcześniejsze trafienia tylko ogłuszają
   czasOgluszenia: 1, // sekundy bez ruchu i bez rzutu
   wibracjaTrafienia: 60, // milisekundy wibracji telefonu przy trafieniu (Android)
-  czasChmurki: 0.4, // jak długo widać białą chmurkę śniegu po trafieniu
+  czasChmurki: 0.5, // jak długo widać obłoczek i rozbryzg po trafieniu
   czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem
 
   // Poziomy: ilu przeciwników i jak dobrze grają.
@@ -75,6 +75,7 @@ const CONFIG = {
   grafikaGracza: "assets/gracze/czerwony_przod.png",
   grafikaPrzeciwnika: "assets/gracze/zielony_przod.png",
   skalaGrafik: 1,
+  skalaSniezki: 1.6, // śnieżka rysowana większa niż jej okrąg trafień (lepiej widoczna)
   promienKropekZycia: 0.006, // kropki z trafieniami nad głową
   gruboscPierscienia: 0.004, // linia pierścienia pod stopami gracza
 

@@ -82,7 +82,15 @@ function trafienie(stan, z) {
   } else {
     z.ogluszenie = CONFIG.czasOgluszenia;
   }
-  stan.chmurki.push({ x: z.x, y: z.y, czas: 0 });
+  // Obłoczek i rozbryzg na wysokości tułowia, losowo wybrane grafiki
+  const tulow = stopyY(z) - rozmiarGrafiki(grafikaPostaci(z)).wys * 0.45;
+  stan.chmurki.push({
+    x: z.x,
+    y: tulow,
+    czas: 0,
+    obloczek: `assets/efekty/obloczek_sniegu_${1 + Math.floor(Math.random() * 2)}.png`,
+    rozbryzg: `assets/efekty/rozbryzg_${1 + Math.floor(Math.random() * 8)}.png`,
+  });
 
   // Krótka wibracja (działa na Androidzie; iPhone tego nie obsługuje)
   if (navigator.vibrate) navigator.vibrate(CONFIG.wibracjaTrafienia);
