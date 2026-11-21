@@ -49,12 +49,29 @@ function rysujZawodnika(ctx, z, zaznaczony) {
   ctx.stroke();
 }
 
+function rysujKropke(ctx, stan) {
+  const k = pozycjaKropki(stan);
+  ctx.save();
+  // Półprzezroczysta, gdy nikt jej nie trzyma
+  ctx.globalAlpha = stan.palec ? 1 : CONFIG.przezroczystoscKropki;
+  ctx.fillStyle = CONFIG.kolorKropki;
+  ctx.beginPath();
+  ctx.arc(k.x, k.y, CONFIG.promienKropki, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.restore();
+}
+
 function rysujScene(ctx, stan) {
   rysujTlo(ctx);
 
   // Rysujemy od góry do dołu, żeby bliżsi (niżej) zasłaniali dalszych
-  const posortowani = [...stan.zawodnicy].sort((a, b) => a.y - b.y);
-  for (const z of posortowani) {
-    rysujZawodnika(ctx, z, z === stan.zaznaczony);
+  const wszyscy = [stan.gracz, ...stan.przeciwnicy].sort((a, b) => a.y - b.y);
+  for (const z of wszyscy) {
+    rysujZawodnika(ctx, z, z === stan.gracz);
   }
+
+  rysujKropke(ctx, stan);
 }
