@@ -27,6 +27,13 @@ const CONFIG = {
   promienSniezki: 0.012,
   wysokoscLuku: 0.15, // jak wysoko leci śnieżka (ułamek długości lotu), tylko wygląd
 
+  // Trafienia
+  trafieniaDoEliminacji: 3, // wcześniejsze trafienia tylko ogłuszają
+  czasOgluszenia: 3, // sekundy bez ruchu i bez rzutu
+  wibracjaTrafienia: 60, // milisekundy wibracji telefonu przy trafieniu (Android)
+  czasChmurki: 0.4, // jak długo widać białą chmurkę śniegu po trafieniu
+  czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem
+
   // Pozycje startowe (y też jako ułamek szerokości; wysokość pola to 1 / ASPECT)
   startGracz: { x: 0.15, y: 0.25 },
   startPrzeciwnicy: [{ x: 0.85, y: 0.25 }],

@@ -54,9 +54,60 @@ function rysujZaspy(ctx) {
   }
 }
 
+function kolorDruzyny(z) {
+  return z.druzyna === "czerwoni" ? CONFIG.kolorCzerwony : CONFIG.kolorZielony;
+}
+
+// Wyeliminowany leży na ziemi: spłaszczony owal w kolorze drużyny
+function rysujLezacego(ctx, z) {
+  const r = PROMIEN_POSTACI;
+  const stopyY = z.y + r * 0.85;
+  ctx.fillStyle = "rgba(60, 90, 130, 0.25)";
+  ctx.beginPath();
+  ctx.ellipse(z.x, stopyY + r * 0.05, r * 1.25, r * 0.45, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = kolorDruzyny(z);
+  ctx.beginPath();
+  ctx.ellipse(z.x, stopyY - r * 0.1, r * 1.1, r * 0.38, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
+  ctx.lineWidth = r * 0.06;
+  ctx.stroke();
+}
+
+// Trzy małe kropki nad głową: pełne = trafienia, które zostały
+function rysujZycia(ctx, z) {
+  const r = PROMIEN_POSTACI;
+  const ile = CONFIG.trafieniaDoEliminacji;
+  const zostalo = ile - z.trafienia;
+  const rk = r * 0.12;
+  const odstep = rk * 3;
+  const y = z.y - r - rk * 2.5;
+  for (let i = 0; i < ile; i++) {
+    const x = z.x + (i - (ile - 1) / 2) * odstep;
+    ctx.beginPath();
+    ctx.arc(x, y, rk, 0, Math.PI * 2);
+    if (i < zostalo) {
+      ctx.fillStyle = kolorDruzyny(z);
+      ctx.fill();
+    }
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.4)";
+    ctx.lineWidth = rk * 0.35;
+    ctx.stroke();
+  }
+}
+
 function rysujZawodnika(ctx, z, toGracz) {
+  if (z.wyeliminowany) {
+    rysujLezacego(ctx, z);
+    return;
+  }
   const r = PROMIEN_POSTACI;
   const stopyY = z.y + r * 0.85; // wysokość "stóp" (dół postaci)
+
+  ctx.save();
+  // Ogłuszony jest wyblakły
+  if (z.ogluszenie > 0) ctx.globalAlpha = 0.45;
 
   // Cień: spłaszczony owal pod postacią
   ctx.fillStyle = "rgba(60, 90, 130, 0.25)";
@@ -74,21 +125,45 @@ function rysujZawodnika(ctx, z, toGracz) {
   }
 
   // Ciało zawodnika
-  ctx.fillStyle = z.druzyna === "czerwoni" ? CONFIG.kolorCzerwony : CONFIG.kolorZielony;
+  ctx.fillStyle = kolorDruzyny(z);
   ctx.beginPath();
   ctx.arc(z.x, z.y, r, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
   ctx.lineWidth = r * 0.06;
   ctx.stroke();
+  ctx.restore();
+
+  rysujZycia(ctx, z);
+}
+
+// Biała chmurka śniegu: kilka kółek rozlatuje się i znika
+function rysujChmurki(ctx, stan) {
+  const r = PROMIEN_POSTACI;
+  for (const ch of stan.chmurki) {
+    const t = ch.czas / CONFIG.czasChmurki; // od 0 do 1
+    ctx.fillStyle = `rgba(255, 255, 255, ${1 - t})`;
+    ctx.strokeStyle = `rgba(150, 180, 210, ${0.6 * (1 - t)})`;
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 7; i++) {
+      const kat = (i / 7) * Math.PI * 2;
+      const odl = r * (0.3 + 0.9 * t);
+      ctx.beginPath();
+      ctx.arc(ch.x + Math.cos(kat) * odl, ch.y + Math.sin(kat) * odl * 0.7, r * (0.35 - 0.15 * t), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
 }
 
 function rysujKropke(ctx, stan) {
+  if (stan.gracz.wyeliminowany || stan.koniec) return;
   const k = pozycjaKropki(stan);
   const r = j(CONFIG.promienKropki);
   ctx.save();
-  // Półprzezroczysta, gdy nikt jej nie trzyma
+  // Półprzezroczysta, gdy nikt jej nie trzyma; ledwo widoczna przy ogłuszeniu
   ctx.globalAlpha = stan.palec ? 1 : CONFIG.przezroczystoscKropki;
+  if (stan.gracz.ogluszenie > 0) ctx.globalAlpha = 0.15;
   ctx.fillStyle = CONFIG.kolorKropki;
   ctx.beginPath();
   ctx.arc(k.x, k.y, r, 0, Math.PI * 2);
@@ -99,15 +174,23 @@ function rysujKropke(ctx, stan) {
   ctx.restore();
 }
 
-// Napis "Level N" na środku, tylko na początku poziomu
-function rysujNapisLevel(ctx, stan) {
-  if (stan.czasPoziomu > CONFIG.czasNapisuLevel) return;
+// Napis na środku pola (cienka jasnoniebieska czcionka)
+function rysujNapis(ctx, tekst) {
   const rozmiar = j(CONFIG.rozmiarNapisuLevel);
   ctx.fillStyle = CONFIG.kolorNapisu;
   ctx.font = `300 ${rozmiar}px "Helvetica Neue", Roboto, "Segoe UI", sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(`Level ${stan.poziom}`, SZEROKOSC_POLA / 2, WYSOKOSC_POLA / 2);
+  ctx.fillText(tekst, SZEROKOSC_POLA / 2, WYSOKOSC_POLA / 2);
+}
+
+// "Level N" na początku poziomu, "Wygrana!"/"Przegrana" na końcu
+function rysujNapisy(ctx, stan) {
+  if (stan.koniec) {
+    rysujNapis(ctx, stan.koniec.wynik === "wygrana" ? "Wygrana!" : "Przegrana");
+  } else if (stan.czasPoziomu <= CONFIG.czasNapisuLevel) {
+    rysujNapis(ctx, `Level ${stan.poziom}`);
+  }
 }
 
 // Linia od zawodnika do palca, pierścień celu i pierścień zasięgu
@@ -176,14 +259,18 @@ function rysujScene(ctx, stan) {
   rysujZaspy(ctx);
   rysujCienieSniezek(ctx, stan);
 
-  // Rysujemy od góry do dołu, żeby bliżsi (niżej) zasłaniali dalszych
-  const wszyscy = [stan.gracz, ...stan.przeciwnicy].sort((a, b) => a.y - b.y);
-  for (const z of wszyscy) {
+  // Najpierw leżący (są na ziemi), potem stojący od góry do dołu,
+  // żeby bliżsi (niżej) zasłaniali dalszych
+  const wszyscy = [stan.gracz, ...stan.przeciwnicy];
+  const lezacy = wszyscy.filter((z) => z.wyeliminowany);
+  const stojacy = wszyscy.filter((z) => !z.wyeliminowany).sort((a, b) => a.y - b.y);
+  for (const z of [...lezacy, ...stojacy]) {
     rysujZawodnika(ctx, z, z === stan.gracz);
   }
 
   rysujCelowanie(ctx, stan); // nad postaciami, żeby cel na przeciwniku był widoczny
   rysujSniezki(ctx, stan); // śnieżki są w powietrzu, więc nad postaciami
+  rysujChmurki(ctx, stan);
   rysujKropke(ctx, stan);
-  rysujNapisLevel(ctx, stan);
+  rysujNapisy(ctx, stan);
 }

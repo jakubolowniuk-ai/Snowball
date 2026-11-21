@@ -13,17 +13,114 @@ function j(ulamek) {
 
 const PROMIEN_POSTACI = j(CONFIG.rozmiarPostaci) / 2;
 
-// Stan gry
-const stan = {
-  gracz: { druzyna: "czerwoni", x: j(CONFIG.startGracz.x), y: j(CONFIG.startGracz.y) },
-  przeciwnicy: CONFIG.startPrzeciwnicy.map((p) => ({ druzyna: "zieloni", x: j(p.x), y: j(p.y) })),
-  palec: null, // gdzie jest palec trzymający kropkę (null = nikt jej nie trzyma)
-  chwyt: null, // zapamiętane przy złapaniu: gdzie był palec i kropka względem zawodnika
-  poziom: 1,
-  czasPoziomu: 0, // ile sekund trwa obecny poziom
-  celowanie: null, // { x, y, czas } gdy palec celuje; czas = ile sekund ładuje się siła
-  sniezki: [], // śnieżki w locie
-};
+// Nowa postać na starcie poziomu
+function nowaPostac(druzyna, start) {
+  return {
+    druzyna,
+    x: j(start.x),
+    y: j(start.y),
+    trafienia: 0, // liczą się przez cały poziom
+    ogluszenie: 0, // ile sekund ogłuszenia zostało (0 = nieogłuszony)
+    wyeliminowany: false,
+  };
+}
+
+// Stan gry (wypełnia go zacznijPoziom)
+const stan = {};
+
+// Ustawia wszystko od nowa na początek poziomu
+function zacznijPoziom(stan) {
+  stan.gracz = nowaPostac("czerwoni", CONFIG.startGracz);
+  stan.przeciwnicy = CONFIG.startPrzeciwnicy.map((p) => nowaPostac("zieloni", p));
+  stan.palec = null; // gdzie jest palec trzymający kropkę (null = nikt jej nie trzyma)
+  stan.chwyt = null; // zapamiętane przy złapaniu: gdzie był palec i kropka względem zawodnika
+  stan.poziom = 1;
+  stan.czasPoziomu = 0; // ile sekund trwa obecny poziom
+  stan.celowanie = null; // { x, y, czas } gdy palec celuje; czas = ile sekund ładuje się siła
+  stan.sniezki = []; // śnieżki w locie
+  stan.chmurki = []; // białe chmurki po trafieniach
+  stan.koniec = null; // { wynik: "wygrana" | "przegrana", czas } po końcu poziomu
+}
+zacznijPoziom(stan);
+
+// Czy gracz może teraz sterować (ruch i rzut)
+function graczMozeSterowac(stan) {
+  return !stan.koniec && !stan.gracz.wyeliminowany && stan.gracz.ogluszenie <= 0;
+}
+
+// --- Trafienia ---
+
+function trafienie(stan, z) {
+  z.trafienia += 1;
+  if (z.trafienia >= CONFIG.trafieniaDoEliminacji) {
+    z.wyeliminowany = true;
+    z.ogluszenie = 0;
+  } else {
+    z.ogluszenie = CONFIG.czasOgluszenia;
+  }
+  stan.chmurki.push({ x: z.x, y: z.y, czas: 0 });
+
+  // Krótka wibracja (działa na Androidzie; iPhone tego nie obsługuje)
+  if (navigator.vibrate) navigator.vibrate(CONFIG.wibracjaTrafienia);
+
+  // Trafiony gracz traci kropkę i celowanie
+  if (z === stan.gracz) {
+    pusc(stan);
+    stan.celowanie = null;
+  }
+}
+
+// Najmniejsza odległość punktu (px, py) od odcinka (ax, ay)-(bx, by)
+function odlegloscOdOdcinka(px, py, ax, ay, bx, by) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const dl2 = dx * dx + dy * dy;
+  let t = dl2 > 0 ? ((px - ax) * dx + (py - ay) * dy) / dl2 : 0;
+  t = Math.min(Math.max(t, 0), 1);
+  return Math.hypot(px - (ax + dx * t), py - (ay + dy * t));
+}
+
+// Przesuwa śnieżkę i sprawdza, czy po drodze kogoś trafiła.
+// Sprawdzamy cały odcinek z tej klatki, żeby szybka śnieżka nie "przeskoczyła" postaci.
+// Zwraca true, gdy śnieżka ma zniknąć.
+function lotSniezki(stan, sn, dt) {
+  const przed = pozycjaSniezki(sn);
+  sn.przebyte = Math.min(sn.przebyte + sn.predkosc * dt, sn.dlugosc);
+  const po = pozycjaSniezki(sn);
+
+  const zasiegTrafienia = PROMIEN_POSTACI + j(CONFIG.promienSniezki);
+  let pierwszy = null;
+  let najblizej = Infinity;
+  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+    if (z === sn.rzucajacy || z.wyeliminowany) continue;
+    if (odlegloscOdOdcinka(z.x, z.y, przed.x, przed.y, po.x, po.y) > zasiegTrafienia) continue;
+    // Gdy na odcinku jest kilka postaci, trafia ta bliżej początku
+    const d = Math.hypot(z.x - przed.x, z.y - przed.y);
+    if (d < najblizej) {
+      najblizej = d;
+      pierwszy = z;
+    }
+  }
+  if (pierwszy) {
+    trafienie(stan, pierwszy);
+    return true;
+  }
+  return sn.przebyte >= sn.dlugosc;
+}
+
+// Wygrana: wszyscy przeciwnicy wyeliminowani. Przegrana: gracz wyeliminowany.
+function sprawdzKoniec(stan) {
+  if (stan.koniec) return;
+  if (stan.gracz.wyeliminowany) {
+    stan.koniec = { wynik: "przegrana", czas: 0 };
+  } else if (stan.przeciwnicy.every((p) => p.wyeliminowany)) {
+    stan.koniec = { wynik: "wygrana", czas: 0 };
+  }
+  if (stan.koniec) {
+    pusc(stan);
+    stan.celowanie = null;
+  }
+}
 
 // --- Rzut ---
 
@@ -57,6 +154,7 @@ function rzuc(stan, p) {
 
   const s = sila(c.czas);
   stan.sniezki.push({
+    rzucajacy: g, // rzucającego śnieżka nie trafia
     startX: g.x,
     startY: g.y,
     kierX: (p.x - g.x) / d,
@@ -110,6 +208,7 @@ function pozycjaKropki(stan) {
     let najblizszy = null;
     let najmniej = Infinity;
     for (const p of stan.przeciwnicy) {
+      if (p.wyeliminowany) continue;
       const d = Math.hypot(p.x - g.x, p.y - g.y);
       if (d < najmniej) {
         najmniej = d;
@@ -179,9 +278,25 @@ function aktualizuj(dt) {
   // Ładowanie siły, dopóki palec celuje
   if (stan.celowanie) stan.celowanie.czas += dt;
 
-  // Lot śnieżek; po dotarciu do końca znikają (trafień jeszcze nie ma)
-  for (const sn of stan.sniezki) sn.przebyte += sn.predkosc * dt;
-  stan.sniezki = stan.sniezki.filter((sn) => sn.przebyte < sn.dlugosc);
+  // Lot śnieżek: znikają po trafieniu albo na końcu lotu
+  stan.sniezki = stan.sniezki.filter((sn) => !lotSniezki(stan, sn, dt));
+
+  // Odliczanie ogłuszenia
+  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+    if (z.ogluszenie > 0) z.ogluszenie = Math.max(z.ogluszenie - dt, 0);
+  }
+
+  // Chmurki śniegu znikają po chwili
+  for (const ch of stan.chmurki) ch.czas += dt;
+  stan.chmurki = stan.chmurki.filter((ch) => ch.czas < CONFIG.czasChmurki);
+
+  // Koniec poziomu: napis, a po chwili automatyczny restart
+  sprawdzKoniec(stan);
+  if (stan.koniec) {
+    stan.koniec.czas += dt;
+    if (stan.koniec.czas >= CONFIG.czasNapisuKonca) zacznijPoziom(stan);
+    return;
+  }
 
   const g = stan.gracz;
   const palec = stan.palec;

@@ -13,6 +13,8 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
   let palecCelu = null; // numer palca, który celuje (null = nikt)
 
   canvas.addEventListener("pointerdown", (e) => {
+    // Ogłuszony, wyeliminowany albo koniec poziomu: dotyk nic nie robi
+    if (!graczMozeSterowac(stan)) return;
     const p = ekranNaPlansze(e.clientX, e.clientY);
     const k = pozycjaKropki(stan);
     const naKropce = odleglosc(p.x, p.y, k.x, k.y) <= j(CONFIG.promienDotykuKropki);
@@ -32,8 +34,9 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
 
   canvas.addEventListener("pointermove", (e) => {
     const p = ekranNaPlansze(e.clientX, e.clientY);
-    if (e.pointerId === palecKropki) stan.palec = p;
-    if (e.pointerId === palecCelu) {
+    // Po trafieniu gra sama puszcza kropkę i celowanie; wtedy ruchy palca pomijamy
+    if (e.pointerId === palecKropki && stan.chwyt) stan.palec = p;
+    if (e.pointerId === palecCelu && stan.celowanie) {
       stan.celowanie.x = p.x;
       stan.celowanie.y = p.y;
     }
