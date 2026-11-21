@@ -16,7 +16,7 @@ Punkt grafiki, który kładziemy na pozycji obiektu w grze. Podana jako ułamek 
 
 ## Zasady
 - **Cieni na grafikach nie ma.** Cienie, pierścień pod stopami, kropki żyć, linię i pierścienie celowania oraz napisy rysuje kod.
-- **Dekoracje (choinki, bałwany, płotki, forty) to tylko ozdoba, bez kolizji.** Śnieżki i postacie przechodzą przez nie.
+- **Dekoracje (choinki, bałwany, płotki, forty) są przeszkodami** (decyzja Jakuba z 21.11.2026): śnieżki rozbijają się o ich podstawę, a postacie nie mogą przez nie przejść.
 - Czerwony zawodnik to gracz, zielony to przeciwnicy. Pozostałe kolory są na później.
 - Forty pochodzą z arkusza w stylu miękkiego śniegu (wybrany przez Jakuba).
 

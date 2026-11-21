@@ -208,7 +208,7 @@ function rysujChmurki(ctx, stan) {
       [ch.obloczek, 0.8 + 0.5 * t],
       [ch.rozbryzg, 0.6 + 0.6 * t],
     ]) {
-      const obraz = OBRAZY[sciezka];
+      const obraz = sciezka && OBRAZY[sciezka];
       if (!obraz) continue;
       const { szer, wys } = rozmiarGrafiki(sciezka);
       ctx.drawImage(obraz, ch.x - (szer * skala) / 2, ch.y - (wys * skala) / 2, szer * skala, wys * skala);
@@ -335,10 +335,16 @@ function rysujScene(ctx, stan) {
   // żeby bliżsi (niżej) zasłaniali dalszych
   const wszyscy = [stan.gracz, ...stan.przeciwnicy];
   const lezacy = wszyscy.filter((z) => z.wyeliminowany);
-  const stojacy = wszyscy.filter((z) => !z.wyeliminowany).sort((a, b) => a.y - b.y);
-  for (const z of [...lezacy, ...stojacy]) {
-    rysujZawodnika(ctx, z, z === stan.gracz);
-  }
+  const stojacy = wszyscy.filter((z) => !z.wyeliminowany);
+  for (const z of lezacy) rysujZawodnika(ctx, z, z === stan.gracz);
+
+  // Stojący zawodnicy i dekoracje razem, od góry do dołu według poziomu stóp/podstawy:
+  // kto stoi niżej na ekranie (bliżej nas), zasłania tego, kto stoi wyżej
+  const obiekty = [
+    ...stojacy.map((z) => ({ y: stopyY(z), rysuj: () => rysujZawodnika(ctx, z, z === stan.gracz) })),
+    ...przeszkody().map((p) => ({ y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
+  ].sort((a, b) => a.y - b.y);
+  for (const o of obiekty) o.rysuj();
   // Kropki z trafieniami na końcu, żeby żadna postać ich nie zasłoniła
   for (const z of stojacy) rysujZycia(ctx, z);
 

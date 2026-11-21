@@ -134,6 +134,20 @@ function lotSniezki(stan, sn, dt) {
       pierwszy = z;
     }
   }
+  // Przeszkoda na drodze? Sprawdzamy tor cienia (na wysokości stóp).
+  const stopy = PROMIEN_POSTACI * 0.85;
+  const p = przeszkodaNaOdcinku(przed.x, przed.y + stopy, po.x, po.y + stopy);
+  if (p && (!pierwszy || Math.hypot(p.x - przed.x, p.y - stopy - przed.y) < najblizej)) {
+    // Śnieżka rozbija się o przeszkodę: sam rozbryzg, bez trafienia
+    stan.chmurki.push({
+      x: po.x,
+      y: po.y - po.wysokosc,
+      czas: 0,
+      obloczek: null,
+      rozbryzg: `assets/efekty/rozbryzg_${1 + Math.floor(Math.random() * 8)}.png`,
+    });
+    return true;
+  }
   if (pierwszy) {
     trafienie(stan, pierwszy);
     return true;
@@ -237,6 +251,7 @@ function idzDo(z, celX, celY, dt) {
     z.y += (dy / dystans) * krok;
   }
   ograniczDoPolowy(z);
+  wypchnijZPrzeszkod(z); // przez przeszkody nie da się przejść (to ważniejsze niż granica połowy)
   return doszla;
 }
 

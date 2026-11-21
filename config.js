@@ -79,6 +79,20 @@ const CONFIG = {
   promienKropekZycia: 0.006, // kropki z trafieniami nad głową
   gruboscPierscienia: 0.004, // linia pierścienia pod stopami gracza
 
+  // Dekoracje: zatrzymują śnieżki, zawodnicy nie mogą przez nie przejść.
+  // plik: nazwa z assets/dekoracje/; x, y: środek podstawy (ułamek szerokości pola)
+  dekoracje: [
+    { plik: "choinka_1", x: 0.07, y: 0.115 },
+    { plik: "fort_1", x: 0.32, y: 0.15 },
+    { plik: "balwan_1", x: 0.32, y: 0.42 },
+    { plik: "plot_2", x: 0.57, y: 0.06 },
+    { plik: "choinka_2", x: 0.95, y: 0.165 },
+    { plik: "balwan_3", x: 0.95, y: 0.365 },
+  ],
+  // Podstawa (owal na ziemi) jako ułamek szerokości grafiki dekoracji
+  podstawaSzerokosc: 0.4, // połowa szerokości owalu
+  podstawaGlebokosc: 0.15, // połowa głębokości owalu
+
   // Kolory
   kolorCzerwony: "#d93a3a",
   kolorZielony: "#3a9a4a",
