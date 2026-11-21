@@ -110,9 +110,71 @@ function rysujNapisLevel(ctx, stan) {
   ctx.fillText(`Level ${stan.poziom}`, SZEROKOSC_POLA / 2, WYSOKOSC_POLA / 2);
 }
 
+// Linia od zawodnika do palca, pierścień celu i pierścień zasięgu
+function rysujCelowanie(ctx, stan) {
+  const c = stan.celowanie;
+  if (!c) return;
+  const g = stan.gracz;
+  const d = odleglosc(g.x, g.y, c.x, c.y);
+  const rCelu = j(CONFIG.promienCelu);
+
+  // Cienka linia
+  ctx.strokeStyle = "rgba(42, 111, 214, 0.5)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(g.x, g.y);
+  ctx.lineTo(c.x, c.y);
+  ctx.stroke();
+
+  // Pierścień celu dokładnie pod palcem
+  ctx.strokeStyle = CONFIG.kolorCelu;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(c.x, c.y, rCelu, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Pierścień zasięgu na linii: rośnie z siłą, zatrzymuje się na celu
+  if (d > 0) {
+    const z = zasieg(sila(c.czas));
+    const doleci = z >= d;
+    const odl = Math.min(z, d);
+    ctx.strokeStyle = doleci ? CONFIG.kolorZasieguDoleci : CONFIG.kolorZasiegu;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(g.x + ((c.x - g.x) / d) * odl, g.y + ((c.y - g.y) / d) * odl, rCelu * 1.35, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function rysujCienieSniezek(ctx, stan) {
+  const r = j(CONFIG.promienSniezki);
+  ctx.fillStyle = "rgba(60, 90, 130, 0.3)";
+  for (const sn of stan.sniezki) {
+    const p = pozycjaSniezki(sn);
+    ctx.beginPath();
+    ctx.ellipse(p.x, p.y, r, r * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function rysujSniezki(ctx, stan) {
+  const r = j(CONFIG.promienSniezki);
+  for (const sn of stan.sniezki) {
+    const p = pozycjaSniezki(sn);
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "rgba(60, 90, 130, 0.6)";
+    ctx.lineWidth = r * 0.25;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y - p.wysokosc, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
 function rysujScene(ctx, stan) {
   rysujTlo(ctx);
   rysujZaspy(ctx);
+  rysujCienieSniezek(ctx, stan);
 
   // Rysujemy od góry do dołu, żeby bliżsi (niżej) zasłaniali dalszych
   const wszyscy = [stan.gracz, ...stan.przeciwnicy].sort((a, b) => a.y - b.y);
@@ -120,6 +182,8 @@ function rysujScene(ctx, stan) {
     rysujZawodnika(ctx, z, z === stan.gracz);
   }
 
+  rysujCelowanie(ctx, stan); // nad postaciami, żeby cel na przeciwniku był widoczny
+  rysujSniezki(ctx, stan); // śnieżki są w powietrzu, więc nad postaciami
   rysujKropke(ctx, stan);
   rysujNapisLevel(ctx, stan);
 }

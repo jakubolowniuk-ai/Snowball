@@ -16,6 +16,17 @@ const CONFIG = {
   promienDotykuKropki: 0.04, // jak blisko kropki trzeba dotknąć, żeby ją złapać
   przezroczystoscKropki: 0.4, // gdy nikt jej nie dotyka (1 = pełna)
 
+  // Rzut
+  MAX_CHARGE: 1.5, // ile sekund ładuje się pełna siła
+  zasiegMin: 0.25, // zasięg śnieżki przy najsłabszym rzucie
+  zasiegMax: 0.9, // zasięg przy pełnej sile
+  predkoscSniezkiMin: 0.6, // szerokości pola na sekundę, najsłabszy rzut
+  predkoscSniezkiMax: 1.6, // przy pełnej sile
+  promienAnulowania: 0.08, // puszczenie palca bliżej zawodnika anuluje rzut
+  promienCelu: 0.03, // pierścień celu pod palcem
+  promienSniezki: 0.012,
+  wysokoscLuku: 0.15, // jak wysoko leci śnieżka (ułamek długości lotu), tylko wygląd
+
   // Pozycje startowe (y też jako ułamek szerokości; wysokość pola to 1 / ASPECT)
   startGracz: { x: 0.15, y: 0.25 },
   startPrzeciwnicy: [{ x: 0.85, y: 0.25 }],
@@ -41,4 +52,7 @@ const CONFIG = {
   kolorSniegu: "#ffffff",
   kolorBrzegu: "#cfe1f1", // przyciemnienie brzegów i tło poza polem
   kolorNapisu: "#8cc4ee",
+  kolorCelu: "#2a6fd6",
+  kolorZasiegu: "#e0902a", // pierścień zasięgu, gdy śnieżka jeszcze nie doleci
+  kolorZasieguDoleci: "#3a9a4a", // gdy zasięg sięga celu
 };
