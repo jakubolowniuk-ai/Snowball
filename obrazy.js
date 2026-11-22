@@ -75,7 +75,11 @@ const OBRAZY = {};
 // Wczytuje wszystkie obrazki z listy SPRITY, potem wywołuje gotowe().
 // Gdy któryś się nie wczyta, piszemy błąd w konsoli, a gra i tak startuje.
 function wczytajObrazy(gotowe) {
-  const sciezki = Object.keys(SPRITY);
+  // Grafiki z sprites.json i grafiki bonusów (tylko te, które mają ustawioną ścieżkę)
+  const sciezki = [
+    ...Object.keys(SPRITY),
+    ...CONFIG.bonusy.typy.filter((t) => t.grafika).map((t) => t.grafika),
+  ];
   let zostalo = sciezki.length;
   const jedenGotowy = () => {
     zostalo -= 1;
