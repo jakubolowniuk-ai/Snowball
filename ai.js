@@ -58,14 +58,17 @@ function aktualizujPrzeciwnika(stan, z, dt) {
   ai.przerwa -= dt;
   const g = stan.gracz;
   if (ai.przerwa <= 0 && z.przeladowanie <= 0 && !g.wyeliminowany && !ai.cel) {
-    // Siła tak dobrana, żeby dorzucić do gracza (plus mały zapas).
-    // Im dalej gracz, tym dłużej trwa unoszenie.
-    const d = odleglosc(z.x, z.y, g.x, g.y) / SZEROKOSC_POLA;
-    const potrzebna = (d - CONFIG.zasiegMin) / (CONFIG.zasiegMax - CONFIG.zasiegMin);
-    const calosc = Math.min(
-      Math.max(potrzebna, 0) * CONFIG.MAX_CHARGE + CONFIG.zapasSily,
-      CONFIG.MAX_CHARGE
-    );
+    // Dobór siły. Unoszenie trwa tyle, ile ładowanie siły (silniejszy = dłużej).
+    let calosc;
+    if (CONFIG.zasiegZalezyOdSily) {
+      // Siła tak dobrana, żeby dorzucić do gracza (plus mały zapas)
+      const d = odleglosc(z.x, z.y, g.x, g.y) / SZEROKOSC_POLA;
+      const potrzebna = (d - CONFIG.zasiegMin) / (CONFIG.zasiegMax - CONFIG.zasiegMin);
+      calosc = Math.min(Math.max(potrzebna, 0) * CONFIG.MAX_CHARGE + CONFIG.zapasSily, CONFIG.MAX_CHARGE);
+    } else {
+      // Śnieżka i tak doleci, więc siła (czyli prędkość) jest losowa z zakresu poziomu
+      calosc = losuj(param.silaMin, param.silaMax) * CONFIG.MAX_CHARGE;
+    }
     ai.unoszenie = { czas: 0, calosc };
     return;
   }
