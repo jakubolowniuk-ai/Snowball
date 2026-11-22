@@ -141,10 +141,12 @@ function lotSniezki(stan, sn, dt) {
   const stopy = PROMIEN_POSTACI * 0.85;
   const p = przeszkodaNaOdcinku(przed.x, przed.y + stopy, po.x, po.y + stopy);
   if (p && (!pierwszy || Math.hypot(p.x - przed.x, p.y - stopy - przed.y) < najblizej)) {
-    // Śnieżka rozbija się o przeszkodę: sam rozbryzg, bez trafienia
+    // Śnieżka rozbija się o przeszkodę: sam rozbryzg, bez trafienia.
+    // Rozbryzg nie wyżej niż czubek grafiki przeszkody.
+    const czubek = p.y - rozmiarGrafiki(p.sciezka).wys * SPRITY[p.sciezka].kotwicaY;
     stan.chmurki.push({
       x: po.x,
-      y: po.y - po.wysokosc,
+      y: Math.max(po.y - po.wysokosc, czubek),
       czas: 0,
       obloczek: null,
       rozbryzg: `assets/efekty/rozbryzg_${1 + Math.floor(Math.random() * 8)}.png`,
@@ -283,13 +285,18 @@ function idzDo(z, celX, celY, dt) {
   return doszla;
 }
 
+// Najwyższy punkt łuku: rośnie z długością lotu, ale nie ponad maxWysokoscLuku
+function wysokoscLukuSniezki(sn) {
+  return Math.min(CONFIG.wysokoscLuku * sn.dlugosc, j(CONFIG.maxWysokoscLuku));
+}
+
 // Pozycja śnieżki na ziemi (cień) i wysokość nad ziemią (łuk, tylko wygląd)
 function pozycjaSniezki(sn) {
   const t = sn.przebyte / sn.dlugosc;
   return {
     x: sn.startX + sn.kierX * sn.przebyte,
     y: sn.startY + sn.kierY * sn.przebyte,
-    wysokosc: 4 * t * (1 - t) * CONFIG.wysokoscLuku * sn.dlugosc,
+    wysokosc: 4 * t * (1 - t) * wysokoscLukuSniezki(sn),
   };
 }
 
