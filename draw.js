@@ -174,50 +174,15 @@ function rysujZawodnika(ctx, z, toGracz) {
   }
 
   // Postać z grafiki (podeszwy w punkcie stóp); gdy grafiki brak, kółko jak dawniej
-  const sciezka = grafikaPostaci(z);
-  if (!OBRAZY[sciezka]) {
+  if (!rysujSprite(ctx, grafikaPostaci(z), z.x, y)) {
     ctx.fillStyle = kolorDruzyny(z);
     ctx.beginPath();
     ctx.arc(z.x, z.y, r, 0, Math.PI * 2);
     ctx.fill();
-  } else {
-    // W trakcie przeładowania zawodnik się schyla i lepi nową śnieżkę.
-    // Z tyłu (gracz) ręce są przed ciałem, więc śnieżkę rysujemy za postacią.
-    const w = silaSchylenia(z);
-    const zTylu = sciezka.includes("_tyl");
-    if (w > 0 && zTylu) rysujLepionaSniezke(ctx, z, y);
-    ctx.save();
-    ctx.translate(z.x, y); // kotwica w stopach: schylanie nie przesuwa butów
-    // Przechył do przodu: gracz w lewo-górę (do zielonych), zieloni w prawo (do gracza)
-    const kierunek = z.druzyna === "czerwoni" ? -1 : 1;
-    ctx.rotate(((kierunek * CONFIG.schyleniePrzechyl * Math.PI) / 180) * w);
-    ctx.scale(1 + (CONFIG.schylenieSkalaX - 1) * w, 1 + (CONFIG.schylenieSkalaY - 1) * w);
-    rysujSprite(ctx, sciezka, 0, 0);
-    ctx.restore();
-    if (w > 0 && !zTylu) rysujLepionaSniezke(ctx, z, y);
   }
   ctx.restore();
 
   rysujUniesionaSniezke(ctx, z);
-}
-
-// Jak bardzo zawodnik jest schylony: 0 = stoi prosto, 1 = pełne schylenie.
-// Na początku przeładowania szybko się schyla, potem trzyma, na końcu płynnie wstaje.
-function silaSchylenia(z) {
-  if (z.przeladowanie <= 0 || z.przeladowanieCalosc <= 0) return 0;
-  const postep = 1 - z.przeladowanie / z.przeladowanieCalosc; // od 0 do 1
-  const wDol = Math.min(postep / CONFIG.schylenieCzasSchodzenia, 1);
-  const wGore = Math.min((1 - postep) / CONFIG.schylenieCzasPowrotu, 1);
-  const w = Math.min(wDol, wGore);
-  return w * w * (3 - 2 * w); // wygładzenie: łagodny start i koniec ruchu
-}
-
-// Lepiona śnieżka przy stopach: rośnie od lepionaSniezkaOd do lepionaSniezkaDo
-function rysujLepionaSniezke(ctx, z, stopy) {
-  const postep = 1 - z.przeladowanie / z.przeladowanieCalosc;
-  const skala = CONFIG.lepionaSniezkaOd + (CONFIG.lepionaSniezkaDo - CONFIG.lepionaSniezkaOd) * postep;
-  const { szer, wys } = rozmiarGrafiki(grafikaPostaci(z));
-  rysujJednaSniezke(ctx, z.x + szer * CONFIG.lepionaSniezkaX, stopy - wys * CONFIG.lepionaSniezkaY, skala);
 }
 
 // Przeciwnik przed rzutem unosi śnieżkę: od ręki aż nad głowę, im większa siła, tym wyżej.
@@ -344,10 +309,10 @@ function rysujCienieSniezek(ctx, stan) {
 }
 
 // Śnieżka z grafiki (powiększona o skalaSniezki, żeby była lepiej widoczna)
-function rysujJednaSniezke(ctx, x, y, skala = 1) {
+function rysujJednaSniezke(ctx, x, y) {
   const obraz = OBRAZY[GRAFIKA_SNIEZKI];
   const { szer, wys } = rozmiarGrafiki(GRAFIKA_SNIEZKI);
-  const k = CONFIG.skalaSniezki * skala;
+  const k = CONFIG.skalaSniezki;
   if (obraz) {
     ctx.drawImage(obraz, x - (szer * k) / 2, y - (wys * k) / 2, szer * k, wys * k);
   } else {
