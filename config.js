@@ -80,6 +80,26 @@ const CONFIG = {
   czasNapisuLevel: 1.5,
   rozmiarNapisuLevel: 0.07,
 
+  // Bonusy: ozdoby choinkowe przy przekątnej; trafienie śnieżką daje bonus rzucającemu
+  bonusy: {
+    pierwszyPoSekundach: 8, // pierwszy bonus po tylu sekundach poziomu (bez napisu "Level")
+    odstepMin: 12, // kolejne co losowo od odstepMin do odstepMax sekund
+    odstepMax: 18,
+    czasZycia: 10, // ile sekund bonus leży na planszy
+    miganieOstatnie: 2, // ostatnie sekundy życia bonus miga
+    maxNaraz: [1, 1, 2], // ile naraz na poziomie 1, 2, 3 (dalej jak ostatni)
+    promienTrafienia: 0.02, // okrąg trafienia bonusu (i jego wielkość na ekranie)
+    pasPrzekatnej: 0.08, // szerokość pasa wokół przekątnej, w którym się pojawia
+    marginesKrawedzi: 0.05, // odstęp od krawędzi pola
+    odstepOdPostaci: 0.08, // nie bliżej żadnej postaci niż tyle
+    zapasPrzeszkody: 0.02, // nie bliżej podstawy przeszkody niż tyle
+    przeciwnicyZbierajaBonusy: false, // false: śnieżki przeciwników przelatują przez bonusy
+    typy: [
+      // grafika: ścieżka do obrazka (np. "assets/bonusy/bombka.png") albo null = kula zastępcza
+      { id: "bombka", nazwa: "Bombka", kolor: "#d93a6a", czasTrwania: 12, waga: 1, grafika: null },
+    ],
+  },
+
   // Grafiki postaci i mnożnik ich wielkości (1 = rozmiar z sprites.json).
   // Mnożnik zmienia tylko wygląd; okrąg trafień ustawia rozmiarPostaci.
   grafikaGracza: "assets/gracze/czerwony_tyl.png", // gracz na dole, widać go z tyłu

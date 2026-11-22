@@ -49,10 +49,10 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 4. **Siła:** przytrzymanie ładuje siłę (max **1,5 s**). Siła zwiększa **tylko prędkość** śnieżki, nie zasięg (opcja `zasiegZalezyOdSily` w `config.js` przywraca dawny zasięg zależny od siły). Bez paska siły: łuk wokół pierścienia celu wypełnia się proporcjonalnie do siły, a przy pełnej sile jest zielony. Puszczenie palca = rzut. Przeciwnicy losują siłę z zakresu zależnego od poziomu (wyżej = częściej mocny, szybki rzut).
 5. **Lot śnieżki:** leci prosto w stronę celu i zatrzymuje się w dotkniętym punkcie, niezależnie od siły. Nigdy nie leci za cel. Rysujemy ją z cieniem na ziemi (efekt łuku), to tylko wygląd.
 6. **Trafienia:** śnieżka **trafia każdego, kto stoi na jej drodze** (przeciwnika, nie samego rzucającego). Dwa trafienia ogłuszają na 1 s, trzecie eliminuje. Liczba trafień liczy się przez cały poziom.
-7. **Ruch w trakcie ładowania** jest dozwolony (dwa kciuki: jeden na kropce, drugi na planszy).
+7. **Ruch w trakcie ładowania** jest dozwolony (dwa kciuki: jeden na padzie, drugi na planszy).
 8. **Przeładowanie:** po rzucie 0,5 s plus czas, który przytrzymaliśmy siłę. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pierścień pod stopami pokazuje odliczanie.
 9. **Przeciwnicy:** te same reguły co gracz. Przed rzutem **unoszą śnieżkę nad głowę** (ostrzeżenie): im silniejszy rzut, tym dłużej unoszenie. Poziom 1: 1 przeciwnik, poziom 2: 2, poziom 3: 3 itd. Wyższe poziomy: lepsze uniki i celność.
-10. **Bonusy:** pojawiają się na planszy i aktywują się trafieniem śnieżką (rzut w ich miejsce). Nie mogą leżeć w strefie pada.
+10. **Bonusy:** ozdoby choinkowe pojawiają się w pasie wokół przekątnej (co 12–18 s, żyją 10 s, ostatnie 2 s migają; 1 naraz na poziomach 1–2, 2 od poziomu 3). Zdobywa je ten, kto trafi je śnieżką (kosztuje rzut). Nie mogą leżeć w strefie pada, w przeszkodzie, przy postaci ani za przeszkodą widzianą od gracza. Pierwszy bonus: **Bombka** (tarcza na jedno trafienie, max 12 s, bańka wokół postaci). Krok B1: zbiera tylko gracz (śnieżki przeciwników przez bonusy przelatują). Krok B2: kolejne bonusy i przeciwnicy.
 11. **Wygrana:** wyeliminowanie wszystkich przeciwników. **Przegrana:** wyeliminowanie zawodnika.
 
 ### Do rozstrzygnięcia (pytania otwarte)

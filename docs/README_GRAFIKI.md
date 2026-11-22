@@ -88,6 +88,15 @@ Punkt grafiki, który kładziemy na pozycji obiektu w grze. Podana jako ułamek 
 | `efekty/rozbryzg_8.png` | 47.0 x 46.5 | 94 x 93 | x 0.5, y 0.5 |
 | `efekty/sniezka.png` | 13.5 x 14.0 | 27 x 28 | x 0.5, y 0.5 |
 
+## Bonusy (grafiki do zrobienia)
+Ozdoby choinkowe leżące na planszy. Do czasu ich dodania gra rysuje kolorową kulę z białym obrysem.
+Format: przezroczysty PNG, ok. 128 x 128 px, ozdoba wyśrodkowana, bez cienia (cień rysuje kod).
+Po wgraniu pliku ustaw w `config.js` w `bonusy.typy` pole `grafika` na ścieżkę pliku.
+
+| Plik | Bonus | Opis |
+| --- | --- | --- |
+| `assets/bonusy/bombka.png` | Bombka (tarcza na jedno trafienie) | okrągła bombka choinkowa z zawieszką |
+
 ## Znane wady i braki
 - **Tył zawodnika to wersja robocza:** kaptur wygląda jak piłka, korpus jest mniejszy niż z przodu.
 - Zawodnik ma śnieżkę w uniesionej ręce, a kod rysuje uniesioną śnieżkę przeciwnika osobno. Trzeba zdecydować, jak to połączyć.

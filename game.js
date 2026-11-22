@@ -23,6 +23,7 @@ function nowaPostac(druzyna, start) {
     ogluszenie: 0, // ile sekund ogłuszenia zostało (0 = nieogłuszony)
     przeladowanie: 0, // ile sekund przeładowania zostało (0 = może rzucać)
     przeladowanieCalosc: 0, // ile trwało całe obecne przeładowanie (do rysowania postępu)
+    bonusy: [], // aktywne bonusy postaci: { typ, pozostalo }
     wyeliminowany: false,
   };
 }
@@ -65,6 +66,7 @@ function zacznijPoziom(stan, poziom) {
   stan.sniezki = []; // śnieżki w locie
   stan.chmurki = []; // białe chmurki po trafieniach
   stan.koniec = null; // { wynik: "wygrana" | "przegrana", czas } po końcu poziomu
+  zacznijBonusy(stan); // bonusy na planszy znikają, licznik od nowa
 }
 zacznijPoziom(stan, 1);
 
@@ -76,6 +78,8 @@ function graczMozeSterowac(stan) {
 // --- Trafienia ---
 
 function trafienie(stan, z) {
+  // Bombka (tarcza) pochłania trafienie: bez zliczenia i bez ogłuszenia
+  if (tarczaPochlania(stan, z)) return;
   z.trafienia += 1;
   if (z.trafienia >= CONFIG.trafieniaDoEliminacji) {
     z.wyeliminowany = true;
@@ -132,10 +136,25 @@ function lotSniezki(stan, sn, dt) {
       pierwszy = z;
     }
   }
+  // Bonus na drodze? (traktowany jak postać; w kroku B1 zbiera go tylko gracz)
+  let bonus = null;
+  if (sniezkaZbieraBonusy(stan, sn)) {
+    const zasiegBonusu = j(CONFIG.bonusy.promienTrafienia) + j(CONFIG.promienSniezki);
+    for (const b of stan.bonusy) {
+      if (odlegloscOdOdcinka(b.x, b.y, przed.x, przed.y, po.x, po.y) > zasiegBonusu) continue;
+      const d = Math.hypot(b.x - przed.x, b.y - przed.y);
+      if (d < najblizej) {
+        najblizej = d;
+        bonus = b;
+        pierwszy = null; // bonus jest bliżej startu niż postać
+      }
+    }
+  }
+
   // Przeszkoda na drodze? Sprawdzamy tor cienia (na wysokości stóp).
   const stopy = PROMIEN_POSTACI * 0.85;
   const p = przeszkodaNaOdcinku(przed.x, przed.y + stopy, po.x, po.y + stopy);
-  if (p && (!pierwszy || Math.hypot(p.x - przed.x, p.y - stopy - przed.y) < najblizej)) {
+  if (p && ((!pierwszy && !bonus) || Math.hypot(p.x - przed.x, p.y - stopy - przed.y) < najblizej)) {
     // Śnieżka rozbija się o przeszkodę: sam rozbryzg, bez trafienia.
     // Rozbryzg nie wyżej niż czubek grafiki przeszkody.
     const czubek = p.y - rozmiarGrafiki(p.sciezka).wys * SPRITY[p.sciezka].kotwicaY;
@@ -146,6 +165,10 @@ function lotSniezki(stan, sn, dt) {
       obloczek: null,
       rozbryzg: `assets/efekty/rozbryzg_${1 + Math.floor(Math.random() * 8)}.png`,
     });
+    return true;
+  }
+  if (bonus) {
+    zdobadzBonus(stan, sn.rzucajacy, bonus);
     return true;
   }
   if (pierwszy) {
@@ -418,6 +441,9 @@ function aktualizuj(dt) {
     }
     return;
   }
+
+  // Bonusy: pojawianie, znikanie, odliczanie (stoją w trakcie napisu i po końcu poziomu)
+  aktualizujBonusy(stan, dt);
 
   // Przeciwnicy (ruch, uniki, rzuty) - logika w ai.js
   for (const p of stan.przeciwnicy) aktualizujPrzeciwnika(stan, p, dt);

@@ -108,6 +108,86 @@ function rysujLezacego(ctx, z) {
   ctx.restore();
 }
 
+// --- Bonusy ---
+
+// Kula bonusu (albo obrazek, gdy typ ma grafikę) w punkcie (x, y) o promieniu r
+function rysujKuleBonusu(ctx, typ, x, y, r) {
+  const obraz = typ.grafika && OBRAZY[typ.grafika];
+  if (obraz) {
+    const rozmiar = r * 2.6;
+    ctx.drawImage(obraz, x - rozmiar / 2, y - rozmiar / 2, rozmiar, rozmiar);
+    return;
+  }
+  // Kształt zastępczy: kolorowa kula z białym obrysem i jasnym odblaskiem
+  ctx.fillStyle = typ.kolor;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = r * 0.2;
+  ctx.stroke();
+  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.beginPath();
+  ctx.arc(x - r * 0.35, y - r * 0.35, r * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+// Bonus na planszy: miękki cień na ziemi i kula lekko unosząca się w górę i w dół.
+// W ostatnich sekundach życia miga.
+function rysujBonusNaPlanszy(ctx, stan, b) {
+  if (b.zostalo < CONFIG.bonusy.miganieOstatnie && Math.floor(b.zostalo * 6) % 2 === 0) return;
+  const r = j(CONFIG.bonusy.promienTrafienia);
+  const ziemia = b.y + PROMIEN_POSTACI * 0.85;
+  const unoszenie = Math.sin(stan.czasPoziomu * 3 + b.x) * r * 0.3;
+  ctx.fillStyle = "rgba(60, 90, 130, 0.25)";
+  ctx.beginPath();
+  ctx.ellipse(b.x, ziemia, r * 1.1, r * 0.4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  rysujKuleBonusu(ctx, typBonusu(b.typ), b.x, b.y + unoszenie, r);
+}
+
+// Bańka wokół postaci z Bombką (tarczą)
+function rysujBanke(ctx, z) {
+  if (!z.bonusy.some((ab) => ab.typ === "bombka")) return;
+  const { wys } = rozmiarGrafiki(grafikaPostaci(z));
+  const x = z.x;
+  const y = stopyY(z) - wys * 0.48;
+  const r = wys * 0.62;
+  ctx.save();
+  ctx.fillStyle = "rgba(180, 220, 255, 0.22)";
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.75)";
+  ctx.lineWidth = r * 0.06;
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // Odblask
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.beginPath();
+  ctx.arc(x, y, r * 0.8, Math.PI * 1.1, Math.PI * 1.45);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Ikony aktywnych bonusów nad kropkami trafień, z kołowym odliczaniem
+function rysujIkonyBonusow(ctx, z, yKropek) {
+  if (!z.bonusy.length) return;
+  const ri = j(CONFIG.promienKropekZycia) * 1.4;
+  const y = yKropek - ri * 2.6;
+  z.bonusy.forEach((ab, i) => {
+    const typ = typBonusu(ab.typ);
+    const x = z.x + (i - (z.bonusy.length - 1) / 2) * ri * 2.8;
+    rysujKuleBonusu(ctx, typ, x, y, ri);
+    // Odliczanie: biały łuk znika zgodnie z ruchem wskazówek zegara
+    const czesc = ab.pozostalo / typ.czasTrwania;
+    ctx.strokeStyle = "rgba(40, 60, 90, 0.8)";
+    ctx.lineWidth = ri * 0.35;
+    ctx.beginPath();
+    ctx.arc(x, y, ri * 1.45, -Math.PI / 2, -Math.PI / 2 + czesc * Math.PI * 2);
+    ctx.stroke();
+  });
+}
+
 // Trzy małe kropki nad głową: pełne = trafienia, które zostały
 function rysujZycia(ctx, z) {
   const ile = CONFIG.trafieniaDoEliminacji;
@@ -129,6 +209,7 @@ function rysujZycia(ctx, z) {
     ctx.lineWidth = rk * 0.35;
     ctx.stroke();
   }
+  rysujIkonyBonusow(ctx, z, y);
 }
 
 function rysujZawodnika(ctx, z, toGracz) {
@@ -183,6 +264,7 @@ function rysujZawodnika(ctx, z, toGracz) {
   ctx.restore();
 
   rysujUniesionaSniezke(ctx, z);
+  rysujBanke(ctx, z);
 }
 
 // Przeciwnik przed rzutem unosi śnieżkę: od ręki aż nad głowę, im większa siła, tym wyżej.
@@ -377,6 +459,7 @@ function rysujScene(ctx, stan) {
   const obiekty = [
     ...stojacy.map((z) => ({ y: stopyY(z), rysuj: () => rysujZawodnika(ctx, z, z === stan.gracz) })),
     ...przeszkody().map((p) => ({ y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
+    ...stan.bonusy.map((b) => ({ y: b.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujBonusNaPlanszy(ctx, stan, b) })),
   ].sort((a, b) => a.y - b.y);
   for (const o of obiekty) o.rysuj();
   // Kropki z trafieniami na końcu, żeby żadna postać ich nie zasłoniła
