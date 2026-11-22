@@ -26,6 +26,7 @@ const CONFIG = {
   promienCelu: 0.03, // pierścień celu pod palcem
   promienSniezki: 0.0065,
   wysokoscLuku: 0.15, // jak wysoko leci śnieżka (ułamek długości lotu), tylko wygląd
+  maxWysokoscLuku: 0.035, // ale nie wyżej niż tyle (ułamek szerokości pola, ok. 35 jednostek)
   czasPrzeladowania: 0.5, // po rzucie: ten czas plus czas ładowania siły
   kolorPrzeladowania: "#b8c4d0", // szary pierścień pod stopami w trakcie przeładowania
 
