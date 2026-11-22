@@ -44,15 +44,15 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 
 ### Mechanika (ustalona z Jakubem)
 1. **Zawodnik gracza:** jeden, czerwony, zawsze zaznaczony (niebieski pierścień pod stopami).
-2. **Ruch:** za zawodnikiem jest **kropka (uchwyt)** w stałej odległości (ok. 1 cm), zawsze po prawej stronie (z dala od przeciwników, pod prawym kciukiem). Podczas przeciągania jest sztywno przyczepiona i się nie obraca. Granica drużyn to przekątna pola: gracz (czerwony, widziany z tyłu) gra w prawym dolnym trójkącie, przeciwnicy (przodem) w lewym górnym. Nikt nie przechodzi przez przekątną. Dotknięcie kropki i przeciągnięcie porusza zawodnika, który idzie za kropką z ograniczonym limitem prędkości (w `config.js`). Palec nie zasłania zawodnika.
-3. **Rzut:** **drugi palec** dotyka dowolnego punktu planszy (poza kropką) i wyznacza **cel** rzutu. Znacznik celu jest dokładnie w miejscu dotyku, cienka linia łączy go z zawodnikiem.
+2. **Ruch:** **stały joystick (pad)** w prawym dolnym rogu ekranu, sterowany prawym kciukiem. Ruch płynny: im większe wychylenie gałki, tym szybciej (do `predkoscZawodnika`), ze strefą martwą przy środku. Puszczenie pada zatrzymuje zawodnika. Wcześniejsza kropka (uchwyt) za zawodnikiem została usunięta, bo wymagała chodzenia palcem za zawodnikiem po planszy. Granica drużyn to przekątna pola: gracz (czerwony, widziany z tyłu) gra w prawym dolnym trójkącie, przeciwnicy (przodem) w lewym górnym. Nikt nie przechodzi przez przekątną. Gracz startuje poza strefą pada.
+3. **Rzut:** **drugi palec** dotyka dowolnego punktu planszy (poza padem) i wyznacza **cel** rzutu. Znacznik celu jest dokładnie w miejscu dotyku, cienka linia łączy go z zawodnikiem.
 4. **Siła:** przytrzymanie ładuje siłę (max **1,5 s**). Siła zwiększa **prędkość i maksymalny zasięg** śnieżki. Bez paska siły: wzdłuż linii do celu rośnie pierścień zasięgu, a gdy sięga celu, zmienia kolor na zielony. Puszczenie palca = rzut.
 5. **Lot śnieżki:** leci prosto w stronę celu. Zatrzymuje się w dotkniętym punkcie albo na końcu zasięgu, jeśli ten jest bliżej. Długie przytrzymanie nie sprawia, że leci za cel. Rysujemy ją z cieniem na ziemi (efekt łuku), to tylko wygląd.
 6. **Trafienia:** śnieżka **trafia każdego, kto stoi na jej drodze** (przeciwnika, nie samego rzucającego). Dwa trafienia ogłuszają na 1 s, trzecie eliminuje. Liczba trafień liczy się przez cały poziom.
 7. **Ruch w trakcie ładowania** jest dozwolony (dwa kciuki: jeden na kropce, drugi na planszy).
 8. **Przeładowanie:** po rzucie 0,5 s plus czas, który przytrzymaliśmy siłę. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pierścień pod stopami pokazuje odliczanie.
 9. **Przeciwnicy:** te same reguły co gracz. Przed rzutem **unoszą śnieżkę nad głowę** (ostrzeżenie): im silniejszy rzut, tym dłużej unoszenie. Poziom 1: 1 przeciwnik, poziom 2: 2, poziom 3: 3 itd. Wyższe poziomy: lepsze uniki i celność.
-10. **Bonusy:** pojawiają się na planszy i aktywują się trafieniem śnieżką (rzut w ich miejsce).
+10. **Bonusy:** pojawiają się na planszy i aktywują się trafieniem śnieżką (rzut w ich miejsce). Nie mogą leżeć w strefie pada.
 11. **Wygrana:** wyeliminowanie wszystkich przeciwników. **Przegrana:** wyeliminowanie zawodnika.
 
 ### Do rozstrzygnięcia (pytania otwarte)
@@ -61,7 +61,7 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 - Skala postaci na małych telefonach (5–5,5 cala): sprawdzić po teście u znajomego.
 
 ### Układ i wygląd (na podstawie analizy rozgrywki z nagrania)
-- **Pole gry:** stałe proporcje 2:1, skalowane tak, żeby mieściło się w ekranie w całości. Tło śnieżne wychodzi poza pole i wypełnia resztę ekranu, bez pustych pasów. Zawodnicy nie wychodzą poza pole, ale kropka może leżeć w marginesie. Wszyscy mają to samo pole gry niezależnie od telefonu.
+- **Pole gry:** stałe proporcje 2:1, skalowane tak, żeby mieściło się w ekranie w całości. Tło śnieżne wychodzi poza pole i wypełnia resztę ekranu, bez pustych pasów. Zawodnicy nie wychodzą poza pole. Joystick jest zakotwiczony do ekranu, nie do pola. Wszyscy mają to samo pole gry niezależnie od telefonu.
 - **Orientacja:** tylko pozioma. W pionie komunikat "Obróć telefon".
 - **Wygląd:** tło z grafiki (śnieżna tekstura) z niebieskawym przyciemnieniem poza polem i przy jego brzegach, widok skośnie z góry, cień pod postaciami. Dekoracje (choinki, bałwany, płotki, forty) są przeszkodami: zatrzymują śnieżki, a zawodnicy nie mogą przez nie przejść. Rysowanych zasp już nie ma.
 - **Postacie:** z grafik, okrąg trafień ok. 1/16 szerokości pola gry (najpierw było 1/8, ale było za duże względem planszy). Czerwony to gracz, zieloni to przeciwnicy.

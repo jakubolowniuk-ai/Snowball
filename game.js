@@ -60,8 +60,6 @@ function zacznijPoziom(stan, poziom) {
     wypchnijZPrzeszkod(p); // nie w środku dekoracji
   }
   for (const p of stan.przeciwnicy) p.ai = nowyStanAI(param);
-  stan.palec = null; // gdzie jest palec trzymający kropkę (null = nikt jej nie trzyma)
-  stan.chwyt = null; // zapamiętane przy złapaniu: gdzie był palec i kropka względem zawodnika
   stan.czasPoziomu = 0; // ile sekund trwa obecny poziom
   stan.celowanie = null; // { x, y, czas } gdy palec celuje; czas = ile sekund ładuje się siła
   stan.sniezki = []; // śnieżki w locie
@@ -98,11 +96,8 @@ function trafienie(stan, z) {
   // Krótka wibracja (działa na Androidzie; iPhone tego nie obsługuje)
   if (navigator.vibrate) navigator.vibrate(CONFIG.wibracjaTrafienia);
 
-  // Trafiony gracz traci kropkę i celowanie, trafiony przeciwnik traci uniesiony rzut
-  if (z === stan.gracz) {
-    pusc(stan);
-    stan.celowanie = null;
-  }
+  // Trafiony gracz traci celowanie (pad zostaje pod kciukiem), przeciwnik traci uniesiony rzut
+  if (z === stan.gracz) stan.celowanie = null;
   if (z.ai) z.ai.unoszenie = null;
 }
 
@@ -169,7 +164,6 @@ function sprawdzKoniec(stan) {
     stan.koniec = { wynik: "wygrana", czas: 0 };
   }
   if (stan.koniec) {
-    pusc(stan);
     stan.celowanie = null;
   }
 }
@@ -300,43 +294,56 @@ function pozycjaSniezki(sn) {
   };
 }
 
-// Wywoływane, gdy palec złapie kropkę: zapamiętujemy sztywne przesunięcia
-function zlapKropke(stan, palec) {
-  const g = stan.gracz;
-  const k = pozycjaKropki(stan);
-  stan.chwyt = {
-    palecX: palec.x - g.x, palecY: palec.y - g.y, // palec względem zawodnika
-    kropkaX: k.x - g.x, kropkaY: k.y - g.y, // kropka względem zawodnika
-  };
-  stan.palec = palec;
+// --- Joystick (pad) ---
+
+// Stan pada (nie zeruje się między poziomami: kciuk może zostać na padzie).
+// wychylX, wychylY: wychylenie gałki od -1 do 1 (długość wektora najwyżej 1)
+const pad = { wychylX: 0, wychylY: 0, dotykany: false };
+
+// Środek pada: prawy dolny róg WIDOCZNEGO ekranu (nie pola gry), z marginesem
+function pozycjaPada() {
+  const odKrawedzi = j(CONFIG.marginesPadu) + j(CONFIG.promienPadu);
+  return { x: widoczny.x1 - odKrawedzi, y: widoczny.y1 - odKrawedzi };
 }
 
-function pusc(stan) {
-  stan.palec = null;
-  stan.chwyt = null;
+// Czy punkt p (jednostki pola) łapie pad?
+function naPadzie(p) {
+  const s = pozycjaPada();
+  return odleglosc(p.x, p.y, s.x, s.y) <= j(CONFIG.promienPadu) + j(CONFIG.promienDotykuPadu);
 }
 
-// Odległość środka kropki od środka zawodnika
-function odlegloscKropkiOdSrodka() {
-  return PROMIEN_POSTACI + j(CONFIG.odlegloscKropki);
-}
-
-// Gdzie leży kropka: gdy jest trzymana, w stałym miejscu względem zawodnika (sztywno),
-// a w spoczynku zawsze po prawej (z dala od przeciwników, pod prawym kciukiem).
-// Nigdy nie wychodzi poza widoczny ekran, żeby dało się jej dotknąć.
-function pozycjaKropki(stan) {
-  const g = stan.gracz;
-  let k;
-  if (stan.chwyt) {
-    k = { x: g.x + stan.chwyt.kropkaX, y: g.y + stan.chwyt.kropkaY };
-  } else {
-    k = { x: g.x + odlegloscKropkiOdSrodka(), y: g.y };
+// Ustawia wychylenie gałki według palca w punkcie p; gałka nie wychodzi poza podstawę
+function ustawWychylenie(p) {
+  const s = pozycjaPada();
+  let wx = (p.x - s.x) / j(CONFIG.promienPadu);
+  let wy = (p.y - s.y) / j(CONFIG.promienPadu);
+  const dl = Math.hypot(wx, wy);
+  if (dl > 1) {
+    wx /= dl;
+    wy /= dl;
   }
+  pad.wychylX = wx;
+  pad.wychylY = wy;
+}
 
-  const r = j(CONFIG.promienKropki);
-  k.x = Math.min(Math.max(k.x, widoczny.x0 + r), widoczny.x1 - r);
-  k.y = Math.min(Math.max(k.y, widoczny.y0 + r), widoczny.y1 - r);
-  return k;
+function puscPad() {
+  pad.wychylX = 0;
+  pad.wychylY = 0;
+  pad.dotykany = false;
+}
+
+// Ruch gracza z pada: kierunek wychylenia, prędkość rośnie z wychyleniem.
+// Poniżej strefy martwej stoi; powyżej wychylenie przeskalowane do 0-1.
+function ruchZPada(z, dt) {
+  const m = Math.hypot(pad.wychylX, pad.wychylY);
+  const martwa = CONFIG.strefaMartwaPadu;
+  if (m <= martwa) return;
+  const sila = Math.min((m - martwa) / (1 - martwa), 1);
+  const krok = j(CONFIG.predkoscZawodnika) * sila * dt;
+  z.x += (pad.wychylX / m) * krok;
+  z.y += (pad.wychylY / m) * krok;
+  ograniczDoSwojejStrony(z);
+  wypchnijZPrzeszkod(z);
 }
 
 // --- Skalowanie pola gry do ekranu ---
@@ -414,10 +421,8 @@ function aktualizuj(dt) {
   // Przeciwnicy (ruch, uniki, rzuty) - logika w ai.js
   for (const p of stan.przeciwnicy) aktualizujPrzeciwnika(stan, p, dt);
 
-  // Gracz: kropka jest sztywno przyczepiona, więc zawodnik chce stanąć tak,
-  // żeby palec był w tym samym miejscu względem niego co przy złapaniu.
-  const palec = stan.palec;
-  if (palec) idzDo(stan.gracz, palec.x - stan.chwyt.palecX, palec.y - stan.chwyt.palecY, dt);
+  // Gracz: ruch z joysticka (ogłuszony stoi, ale kciuk może zostać na padzie)
+  if (graczMozeSterowac(stan)) ruchZPada(stan.gracz, dt);
 }
 
 // --- Pętla gry ---
