@@ -10,11 +10,15 @@ const CONFIG = {
   rozmiarPostaci: 1 / 16, // średnica okręgu trafień (hitbox) zawodnika
   predkoscZawodnika: 0.3, // limit prędkości: szerokości pola na sekundę
 
-  // Kropka (uchwyt) za zawodnikiem
-  odlegloscKropki: 0.075, // od krawędzi zawodnika (ok. 1 cm na telefonie)
-  promienKropki: 0.0125, // wielkość rysowanej kropki
-  promienDotykuKropki: 0.04, // jak blisko kropki trzeba dotknąć, żeby ją złapać
-  przezroczystoscKropki: 0.4, // gdy nikt jej nie dotyka (1 = pełna)
+  // Joystick (pad) do ruchu: stały, w prawym dolnym rogu widocznego ekranu.
+  // 1 cm na telefonie to ok. 0,08-0,11 szerokości pola (zależnie od telefonu).
+  promienPadu: 0.12, // promień podstawy (ok. 1,4 cm)
+  promienGalki: 0.05, // promień gałki
+  marginesPadu: 0.05, // odstęp podstawy od prawej i dolnej krawędzi ekranu
+  promienDotykuPadu: 0.03, // zapas: dotyk tyle poza podstawą też łapie pad
+  strefaMartwaPadu: 0.12, // wychylenie mniejsze niż to (0-1) nie rusza zawodnika
+  przezroczystoscPadu: 0.35, // gdy nikt go nie dotyka
+  przezroczystoscPaduAktywnego: 0.6, // gdy kciuk jest na padzie
 
   // Rzut
   MAX_CHARGE: 1.5, // ile sekund ładuje się pełna siła
@@ -59,7 +63,7 @@ const CONFIG = {
   zapasSily: 0.15, // ile sekund dłużej ładuje siłę, żeby na pewno dorzucić
 
   // Pozycje startowe (y też jako ułamek szerokości; wysokość pola to 1 / ASPECT)
-  startGracz: { x: 0.85, y: 0.38 }, // prawy dolny róg
+  startGracz: { x: 0.62, y: 0.42 }, // prawa dolna część pola, poza padem
   // Przeciwnicy stoją w lewym górnym trójkącie, równo rozłożeni na linii równoległej
   // do przekątnej. 0 = w samym lewym górnym rogu, 1 = na przekątnej (granicy).
   liniaPrzeciwnikow: 0.55,
@@ -87,8 +91,8 @@ const CONFIG = {
     { plik: "choinka_1", x: 0.06, y: 0.105 }, // róg zielonych
     { plik: "plot_2", x: 0.33, y: 0.23 }, // osłona przed linią zielonych
     { plik: "balwan_3", x: 0.09, y: 0.44 }, // lewy dolny róg
-    { plik: "fort_1", x: 0.68, y: 0.3 }, // osłona gracza
-    { plik: "balwan_1", x: 0.56, y: 0.455 }, // strona gracza, u dołu
+    { plik: "fort_1", x: 0.6, y: 0.28 }, // osłona gracza
+    { plik: "balwan_1", x: 0.47, y: 0.47 }, // strona gracza, u dołu
     { plik: "choinka_2", x: 0.96, y: 0.14 }, // prawy górny róg
   ],
 
@@ -100,7 +104,7 @@ const CONFIG = {
   kolorCzerwony: "#d93a3a",
   kolorZielony: "#3a9a4a",
   kolorPierscienia: "#2a6fd6",
-  kolorKropki: "#2a6fd6",
+  kolorPadu: "#2a6fd6",
   kolorSniegu: "#ffffff",
   kolorBrzegu: "#b9d0e6", // przyciemnienie poza polem i przy jego brzegach
   kolorNapisu: "#8cc4ee",

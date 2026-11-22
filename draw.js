@@ -1,4 +1,4 @@
-// Rysowanie tła, zawodników, śnieżek, kropki i napisów.
+// Rysowanie tła, zawodników, śnieżek, joysticka i napisów.
 // Rysujemy w jednostkach pola (szerokość 1000), skalowanie robi game.js.
 
 const TLO = "assets/tlo/tlo_plansza.png";
@@ -221,20 +221,31 @@ function rysujChmurki(ctx, stan) {
   }
 }
 
-function rysujKropke(ctx, stan) {
-  if (stan.gracz.wyeliminowany || stan.koniec) return;
-  const k = pozycjaKropki(stan);
-  const r = j(CONFIG.promienKropki);
+// Joystick: półprzezroczysta podstawa i gałka przesunięta o wychylenie
+function rysujPad(ctx) {
+  const s = pozycjaPada();
+  const R = j(CONFIG.promienPadu);
+  const rg = j(CONFIG.promienGalki);
+  const gx = s.x + pad.wychylX * R;
+  const gy = s.y + pad.wychylY * R;
   ctx.save();
-  // Półprzezroczysta, gdy nikt jej nie trzyma; ledwo widoczna przy ogłuszeniu
-  ctx.globalAlpha = stan.palec ? 1 : CONFIG.przezroczystoscKropki;
-  if (stan.gracz.ogluszenie > 0) ctx.globalAlpha = 0.15;
-  ctx.fillStyle = CONFIG.kolorKropki;
+  ctx.globalAlpha = pad.dotykany ? CONFIG.przezroczystoscPaduAktywnego : CONFIG.przezroczystoscPadu;
+  // Podstawa: pierścień z lekko wypełnionym środkiem
+  ctx.fillStyle = CONFIG.kolorPadu;
+  ctx.globalAlpha *= 0.35;
   ctx.beginPath();
-  ctx.arc(k.x, k.y, r, 0, Math.PI * 2);
+  ctx.arc(s.x, s.y, R, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha /= 0.35;
+  ctx.strokeStyle = CONFIG.kolorPadu;
+  ctx.lineWidth = R * 0.06;
+  ctx.stroke();
+  // Gałka
+  ctx.beginPath();
+  ctx.arc(gx, gy, rg, 0, Math.PI * 2);
   ctx.fill();
   ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = r * 0.25;
+  ctx.lineWidth = rg * 0.15;
   ctx.stroke();
   ctx.restore();
 }
@@ -355,6 +366,6 @@ function rysujScene(ctx, stan) {
   rysujCelowanie(ctx, stan); // nad postaciami, żeby cel na przeciwniku był widoczny
   rysujSniezki(ctx, stan); // śnieżki są w powietrzu, więc nad postaciami
   rysujChmurki(ctx, stan);
-  rysujKropke(ctx, stan);
+  rysujPad(ctx);
   rysujNapisy(ctx, stan);
 }

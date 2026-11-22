@@ -1,6 +1,6 @@
 // Dotyk i mysz przez Pointer Events (jedno API dla obu).
 // Każdy palec ma swój numer (pointerId), dzięki temu obsługujemy dwa palce naraz:
-// jeden na kropce (ruch), drugi gdziekolwiek indziej (celowanie i rzut).
+// jeden na joysticku (ruch), drugi gdziekolwiek indziej (celowanie i rzut).
 
 function odleglosc(ax, ay, bx, by) {
   return Math.hypot(ax - bx, ay - by);
@@ -9,34 +9,32 @@ function odleglosc(ax, ay, bx, by) {
 // Podpina obsługę wskaźnika do canvasa.
 // ekranNaPlansze: funkcja zamieniająca współrzędne ekranu na współrzędne planszy.
 function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
-  let palecKropki = null; // numer palca na kropce (null = nikt)
+  let palecPada = null; // numer palca na joysticku (null = nikt)
   let palecCelu = null; // numer palca, który celuje (null = nikt)
 
   canvas.addEventListener("pointerdown", (e) => {
-    // Ogłuszony, wyeliminowany albo koniec poziomu: dotyk nic nie robi
-    if (!graczMozeSterowac(stan)) return;
     const p = ekranNaPlansze(e.clientX, e.clientY);
-    const k = pozycjaKropki(stan);
-    const naKropce = odleglosc(p.x, p.y, k.x, k.y) <= j(CONFIG.promienDotykuKropki);
 
-    if (naKropce && palecKropki === null) {
-      palecKropki = e.pointerId;
-      zlapKropke(stan, p);
-    } else if (!naKropce && palecCelu === null && stan.gracz.przeladowanie <= 0) {
-      // W trakcie przeładowania dotyk planszy nic nie robi
+    if (palecPada === null && naPadzie(p)) {
+      // Pad można złapać zawsze, także przy ogłuszeniu (zawodnik ruszy, gdy minie)
+      palecPada = e.pointerId;
+      pad.dotykany = true;
+      ustawWychylenie(p);
+    } else if (!naPadzie(p) && palecCelu === null && graczMozeSterowac(stan) && stan.gracz.przeladowanie <= 0) {
+      // Celowanie: nie przy ogłuszeniu, nie po końcu poziomu i nie w trakcie przeładowania
       palecCelu = e.pointerId;
       zacznijCelowanie(stan, p);
     } else {
       return; // trzeci palec i kolejne pomijamy
     }
-    // Dalej dostajemy ruchy palca, nawet gdy wyjedzie poza canvas
+    // Dalej dostajemy ruchy palca, nawet gdy wyjedzie poza canvas albo poza pad
     canvas.setPointerCapture(e.pointerId);
   });
 
   canvas.addEventListener("pointermove", (e) => {
     const p = ekranNaPlansze(e.clientX, e.clientY);
-    // Po trafieniu gra sama puszcza kropkę i celowanie; wtedy ruchy palca pomijamy
-    if (e.pointerId === palecKropki && stan.chwyt) stan.palec = p;
+    if (e.pointerId === palecPada) ustawWychylenie(p);
+    // Po trafieniu gra sama przerywa celowanie; wtedy ruchy palca pomijamy
     if (e.pointerId === palecCelu && stan.celowanie) {
       stan.celowanie.x = p.x;
       stan.celowanie.y = p.y;
@@ -44,9 +42,9 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
   });
 
   canvas.addEventListener("pointerup", (e) => {
-    if (e.pointerId === palecKropki) {
-      palecKropki = null;
-      pusc(stan);
+    if (e.pointerId === palecPada) {
+      palecPada = null;
+      puscPad(); // gałka wraca na środek, zawodnik staje
     }
     if (e.pointerId === palecCelu) {
       palecCelu = null;
@@ -54,11 +52,11 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
     }
   });
 
-  // Przerwany dotyk (np. przyszło powiadomienie): puszczamy kropkę, rzutu nie ma
+  // Przerwany dotyk (np. przyszło powiadomienie): puszczamy pad, rzutu nie ma
   canvas.addEventListener("pointercancel", (e) => {
-    if (e.pointerId === palecKropki) {
-      palecKropki = null;
-      pusc(stan);
+    if (e.pointerId === palecPada) {
+      palecPada = null;
+      puscPad();
     }
     if (e.pointerId === palecCelu) {
       palecCelu = null;
