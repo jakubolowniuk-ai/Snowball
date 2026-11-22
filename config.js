@@ -22,7 +22,10 @@ const CONFIG = {
 
   // Rzut
   MAX_CHARGE: 1.5, // ile sekund ładuje się pełna siła
-  zasiegMin: 0.25, // zasięg śnieżki przy najsłabszym rzucie
+  // false: śnieżka zawsze leci do dotkniętego punktu, siła zmienia tylko prędkość.
+  // true: stare zachowanie, siła zmienia też zasięg (od zasiegMin do zasiegMax).
+  zasiegZalezyOdSily: false,
+  zasiegMin: 0.25, // zasięg śnieżki przy najsłabszym rzucie (tylko gdy zasiegZalezyOdSily)
   zasiegMax: 0.9, // zasięg przy pełnej sile
   predkoscSniezkiMin: 0.6, // szerokości pola na sekundę, najsłabszy rzut
   predkoscSniezkiMax: 1.6, // przy pełnej sile
@@ -47,12 +50,13 @@ const CONFIG = {
   //  szansaUniku: szansa (0-1), że w ogóle spróbuje uniknąć śnieżki
   //  rozrzut: jak bardzo chybia (promień losowego błędu celowania)
   //  przerwaMin/Max: przerwa między rzutami jednego przeciwnika (sekundy, losowo)
+  //  silaMin/Max: siła rzutu (0-1) losowana z tego zakresu (gdy zasięg nie zależy od siły)
   poziomy: [
-    { przeciwnicy: 1, czasReakcji: 0.8, szansaUniku: 0.3, rozrzut: 0.04, przerwaMin: 1.5, przerwaMax: 3 },
-    { przeciwnicy: 2, czasReakcji: 0.7, szansaUniku: 0.4, rozrzut: 0.035, przerwaMin: 2, przerwaMax: 3.5 },
-    { przeciwnicy: 3, czasReakcji: 0.6, szansaUniku: 0.5, rozrzut: 0.03, przerwaMin: 2.5, przerwaMax: 4 },
-    { przeciwnicy: 4, czasReakcji: 0.5, szansaUniku: 0.6, rozrzut: 0.025, przerwaMin: 3, przerwaMax: 4.5 },
-    { przeciwnicy: 5, czasReakcji: 0.4, szansaUniku: 0.7, rozrzut: 0.02, przerwaMin: 3.5, przerwaMax: 5 },
+    { przeciwnicy: 1, czasReakcji: 0.8, szansaUniku: 0.3, rozrzut: 0.04, przerwaMin: 1.5, przerwaMax: 3, silaMin: 0.1, silaMax: 0.5 },
+    { przeciwnicy: 2, czasReakcji: 0.7, szansaUniku: 0.4, rozrzut: 0.035, przerwaMin: 2, przerwaMax: 3.5, silaMin: 0.2, silaMax: 0.6 },
+    { przeciwnicy: 3, czasReakcji: 0.6, szansaUniku: 0.5, rozrzut: 0.03, przerwaMin: 2.5, przerwaMax: 4, silaMin: 0.3, silaMax: 0.75 },
+    { przeciwnicy: 4, czasReakcji: 0.5, szansaUniku: 0.6, rozrzut: 0.025, przerwaMin: 3, przerwaMax: 4.5, silaMin: 0.4, silaMax: 0.9 },
+    { przeciwnicy: 5, czasReakcji: 0.4, szansaUniku: 0.7, rozrzut: 0.02, przerwaMin: 3.5, przerwaMax: 5, silaMin: 0.5, silaMax: 1 },
   ],
 
   // Zachowanie przeciwnika (na każdym poziomie takie samo)
@@ -109,6 +113,6 @@ const CONFIG = {
   kolorBrzegu: "#b9d0e6", // przyciemnienie poza polem i przy jego brzegach
   kolorNapisu: "#8cc4ee",
   kolorCelu: "#2a6fd6",
-  kolorZasiegu: "#e0902a", // pierścień zasięgu, gdy śnieżka jeszcze nie doleci
-  kolorZasieguDoleci: "#3a9a4a", // gdy zasięg sięga celu
+  kolorZasiegu: "#e0902a", // łuk siły (niepełna siła) albo pierścień zasięgu, gdy nie doleci
+  kolorZasieguDoleci: "#3a9a4a", // pełna siła albo zasięg sięga celu
 };

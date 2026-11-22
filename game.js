@@ -212,7 +212,8 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania) {
     startY: z.y,
     kierX: (celX - z.x) / d,
     kierY: (celY - z.y) / d,
-    dlugosc: Math.min(d, zasieg(s)), // leci do celu albo do końca zasięgu
+    // Leci do celu; gdy zasięg zależy od siły, najwyżej do końca zasięgu
+    dlugosc: CONFIG.zasiegZalezyOdSily ? Math.min(d, zasieg(s)) : d,
     predkosc: j(pomiedzy(CONFIG.predkoscSniezkiMin, CONFIG.predkoscSniezkiMax, s)),
     przebyte: 0,
   });

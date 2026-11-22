@@ -292,6 +292,25 @@ function rysujCelowanie(ctx, stan) {
   ctx.arc(c.x, c.y, rCelu, 0, Math.PI * 2);
   ctx.stroke();
 
+  // Siła na pierścieniu celu (gdy zasięg nie zależy od siły): blady okrąg
+  // i łuk od góry, który wypełnia się proporcjonalnie do siły
+  if (!CONFIG.zasiegZalezyOdSily) {
+    const s = sila(c.czas);
+    const rLuku = rCelu * 1.35;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "rgba(120, 140, 160, 0.35)";
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, rLuku, 0, Math.PI * 2);
+    ctx.stroke();
+    if (s > 0) {
+      ctx.strokeStyle = s >= 1 ? CONFIG.kolorZasieguDoleci : CONFIG.kolorZasiegu;
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, rLuku, -Math.PI / 2, -Math.PI / 2 + s * Math.PI * 2);
+      ctx.stroke();
+    }
+    return;
+  }
+
   // Pierścień zasięgu na linii: rośnie z siłą, zatrzymuje się na celu
   if (d > 0) {
     const z = zasieg(sila(c.czas));
