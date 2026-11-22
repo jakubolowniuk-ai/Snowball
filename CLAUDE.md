@@ -29,7 +29,7 @@ Snowcraft to gra na telefon (przeglądarka) inspirowana klasyczną grą Flash z 
 - **Lot śnieżki:** leci prosto do celu i zatrzymuje się w dotkniętym punkcie, niezależnie od siły (przy `zasiegZalezyOdSily: true` najwyżej do końca zasięgu). Nigdy nie leci za cel. Rysuj ją z cieniem na ziemi (efekt łuku), to tylko wygląd.
 - Bez paska siły. Siłę pokazuje łuk wokół pierścienia celu: wypełnia się proporcjonalnie do siły (pomarańczowy), przy pełnej sile cały zielony. (Przy `zasiegZalezyOdSily: true` zamiast łuku jest dawny pierścień zasięgu na linii do celu.)
 - **Strony pola:** granica drużyn to przekątna pola (od lewego dolnego do prawego górnego rogu). Gracz gra w prawym dolnym trójkącie i jest pokazany z tyłu (`czerwony_tyl.png`), przeciwnicy w lewym górnym trójkącie, przodem. Nikt nie przechodzi przez przekątną.
-- Rzut można ładować w trakcie ruchu (jeden palec na kropce, drugi na planszy).
+- Rzut można ładować w trakcie ruchu (jeden palec na padzie, drugi na planszy).
 - Puszczenie palca bardzo blisko zawodnika anuluje rzut (promień w `config.js`).
 - **Trafienia:** śnieżka trafia **każdego, kto stoi na jej drodze**. Pierwsze 2 trafienia ogłuszają na 1 s (`czasOgluszenia` w `config.js`, nie można wtedy ruszać się ani rzucać), trzecie eliminuje. Liczba trafień liczy się przez cały poziom. Dotyczy gracza i przeciwników.
 - **Przeładowanie:** po rzucie 0,5 s plus czas ładowania siły (`czasPrzeladowania` w `config.js`). W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Odliczanie pokazuje pierścień pod stopami.
