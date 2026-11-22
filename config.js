@@ -30,6 +30,17 @@ const CONFIG = {
   czasPrzeladowania: 0.5, // po rzucie: ten czas plus czas ładowania siły
   kolorPrzeladowania: "#b8c4d0", // szary pierścień pod stopami w trakcie przeładowania
 
+  // Schylanie (lepienie nowej śnieżki) w trakcie przeładowania. Tylko wygląd.
+  schylenieSkalaY: 0.8, // wysokość postaci przy pełnym schyleniu (1 = bez zmian)
+  schylenieSkalaX: 1.05, // szerokość postaci przy pełnym schyleniu
+  schyleniePrzechyl: 6, // przechył do przodu (w stronę przeciwnika), w stopniach
+  schylenieCzasSchodzenia: 0.15, // jaką część przeładowania trwa schylanie się
+  schylenieCzasPowrotu: 0.2, // jaką część przeładowania trwa prostowanie na końcu
+  lepionaSniezkaOd: 0.3, // rozmiar lepionej śnieżki na początku (1 = pełna)
+  lepionaSniezkaDo: 1, // rozmiar na końcu przeładowania
+  lepionaSniezkaX: 0, // położenie lepionej śnieżki: w bok od stóp (ułamek szerokości grafiki)
+  lepionaSniezkaY: 0.12, // i w górę od stóp (ułamek wysokości grafiki)
+
   // Trafienia
   trafieniaDoEliminacji: 3, // wcześniejsze trafienia tylko ogłuszają
   czasOgluszenia: 1, // sekundy bez ruchu i bez rzutu
