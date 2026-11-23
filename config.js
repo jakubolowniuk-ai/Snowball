@@ -194,6 +194,7 @@ const CONFIG = {
     drogaNaKlatkeChodu: 0.04, // co tyle drogi (ułamek szerokości pola) następna klatka chodu
     progRuchu: 0.02, // od tej prędkości (szerokości pola/s) postać "idzie"
     opoznienieStania: 0.1, // po tylu sekundach bez ruchu wraca do "stanie" (bez migania przy krótkich postojach)
+    katBoku: 30, // ruch do tylu stopni od poziomu = widok z boku (przód odbity), dalej przód albo tył
   },
 
   // Kolory zawodników: nazwa atlasu w assets/gracze/atlasy/ (16 kolorów, lista w README_GRAFIKI)
