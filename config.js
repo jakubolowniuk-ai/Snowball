@@ -189,8 +189,9 @@ const CONFIG = {
 
   // Grafiki postaci i mnożnik ich wielkości (1 = rozmiar z sprites.json).
   // Mnożnik zmienia tylko wygląd; okrąg trafień ustawia rozmiarPostaci.
-  grafikaGracza: "assets/gracze/czerwony_tyl.png", // gracz na dole, widać go z tyłu
-  grafikaPrzeciwnika: "assets/gracze/zielony_przod.png",
+  // Kolory zawodników: nazwa atlasu w assets/gracze/atlasy/ (16 kolorów, lista w README_GRAFIKI)
+  kolorGracza: "czerwony",
+  kolorPrzeciwnika: "zielony",
   skalaGrafik: 1,
   skalaSniezki: 1.6, // śnieżka rysowana większa niż jej okrąg trafień (lepiej widoczna)
   promienKropekZycia: 0.006, // kropki z trafieniami nad głową

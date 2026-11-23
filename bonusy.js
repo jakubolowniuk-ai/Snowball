@@ -174,7 +174,7 @@ function tarczaPochlania(stan, z) {
   // Bańka pęka: chmurka śniegu na wysokości tułowia
   stan.chmurki.push({
     x: z.x,
-    y: stopyY(z) - rozmiarGrafiki(grafikaPostaci(z)).wys * 0.45,
+    y: stopyY(z) - rozmiarPostaci(z).wys * 0.45,
     czas: 0,
     obloczek: `assets/efekty/obloczek_sniegu_${1 + Math.floor(Math.random() * 2)}.png`,
     rozbryzg: null,

@@ -85,9 +85,65 @@ function kolorDruzyny(z) {
   return z.druzyna === "czerwoni" ? CONFIG.kolorCzerwony : CONFIG.kolorZielony;
 }
 
-// Ścieżka grafiki postaci
-function grafikaPostaci(z) {
-  return z.druzyna === "czerwoni" ? CONFIG.grafikaGracza : CONFIG.grafikaPrzeciwnika;
+// --- Zawodnik z atlasu animacji ---
+
+// Atlas (obrazek z klatkami) w kolorze drużyny
+function atlasPostaci(z) {
+  return ZAWODNIK.atlas(z.druzyna === "czerwoni" ? CONFIG.kolorGracza : CONFIG.kolorPrzeciwnika);
+}
+
+// Widok postaci: gracz z tyłu, przeciwnicy z przodu (jak dotąd)
+function widokPostaci(z) {
+  return z.druzyna === "czerwoni" ? "tyl" : "przod";
+}
+
+// Obecna klatka postaci: { dane, odbicie } (na razie zawsze "stanie")
+function klatkaPostaci(z) {
+  return { dane: ZAWODNIK.klatki[widokPostaci(z)].stanie, odbicie: false };
+}
+
+// Rozmiar obecnej klatki w jednostkach pola (z mnożnikiem skali z config.js)
+function rozmiarPostaci(z) {
+  const k = klatkaPostaci(z).dane;
+  return { szer: k.szer * CONFIG.skalaGrafik, wys: k.wys * CONFIG.skalaGrafik };
+}
+
+// Rysuje klatkę z atlasu tak, żeby jej kotwica wypadła w (x, y). Odbicie: lustro w poziomie
+// (wtedy kotwica x zamienia się na 1 - x). Zwraca false, gdy atlas się nie wczytał.
+function rysujKlatke(ctx, atlas, k, x, y, odbicie) {
+  const obraz = OBRAZY[atlas];
+  if (!obraz) return false;
+  const szer = k.szer * CONFIG.skalaGrafik;
+  const wys = k.wys * CONFIG.skalaGrafik;
+  const kx = odbicie ? 1 - k.kotwicaX : k.kotwicaX;
+  ctx.save();
+  ctx.translate(x - kx * szer, y - k.kotwicaY * wys);
+  if (odbicie) {
+    ctx.translate(szer, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.drawImage(obraz, k.ax, k.ay, k.aw, k.ah, 0, 0, szer, wys);
+  ctx.restore();
+  return true;
+}
+
+// Punkt dłoni klatki (środek trzymanej śnieżki) w świecie, albo null, gdy klatka go nie ma
+function punktReki(k, x, y, odbicie) {
+  if (!k.reka) return null;
+  const szer = k.szer * CONFIG.skalaGrafik;
+  const wys = k.wys * CONFIG.skalaGrafik;
+  const kx = odbicie ? 1 - k.kotwicaX : k.kotwicaX;
+  const rx = odbicie ? 1 - k.reka.x : k.reka.x;
+  return { x: x + (rx - kx) * szer, y: y - (k.kotwicaY - k.reka.y) * wys, promien: k.reka.promien * CONFIG.skalaGrafik };
+}
+
+// Postać: klatka z atlasu plus śnieżka w dłoni rysowana kodem (grafiki jej nie mają)
+function rysujPostac(ctx, z, x, y) {
+  const { dane, odbicie } = klatkaPostaci(z);
+  if (!rysujKlatke(ctx, atlasPostaci(z), dane, x, y, odbicie)) return false;
+  const r = punktReki(dane, x, y, odbicie);
+  if (r) rysujSniezkeOPromieniu(ctx, r.x, r.y, r.promien);
+  return true;
 }
 
 // Rozmiar grafiki w jednostkach pola (z mnożnikiem skali z config.js)
@@ -115,8 +171,8 @@ function stopyY(z) {
 // Wyeliminowany leży na ziemi: grafika postaci obrócona o 90 stopni
 // i lekko spłaszczona (widok skośnie z góry). Docelowo dojdzie osobna grafika.
 function rysujLezacego(ctx, z) {
-  const sciezka = grafikaPostaci(z);
-  const { szer, wys } = rozmiarGrafiki(sciezka);
+  const k = klatkaPostaci(z).dane;
+  const { szer, wys } = rozmiarPostaci(z);
   const y = stopyY(z);
   const splaszczenie = 0.7;
 
@@ -126,14 +182,14 @@ function rysujLezacego(ctx, z) {
   ctx.ellipse(z.x, y, wys * 0.5, szer * 0.3, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  const obraz = OBRAZY[sciezka];
+  const obraz = OBRAZY[atlasPostaci(z)];
   if (!obraz) return;
   ctx.save();
   ctx.translate(z.x, y - (szer / 2) * splaszczenie);
   ctx.scale(1, splaszczenie);
   // Czerwony leży głową w lewo, zielony głową w prawo
   ctx.rotate(z.druzyna === "czerwoni" ? -Math.PI / 2 : Math.PI / 2);
-  ctx.drawImage(obraz, -szer / 2, -wys / 2, szer, wys);
+  ctx.drawImage(obraz, k.ax, k.ay, k.aw, k.ah, -szer / 2, -wys / 2, szer, wys);
   ctx.restore();
 }
 
@@ -288,7 +344,7 @@ function rysujBonusNaPlanszy(ctx, stan, b) {
 // Bańka wokół postaci z Bombką (tarczą)
 function rysujBanke(ctx, z) {
   if (!z.bonusy.some((ab) => ab.typ === "bombka")) return;
-  const { wys } = rozmiarGrafiki(grafikaPostaci(z));
+  const { wys } = rozmiarPostaci(z);
   const x = z.x;
   const y = stopyY(z) - wys * 0.48;
   const r = wys * 0.62;
@@ -333,7 +389,7 @@ function rysujZycia(ctx, z) {
   const zostalo = ile - z.trafienia;
   const rk = j(CONFIG.promienKropekZycia);
   const odstep = rk * 3;
-  const { wys } = rozmiarGrafiki(grafikaPostaci(z));
+  const { wys } = rozmiarPostaci(z);
   // Nad głową, ale nie wyżej niż górna krawędź ekranu
   const y = Math.max(stopyY(z) - wys - rk * 2, widokSwiata().y0 + rk * 1.5);
   for (let i = 0; i < ile; i++) {
@@ -396,7 +452,7 @@ function rysujZawodnika(ctx, z, toGracz) {
   // Postać z grafiki (podeszwy w punkcie stóp); gdy grafiki brak, kółko jak dawniej
   // Niesiony wiatrem zamieci podskakuje (cień zostaje na ziemi)
   const podskok = z.wiatr ? Math.abs(Math.sin(stan.czasPoziomu * 12)) * j(CONFIG.tryby.wielkaArena.wysokoscPodskoku) : 0;
-  if (!rysujSprite(ctx, grafikaPostaci(z), z.x, y - podskok)) {
+  if (!rysujPostac(ctx, z, z.x, y - podskok)) {
     ctx.fillStyle = kolorDruzyny(z);
     ctx.beginPath();
     ctx.arc(z.x, z.y, r, 0, Math.PI * 2);
@@ -413,12 +469,10 @@ function rysujZawodnika(ctx, z, toGracz) {
 function rysujUniesionaSniezke(ctx, z) {
   if (!z.ai || !z.ai.unoszenie) return;
   const s = sila(z.ai.unoszenie.czas);
-  const { szer, wys } = rozmiarGrafiki(grafikaPostaci(z));
-  // Śnieżka w ręce na grafice: z przodu w prawej ręce, z tyłu w lewej
-  const zTylu = grafikaPostaci(z).includes("_tyl");
-  const reka = zTylu
-    ? { x: z.x - szer * 0.48, y: stopyY(z) - wys * 0.5 }
-    : { x: z.x + szer * 0.51, y: stopyY(z) - wys * 0.61 };
+  const { wys } = rozmiarPostaci(z);
+  // Startuje z dłoni obecnej klatki (albo ze środka postaci, gdy klatka nie ma dłoni)
+  const { dane, odbicie } = klatkaPostaci(z);
+  const reka = punktReki(dane, z.x, stopyY(z), odbicie) || { x: z.x, y: stopyY(z) - wys * 0.6 };
   const nadGlowa = { x: z.x, y: stopyY(z) - wys - j(CONFIG.promienKropekZycia) * 5 };
   const x = reka.x + (nadGlowa.x - reka.x) * s;
   const y = reka.y + (nadGlowa.y - reka.y) * s;
@@ -430,7 +484,7 @@ function rysujUniesionaSniezke(ctx, z) {
 function rysujSerduszko(ctx, ch) {
   const z = ch.serce;
   const t = ch.czas / ch.trwa; // od 0 do 1
-  const { wys } = rozmiarGrafiki(grafikaPostaci(z));
+  const { wys } = rozmiarPostaci(z);
   const r = j(CONFIG.promienKropekZycia) * 1.6;
   const x = z.x;
   const y = stopyY(z) - wys - r * 6 - t * r * 4;
@@ -590,10 +644,10 @@ function rysujCienieSniezek(ctx, stan) {
 }
 
 // Śnieżka z grafiki (powiększona o skalaSniezki, żeby była lepiej widoczna)
-function rysujJednaSniezke(ctx, x, y) {
+function rysujJednaSniezke(ctx, x, y, skala = 1) {
   const obraz = OBRAZY[GRAFIKA_SNIEZKI];
   const { szer, wys } = rozmiarGrafiki(GRAFIKA_SNIEZKI);
-  const k = CONFIG.skalaSniezki;
+  const k = CONFIG.skalaSniezki * skala; // skala: mnożnik dla mniejszych śnieżek (np. w dłoni)
   if (obraz) {
     ctx.drawImage(obraz, x - (szer * k) / 2, y - (wys * k) / 2, szer * k, wys * k);
   } else {
@@ -603,6 +657,12 @@ function rysujJednaSniezke(ctx, x, y) {
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
   }
+}
+
+// Śnieżka o zadanym promieniu (np. trzymana w dłoni)
+function rysujSniezkeOPromieniu(ctx, x, y, promien) {
+  const { szer } = rozmiarGrafiki(GRAFIKA_SNIEZKI);
+  rysujJednaSniezke(ctx, x, y, (promien * 2) / (szer * CONFIG.skalaSniezki));
 }
 
 function rysujSniezki(ctx, stan) {

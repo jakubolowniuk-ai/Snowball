@@ -299,326 +299,6 @@
     "y": 0.9
    }
   },
-  "assets/gracze/czerwony_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/zielony_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/niebieski_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/zolty_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/pomaranczowy_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/fioletowy_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/rozowy_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/blekitny_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/limonkowy_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/brazowy_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/turkusowy_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/granatowy_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/magenta_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/szary_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/bordowy_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/zloty_przod.png": {
-   "szer_px": 114,
-   "wys_px": 144,
-   "szer_jedn": 57.0,
-   "wys_jedn": 72.0,
-   "kotwica": {
-    "x": 0.367,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/czerwony_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/zielony_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/niebieski_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/zolty_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/pomaranczowy_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/fioletowy_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/rozowy_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/blekitny_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/limonkowy_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/brazowy_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/turkusowy_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/granatowy_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/magenta_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/szary_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/bordowy_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
-  "assets/gracze/zloty_tyl.png": {
-   "szer_px": 110,
-   "wys_px": 143,
-   "szer_jedn": 55.0,
-   "wys_jedn": 71.5,
-   "kotwica": {
-    "x": 0.563,
-    "y": 0.98
-   }
-  },
   "assets/tlo/tlo_plansza.png": {
    "szer_px": 2400,
    "wys_px": 1500,
@@ -631,6 +311,807 @@
     "wys": 1000
    },
    "uwaga": "pole gry 1000x500 jedn. leży na środku; zapas 100 jedn. po bokach i 125 jedn. u góry i u dołu"
+  }
+ },
+ "zawodnik": {
+  "uwaga": "Nowy układ: klatki animacji w atlasie WebP na kolor. Kotwica = punkt stopy/ciała (ułamki rozmiaru klatki). 'reka' = środek śnieżki trzymanej w dłoni (rysowana kodem), tylko w klatkach, w których zawodnik ją trzyma.",
+  "atlas_szer": 1024,
+  "atlas_wys": 532,
+  "plik_atlasu": "assets/gracze/atlasy/{kolor}.webp",
+  "plik_klatki": "assets/gracze/klatki/{kolor}/{widok}_{klatka}.png",
+  "bez_widoku_z_tylu": [
+   "trafiony",
+   "ogluszony_a",
+   "ogluszony_b",
+   "upadek",
+   "siedzi",
+   "lezy"
+  ],
+  "klatki": {
+   "przod": {
+    "stanie": {
+     "atlas": {
+      "x": 0,
+      "y": 0,
+      "szer": 114,
+      "wys": 144
+     },
+     "szer_jedn": 57.0,
+     "wys_jedn": 72.0,
+     "kotwica": {
+      "x": 0.494,
+      "y": 0.986
+     },
+     "reka": {
+      "x": 0.878,
+      "y": 0.38,
+      "promien_jedn": 3.6
+     }
+    },
+    "wstawanie": {
+     "atlas": {
+      "x": 116,
+      "y": 0,
+      "szer": 91,
+      "wys": 143
+     },
+     "szer_jedn": 45.5,
+     "wys_jedn": 71.5,
+     "kotwica": {
+      "x": 0.594,
+      "y": 0.986
+     }
+    },
+    "zamach_1": {
+     "atlas": {
+      "x": 209,
+      "y": 0,
+      "szer": 111,
+      "wys": 142
+     },
+     "szer_jedn": 55.5,
+     "wys_jedn": 71.0,
+     "kotwica": {
+      "x": 0.514,
+      "y": 0.986
+     },
+     "reka": {
+      "x": 0.882,
+      "y": 0.4,
+      "promien_jedn": 3.6
+     }
+    },
+    "chod_2": {
+     "atlas": {
+      "x": 322,
+      "y": 0,
+      "szer": 112,
+      "wys": 141
+     },
+     "szer_jedn": 56.0,
+     "wys_jedn": 70.5,
+     "kotwica": {
+      "x": 0.509,
+      "y": 0.986
+     },
+     "reka": {
+      "x": 0.889,
+      "y": 0.388,
+      "promien_jedn": 3.6
+     }
+    },
+    "chod_3": {
+     "atlas": {
+      "x": 436,
+      "y": 0,
+      "szer": 112,
+      "wys": 141
+     },
+     "szer_jedn": 56.0,
+     "wys_jedn": 70.5,
+     "kotwica": {
+      "x": 0.511,
+      "y": 0.986
+     },
+     "reka": {
+      "x": 0.889,
+      "y": 0.389,
+      "promien_jedn": 3.6
+     }
+    },
+    "ogluszony_a": {
+     "atlas": {
+      "x": 550,
+      "y": 0,
+      "szer": 103,
+      "wys": 141
+     },
+     "szer_jedn": 51.5,
+     "wys_jedn": 70.5,
+     "kotwica": {
+      "x": 0.501,
+      "y": 0.986
+     }
+    },
+    "rzut": {
+     "atlas": {
+      "x": 655,
+      "y": 0,
+      "szer": 114,
+      "wys": 140
+     },
+     "szer_jedn": 57.0,
+     "wys_jedn": 70.0,
+     "kotwica": {
+      "x": 0.499,
+      "y": 0.986
+     }
+    },
+    "zamach_2": {
+     "atlas": {
+      "x": 771,
+      "y": 0,
+      "szer": 98,
+      "wys": 140
+     },
+     "szer_jedn": 49.0,
+     "wys_jedn": 70.0,
+     "kotwica": {
+      "x": 0.582,
+      "y": 0.986
+     }
+    },
+    "ogluszony_b": {
+     "atlas": {
+      "x": 871,
+      "y": 0,
+      "szer": 105,
+      "wys": 139
+     },
+     "szer_jedn": 52.5,
+     "wys_jedn": 69.5,
+     "kotwica": {
+      "x": 0.537,
+      "y": 0.986
+     }
+    },
+    "powrot": {
+     "atlas": {
+      "x": 0,
+      "y": 146,
+      "szer": 104,
+      "wys": 139
+     },
+     "szer_jedn": 52.0,
+     "wys_jedn": 69.5,
+     "kotwica": {
+      "x": 0.544,
+      "y": 0.986
+     }
+    },
+    "chod_1": {
+     "atlas": {
+      "x": 106,
+      "y": 146,
+      "szer": 112,
+      "wys": 138
+     },
+     "szer_jedn": 56.0,
+     "wys_jedn": 69.0,
+     "kotwica": {
+      "x": 0.504,
+      "y": 0.986
+     },
+     "reka": {
+      "x": 0.883,
+      "y": 0.393,
+      "promien_jedn": 3.6
+     }
+    },
+    "trafiony": {
+     "atlas": {
+      "x": 220,
+      "y": 146,
+      "szer": 116,
+      "wys": 136
+     },
+     "szer_jedn": 58.0,
+     "wys_jedn": 68.0,
+     "kotwica": {
+      "x": 0.484,
+      "y": 0.985
+     }
+    },
+    "upadek": {
+     "atlas": {
+      "x": 338,
+      "y": 146,
+      "szer": 131,
+      "wys": 135
+     },
+     "szer_jedn": 65.5,
+     "wys_jedn": 67.5,
+     "kotwica": {
+      "x": 0.499,
+      "y": 0.985
+     }
+    },
+    "siedzi": {
+     "atlas": {
+      "x": 471,
+      "y": 146,
+      "szer": 129,
+      "wys": 134
+     },
+     "szer_jedn": 64.5,
+     "wys_jedn": 67.0,
+     "kotwica": {
+      "x": 0.501,
+      "y": 0.985
+     }
+    },
+    "przedluzenie": {
+     "atlas": {
+      "x": 602,
+      "y": 146,
+      "szer": 117,
+      "wys": 131
+     },
+     "szer_jedn": 58.5,
+     "wys_jedn": 65.5,
+     "kotwica": {
+      "x": 0.485,
+      "y": 0.985
+     }
+    },
+    "przysiad": {
+     "atlas": {
+      "x": 721,
+      "y": 146,
+      "szer": 95,
+      "wys": 125
+     },
+     "szer_jedn": 47.5,
+     "wys_jedn": 62.5,
+     "kotwica": {
+      "x": 0.604,
+      "y": 0.984
+     }
+    },
+    "schylenie": {
+     "atlas": {
+      "x": 818,
+      "y": 146,
+      "szer": 95,
+      "wys": 125
+     },
+     "szer_jedn": 47.5,
+     "wys_jedn": 62.5,
+     "kotwica": {
+      "x": 0.616,
+      "y": 0.984
+     }
+    },
+    "lepienie_b": {
+     "atlas": {
+      "x": 99,
+      "y": 287,
+      "szer": 92,
+      "wys": 124
+     },
+     "szer_jedn": 46.0,
+     "wys_jedn": 62.0,
+     "kotwica": {
+      "x": 0.595,
+      "y": 0.984
+     }
+    },
+    "lepienie_a": {
+     "atlas": {
+      "x": 683,
+      "y": 287,
+      "szer": 92,
+      "wys": 118
+     },
+     "szer_jedn": 46.0,
+     "wys_jedn": 59.0,
+     "kotwica": {
+      "x": 0.6,
+      "y": 0.983
+     }
+    },
+    "lezy": {
+     "atlas": {
+      "x": 262,
+      "y": 414,
+      "szer": 165,
+      "wys": 101
+     },
+     "szer_jedn": 82.5,
+     "wys_jedn": 50.5,
+     "kotwica": {
+      "x": 0.501,
+      "y": 0.98
+     }
+    }
+   },
+   "tyl": {
+    "rzut": {
+     "atlas": {
+      "x": 915,
+      "y": 146,
+      "szer": 104,
+      "wys": 125
+     },
+     "szer_jedn": 52.0,
+     "wys_jedn": 62.5,
+     "kotwica": {
+      "x": 0.632,
+      "y": 0.984
+     }
+    },
+    "zamach_2": {
+     "atlas": {
+      "x": 0,
+      "y": 287,
+      "szer": 97,
+      "wys": 125
+     },
+     "szer_jedn": 48.5,
+     "wys_jedn": 62.5,
+     "kotwica": {
+      "x": 0.602,
+      "y": 0.984
+     },
+     "reka": {
+      "x": 0.177,
+      "y": 0.133,
+      "promien_jedn": 3.6
+     }
+    },
+    "stanie": {
+     "atlas": {
+      "x": 193,
+      "y": 287,
+      "szer": 94,
+      "wys": 123
+     },
+     "szer_jedn": 47.0,
+     "wys_jedn": 61.5,
+     "kotwica": {
+      "x": 0.527,
+      "y": 0.984
+     },
+     "reka": {
+      "x": 0.114,
+      "y": 0.476,
+      "promien_jedn": 3.6
+     }
+    },
+    "chod_1": {
+     "atlas": {
+      "x": 289,
+      "y": 287,
+      "szer": 96,
+      "wys": 122
+     },
+     "szer_jedn": 48.0,
+     "wys_jedn": 61.0,
+     "kotwica": {
+      "x": 0.608,
+      "y": 0.984
+     },
+     "reka": {
+      "x": 0.179,
+      "y": 0.39,
+      "promien_jedn": 3.6
+     }
+    },
+    "chod_2": {
+     "atlas": {
+      "x": 387,
+      "y": 287,
+      "szer": 95,
+      "wys": 122
+     },
+     "szer_jedn": 47.5,
+     "wys_jedn": 61.0,
+     "kotwica": {
+      "x": 0.613,
+      "y": 0.984
+     },
+     "reka": {
+      "x": 0.179,
+      "y": 0.387,
+      "promien_jedn": 3.6
+     }
+    },
+    "chod_3": {
+     "atlas": {
+      "x": 484,
+      "y": 287,
+      "szer": 95,
+      "wys": 122
+     },
+     "szer_jedn": 47.5,
+     "wys_jedn": 61.0,
+     "kotwica": {
+      "x": 0.613,
+      "y": 0.984
+     },
+     "reka": {
+      "x": 0.18,
+      "y": 0.388,
+      "promien_jedn": 3.6
+     }
+    },
+    "zamach_1": {
+     "atlas": {
+      "x": 581,
+      "y": 287,
+      "szer": 100,
+      "wys": 122
+     },
+     "szer_jedn": 50.0,
+     "wys_jedn": 61.0,
+     "kotwica": {
+      "x": 0.624,
+      "y": 0.984
+     },
+     "reka": {
+      "x": 0.136,
+      "y": 0.382,
+      "promien_jedn": 3.6
+     }
+    },
+    "powrot": {
+     "atlas": {
+      "x": 777,
+      "y": 287,
+      "szer": 91,
+      "wys": 118
+     },
+     "szer_jedn": 45.5,
+     "wys_jedn": 59.0,
+     "kotwica": {
+      "x": 0.58,
+      "y": 0.983
+     }
+    },
+    "schylenie": {
+     "atlas": {
+      "x": 870,
+      "y": 287,
+      "szer": 86,
+      "wys": 118
+     },
+     "szer_jedn": 43.0,
+     "wys_jedn": 59.0,
+     "kotwica": {
+      "x": 0.456,
+      "y": 0.983
+     }
+    },
+    "wstawanie": {
+     "atlas": {
+      "x": 0,
+      "y": 414,
+      "szer": 78,
+      "wys": 118
+     },
+     "szer_jedn": 39.0,
+     "wys_jedn": 59.0,
+     "kotwica": {
+      "x": 0.485,
+      "y": 0.983
+     }
+    },
+    "przedluzenie": {
+     "atlas": {
+      "x": 80,
+      "y": 414,
+      "szer": 101,
+      "wys": 117
+     },
+     "szer_jedn": 50.5,
+     "wys_jedn": 58.5,
+     "kotwica": {
+      "x": 0.622,
+      "y": 0.983
+     }
+    },
+    "lepienie": {
+     "atlas": {
+      "x": 183,
+      "y": 414,
+      "szer": 77,
+      "wys": 106
+     },
+     "szer_jedn": 38.5,
+     "wys_jedn": 53.0,
+     "kotwica": {
+      "x": 0.487,
+      "y": 0.981
+     }
+    },
+    "przysiad": {
+     "atlas": {
+      "x": 429,
+      "y": 414,
+      "szer": 84,
+      "wys": 101
+     },
+     "szer_jedn": 42.0,
+     "wys_jedn": 50.5,
+     "kotwica": {
+      "x": 0.507,
+      "y": 0.98
+     }
+    }
+   }
+  },
+  "animacje": {
+   "przod": {
+    "stanie": {
+     "klatki": [
+      {
+       "klatka": "stanie",
+       "ms": 1000
+      }
+     ],
+     "petla": true
+    },
+    "chod": {
+     "klatki": [
+      {
+       "klatka": "chod_1",
+       "ms": 140
+      },
+      {
+       "klatka": "chod_2",
+       "ms": 140
+      },
+      {
+       "klatka": "chod_3",
+       "ms": 140
+      },
+      {
+       "klatka": "chod_2",
+       "ms": 140
+      }
+     ],
+     "petla": true
+    },
+    "zamach": {
+     "klatki": [
+      {
+       "klatka": "zamach_1",
+       "ms": 90
+      },
+      {
+       "klatka": "zamach_2",
+       "ms": 90
+      }
+     ],
+     "petla": false,
+     "uwaga": "ostatnia klatka trzyma się do puszczenia przycisku"
+    },
+    "rzut": {
+     "klatki": [
+      {
+       "klatka": "rzut",
+       "ms": 70
+      },
+      {
+       "klatka": "przedluzenie",
+       "ms": 110
+      },
+      {
+       "klatka": "powrot",
+       "ms": 140
+      }
+     ],
+     "petla": false,
+     "uwaga": "śnieżka wylatuje w momencie klatki 'rzut'"
+    },
+    "przeladowanie_krotkie": {
+     "klatki": [
+      {
+       "klatka": "schylenie",
+       "ms": 150
+      },
+      {
+       "klatka": "przysiad",
+       "ms": 120
+      },
+      {
+       "klatka": "wstawanie",
+       "ms": 150
+      }
+     ],
+     "petla": false,
+     "uwaga": "razem ok. 0,42 s plus powrót do 'stanie'"
+    },
+    "przeladowanie_pelne": {
+     "klatki": [
+      {
+       "klatka": "schylenie",
+       "ms": 200
+      },
+      {
+       "klatka": "przysiad",
+       "ms": 200
+      },
+      {
+       "klatka": "lepienie_a",
+       "ms": 250
+      },
+      {
+       "klatka": "lepienie_b",
+       "ms": 250
+      },
+      {
+       "klatka": "wstawanie",
+       "ms": 200
+      }
+     ],
+     "petla_srodek": [
+      "lepienie_a",
+      "lepienie_b"
+     ],
+     "calosc_ms": 2000,
+     "petla": false,
+     "uwaga": "klatki lepienie_a/b powtarzane naprzemiennie tak, by całość trwała ok. 2 s"
+    },
+    "trafiony": {
+     "klatki": [
+      {
+       "klatka": "trafiony",
+       "ms": 150
+      },
+      {
+       "klatka": "ogluszony_a",
+       "ms": 150
+      },
+      {
+       "klatka": "ogluszony_b",
+       "ms": 150
+      }
+     ],
+     "petla_srodek": [
+      "ogluszony_a",
+      "ogluszony_b"
+     ],
+     "calosc_ms": 1000,
+     "petla": false
+    },
+    "eliminacja": {
+     "klatki": [
+      {
+       "klatka": "trafiony",
+       "ms": 160
+      },
+      {
+       "klatka": "upadek",
+       "ms": 220
+      },
+      {
+       "klatka": "siedzi",
+       "ms": 260
+      },
+      {
+       "klatka": "lezy",
+       "ms": 1000
+      }
+     ],
+     "petla": false,
+     "uwaga": "'lezy' zostaje na stałe"
+    }
+   },
+   "tyl": {
+    "stanie": {
+     "klatki": [
+      {
+       "klatka": "stanie",
+       "ms": 1000
+      }
+     ],
+     "petla": true
+    },
+    "chod": {
+     "klatki": [
+      {
+       "klatka": "chod_1",
+       "ms": 140
+      },
+      {
+       "klatka": "chod_2",
+       "ms": 140
+      },
+      {
+       "klatka": "chod_3",
+       "ms": 140
+      },
+      {
+       "klatka": "chod_2",
+       "ms": 140
+      }
+     ],
+     "petla": true
+    },
+    "zamach": {
+     "klatki": [
+      {
+       "klatka": "zamach_1",
+       "ms": 90
+      },
+      {
+       "klatka": "zamach_2",
+       "ms": 90
+      }
+     ],
+     "petla": false
+    },
+    "rzut": {
+     "klatki": [
+      {
+       "klatka": "rzut",
+       "ms": 70
+      },
+      {
+       "klatka": "przedluzenie",
+       "ms": 110
+      },
+      {
+       "klatka": "powrot",
+       "ms": 140
+      }
+     ],
+     "petla": false
+    },
+    "przeladowanie_krotkie": {
+     "klatki": [
+      {
+       "klatka": "schylenie",
+       "ms": 150
+      },
+      {
+       "klatka": "przysiad",
+       "ms": 120
+      },
+      {
+       "klatka": "wstawanie",
+       "ms": 150
+      }
+     ],
+     "petla": false
+    },
+    "przeladowanie_pelne": {
+     "klatki": [
+      {
+       "klatka": "schylenie",
+       "ms": 200
+      },
+      {
+       "klatka": "przysiad",
+       "ms": 200
+      },
+      {
+       "klatka": "lepienie",
+       "ms": 500
+      },
+      {
+       "klatka": "wstawanie",
+       "ms": 200
+      }
+     ],
+     "petla_srodek": [
+      "lepienie"
+     ],
+     "calosc_ms": 2000,
+     "petla": false
+    }
+   }
   }
  }
 }

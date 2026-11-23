@@ -97,7 +97,7 @@ function trafienie(stan, z) {
     z.ogluszenie = CONFIG.czasOgluszenia;
   }
   // Obłoczek i rozbryzg na wysokości tułowia, losowo wybrane grafiki
-  const tulow = stopyY(z) - rozmiarGrafiki(grafikaPostaci(z)).wys * 0.45;
+  const tulow = stopyY(z) - rozmiarPostaci(z).wys * 0.45;
   stan.chmurki.push({
     x: z.x,
     y: tulow,
