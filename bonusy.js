@@ -24,6 +24,7 @@ function zacznijBonusy(stan) {
 // Losowanie typu według wag
 function losujTypBonusu() {
   const typy = B().typy;
+  if (B().wymusTyp) return typBonusu(B().wymusTyp); // tryb testowy: zawsze ten typ
   const suma = typy.reduce((s, t) => s + t.waga, 0);
   let r = Math.random() * suma;
   for (const t of typy) {
@@ -180,4 +181,9 @@ function tarczaPochlania(stan, z) {
     rozbryzg: null,
   });
   return true;
+}
+
+// Mnożnik przeładowania z bonusów postaci (Kakao skraca; 1 = bez zmian)
+function mnoznikPrzeladowaniaBonusow(z) {
+  return z.bonusy.some((ab) => ab.typ === "kakao") ? typBonusu("kakao").mnoznikPrzeladowania : 1;
 }
