@@ -154,6 +154,15 @@ const CONFIG = {
       // Strzałki przy krawędzi ekranu do przeciwników poza widokiem
       strzalkaRozmiar: 0.018,
       strzalkaMargines: 0.03, // odstęp strzałki od krawędzi ekranu
+      // Zamieć: po czasDoZwezania s granice zwężają się przez czasZwezania s do jednego pola
+      czasDoZwezania: 90,
+      czasZwezania: 30,
+      ostrzezenieZamieci: 10, // tyle sekund wcześniej napis "Zamieć się zbliża!"
+      predkoscWiatru: 0.15, // jak szybko wiatr spycha postać spoza granicy (szerokości pola/s)
+      szerokoscZamieci: 0.06, // szerokość mgły wchodzącej do środka przy granicy
+      gestoscZamieci: 0.75, // jak gęsta jest mgła poza granicą (0-1)
+      kolorZamieci: "196, 212, 230", // kolor mgły (r, g, b): szaroniebieski, żeby było ją widać na śniegu
+      wysokoscPodskoku: 0.012, // podskok postaci niesionej wiatrem (tylko wygląd)
       // Dekoracje (przeszkody) w całym świecie: x od 0 do 2, y od 0 do 1
       dekoracje: [
         { plik: "choinka_1", x: 0.1, y: 0.12 },

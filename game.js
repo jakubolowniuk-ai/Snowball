@@ -55,6 +55,7 @@ function zacznijPoziom(stan, poziom) {
   stan.poziom = poziom;
   const param = parametryPoziomu(stan);
   ustawSwiat(stan); // Arena: świat = pole; Wielka arena: większy świat
+  resetPrzeszkod(); // wszystkie dekoracje z powrotem (zamieć mogła je usunąć)
   const wielka = jestWielka(stan);
   stan.gracz = nowaPostac("czerwoni", wielka ? CONFIG.tryby.wielkaArena.startGracz : CONFIG.startGracz);
   const ilu = wielka
@@ -304,7 +305,8 @@ function ograniczDoSwojejStrony(z) {
   const r = PROMIEN_POSTACI;
   const W = SZEROKOSC_POLA;
   const H = WYSOKOSC_POLA;
-  const s = stan.swiat;
+  // Postać niesiona wiatrem zamieci jest poza granicą: trzymamy ją tylko w pełnym świecie
+  const s = z.wiatr ? stan.swiatPelny : stan.swiat;
   const wPolu = () => {
     z.x = Math.min(Math.max(z.x, s.x0 + r), s.x1 - r);
     z.y = Math.min(Math.max(z.y, s.y0 + r), s.y1 - r);
@@ -347,7 +349,7 @@ function idzDo(z, celX, celY, dt) {
     z.y += (dy / dystans) * krok;
   }
   ograniczDoSwojejStrony(z);
-  wypchnijZPrzeszkod(z); // przez przeszkody nie da się przejść (to ważniejsze niż granica)
+  if (!z.wiatr) wypchnijZPrzeszkod(z); // przez przeszkody nie da się przejść (wiatr przenosi)
   return doszla;
 }
 
@@ -415,7 +417,7 @@ function ruchZPada(z, dt) {
   z.x += (pad.wychylX / m) * krok;
   z.y += (pad.wychylY / m) * krok;
   ograniczDoSwojejStrony(z);
-  wypchnijZPrzeszkod(z);
+  if (!z.wiatr) wypchnijZPrzeszkod(z);
 }
 
 // --- Skalowanie pola gry do ekranu ---
@@ -492,6 +494,9 @@ function aktualizuj(dt) {
     }
     return;
   }
+
+  // Zamieć w Wielkiej arenie: zwężanie świata, wiatr, znikanie rzeczy poza granicą
+  aktualizujZamiec(stan, dt);
 
   // Bonusy: pojawianie, znikanie, odliczanie (stoją w trakcie napisu i po końcu poziomu)
   aktualizujBonusy(stan, dt);
