@@ -28,8 +28,8 @@ function nowaPostac(druzyna, start) {
   };
 }
 
-// Stan gry (wypełnia go zacznijPoziom)
-const stan = {};
+// Stan gry (wypełnia go zacznijPoziom). tryb: "arena" albo "wielkaArena"; wMenu: widać menu
+const stan = { tryb: "arena", wMenu: true };
 
 // Parametry obecnego poziomu z config.js (po ostatnim zostają ustawienia ostatniego)
 function parametryPoziomu(stan) {
@@ -54,8 +54,14 @@ function pozycjePrzeciwnikow(n) {
 function zacznijPoziom(stan, poziom) {
   stan.poziom = poziom;
   const param = parametryPoziomu(stan);
-  stan.gracz = nowaPostac("czerwoni", CONFIG.startGracz);
-  stan.przeciwnicy = pozycjePrzeciwnikow(param.przeciwnicy).map((p) => nowaPostac("zieloni", p));
+  ustawSwiat(stan); // Arena: świat = pole; Wielka arena: większy świat
+  const wielka = jestWielka(stan);
+  stan.gracz = nowaPostac("czerwoni", wielka ? CONFIG.tryby.wielkaArena.startGracz : CONFIG.startGracz);
+  const ilu = wielka
+    ? Math.max(1, Math.round(param.przeciwnicy * CONFIG.tryby.wielkaArena.mnoznikPrzeciwnikow))
+    : param.przeciwnicy;
+  const pozycje = wielka ? pozycjePrzeciwnikowWielka(ilu) : pozycjePrzeciwnikow(ilu);
+  stan.przeciwnicy = pozycje.map((p) => nowaPostac("zieloni", p));
   for (const p of stan.przeciwnicy) {
     ograniczDoSwojejStrony(p); // nie za blisko brzegu
     wypchnijZPrzeszkod(p); // nie w środku dekoracji
@@ -68,6 +74,12 @@ function zacznijPoziom(stan, poziom) {
   stan.koniec = null; // { wynik: "wygrana" | "przegrana", czas } po końcu poziomu
   zacznijStanowiska(stan); // stos i armatka z pełną amunicją
   zacznijBonusy(stan); // bonusy na planszy znikają, licznik od nowa
+  if (wielka) {
+    // Krok W1: w Wielkiej arenie jeszcze bez stanowisk i bonusów (dojdą w W2)
+    stan.stanowiska = [];
+    stan.doBonusu = Infinity;
+  }
+  ustawKamere(stan);
 }
 zacznijPoziom(stan, 1);
 
@@ -208,15 +220,28 @@ function zasieg(s) {
   return j(pomiedzy(CONFIG.zasiegMin, CONFIG.zasiegMax, s));
 }
 
+// p: punkt w oknie ekranu. Zapamiętujemy go, bo w Wielkiej arenie kamera się przesuwa,
+// a cel ma zostać pod palcem (x, y w świecie liczymy co klatkę).
 function zacznijCelowanie(stan, p) {
-  stan.celowanie = { x: p.x, y: p.y, czas: 0 };
+  const s = oknoNaSwiat(p);
+  stan.celowanie = { oknoX: p.x, oknoY: p.y, x: s.x, y: s.y, czas: 0 };
 }
 
-// Puszczenie palca celującego: rzut w miejsce palca albo anulowanie
-function rzuc(stan, p) {
+function przesunCelowanie(stan, p) {
+  const c = stan.celowanie;
+  c.oknoX = p.x;
+  c.oknoY = p.y;
+  const s = oknoNaSwiat(p);
+  c.x = s.x;
+  c.y = s.y;
+}
+
+// Puszczenie palca celującego (p: punkt w oknie ekranu): rzut w miejsce palca albo anulowanie
+function rzuc(stan, pOkno) {
   const c = stan.celowanie;
   stan.celowanie = null;
   if (!c) return;
+  const p = oknoNaSwiat(pOkno);
 
   const g = stan.gracz;
   const d = odleglosc(g.x, g.y, p.x, p.y);
@@ -274,16 +299,19 @@ function odlegloscOdPrzekatnej(x, y) {
   return (x / W + y / H - 1) / Math.hypot(1 / W, 1 / H);
 }
 
-// Każda drużyna zostaje na swojej stronie przekątnej i w polu gry
+// Każda drużyna zostaje na swojej stronie przekątnej i w świecie.
+// W Wielkiej arenie nie ma przekątnej: ograniczają tylko granice świata.
 function ograniczDoSwojejStrony(z) {
   const r = PROMIEN_POSTACI;
   const W = SZEROKOSC_POLA;
   const H = WYSOKOSC_POLA;
+  const s = stan.swiat;
   const wPolu = () => {
-    z.x = Math.min(Math.max(z.x, r), W - r);
-    z.y = Math.min(Math.max(z.y, r), H - r);
+    z.x = Math.min(Math.max(z.x, s.x0 + r), s.x1 - r);
+    z.y = Math.min(Math.max(z.y, s.y0 + r), s.y1 - r);
   };
   wPolu();
+  if (jestWielka(stan)) return;
   // Strona: czerwoni co najmniej r za przekątną (+), zieloni co najmniej r przed nią (-)
   const znak = z.druzyna === "czerwoni" ? 1 : -1;
   const d = odlegloscOdPrzekatnej(z.x, z.y) * znak;
@@ -435,8 +463,11 @@ podepnijSterowanie(canvas, stan, ekranNaPlansze);
 function aktualizuj(dt) {
   stan.czasPoziomu += dt;
 
-  // Ładowanie siły, dopóki palec celuje
-  if (stan.celowanie) stan.celowanie.czas += dt;
+  // Ładowanie siły, dopóki palec celuje; cel zostaje pod palcem, gdy kamera jedzie
+  if (stan.celowanie) {
+    stan.celowanie.czas += dt;
+    przesunCelowanie(stan, { x: stan.celowanie.oknoX, y: stan.celowanie.oknoY });
+  }
 
   // Lot śnieżek: znikają po trafieniu albo na końcu lotu
   stan.sniezki = stan.sniezki.filter((sn) => !lotSniezki(stan, sn, dt));
@@ -471,6 +502,9 @@ function aktualizuj(dt) {
 
   // Gracz: ruch z joysticka (ogłuszony stoi, ale kciuk może zostać na padzie)
   if (graczMozeSterowac(stan)) ruchZPada(stan.gracz, dt);
+
+  // Kamera podąża za graczem (tylko w Wielkiej arenie)
+  aktualizujKamere(stan, dt);
 }
 
 // --- Pętla gry ---
@@ -481,8 +515,13 @@ function klatka(teraz) {
   const dt = Math.min((teraz - poprzedniCzas) / 1000, 0.1);
   poprzedniCzas = teraz;
 
-  aktualizuj(dt);
-  rysujScene(ctx, stan);
+  if (stan.wMenu) {
+    rysujTlo(ctx); // za menu samo tło
+  } else {
+    aktualizuj(dt);
+    rysujScene(ctx, stan);
+  }
+  aktualizujPrzyciskMenu(stan);
   requestAnimationFrame(klatka);
 }
 
@@ -490,7 +529,7 @@ function klatka(teraz) {
 rysujTlo(ctx);
 rysujNapis(ctx, "Ładowanie...");
 wczytajObrazy(() => {
-  zacznijPoziom(stan, 1); // od nowa, gdyby ktoś dotykał ekranu w trakcie ładowania
+  pokazMenu(stan); // po wczytaniu: menu z wyborem trybu
   poprzedniCzas = performance.now();
   requestAnimationFrame(klatka);
 });

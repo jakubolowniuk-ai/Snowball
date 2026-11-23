@@ -80,6 +80,11 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 - 2–3 osłony zimowe/świąteczne (później).
 - Cel: sprawdzić, czy sterowanie dwoma palcami (ruch + rzut w dowolny punkt) dobrze się czuje na telefonie.
 
+### Tryby gry
+- **Menu** po wczytaniu: Arena, Wielka arena, Kampania (wkrótce). Na ekranie końca poziomu przycisk "Menu".
+- **Arena:** jedno pole z przekątną (wszystko jak wyżej).
+- **Wielka arena:** świat 2 × 2 pola, kamera jedzie za graczem, bez przekątnej, 18 dekoracji w całym świecie. Przeciwnicy podchodzą na odległość rzutu i rzucają tylko, gdy są na ekranie gracza. Kroki: W1 (zrobione: menu, świat, kamera, ruch, AI), W2 (strzałki do przeciwników poza ekranem, zasięg śnieżki do szerokości widoku, neutralne stanowiska, bonusy w całym świecie), W3 (zamieć: po 90 s świat przez 30 s zwęża się do jednego pola, ostrzeżenie 10 s wcześniej, wiatr spycha postacie do środka).
+
 ### Przeciwnicy według poziomów
 - Poziomy 1–3: chodzą losowo, reagują wolno albo wcale.
 - Środek: widzą start śnieżki i po krótkiej reakcji robią krok w bok.

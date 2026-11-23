@@ -3,11 +3,15 @@
 // i nie mogą w nią wejść zawodnicy (stopy zawodnika zostają poza owalem).
 
 let _przeszkody = null;
+let _przeszkodyTryb = null;
 
-// Lista przeszkód w jednostkach pola (liczona raz, przy pierwszym użyciu)
+// Lista przeszkód w jednostkach pola (liczona raz na tryb, przy pierwszym użyciu).
+// Wielka arena ma własną, dłuższą listę dekoracji.
 function przeszkody() {
-  if (_przeszkody) return _przeszkody;
-  _przeszkody = CONFIG.dekoracje.map((d) => {
+  if (_przeszkody && _przeszkodyTryb === stan.tryb) return _przeszkody;
+  _przeszkodyTryb = stan.tryb;
+  const lista = jestWielka(stan) ? CONFIG.tryby.wielkaArena.dekoracje : CONFIG.dekoracje;
+  _przeszkody = lista.map((d) => {
     const sciezka = `assets/dekoracje/${d.plik}.png`;
     const szer = SPRITY[sciezka].szer * CONFIG.skalaGrafik;
     return {

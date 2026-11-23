@@ -3,44 +3,72 @@
 
 const TLO = "assets/tlo/tlo_plansza.png";
 
-function rysujTlo(ctx) {
-  const W = SZEROKOSC_POLA;
-  const H = WYSOKOSC_POLA;
-  const g = j(CONFIG.glebokoscBrzegu);
-  const ekranX = widoczny.x0;
-  const ekranY = widoczny.y0;
-  const ekranW = widoczny.x1 - widoczny.x0;
-  const ekranH = widoczny.y1 - widoczny.y0;
+// Wzór śniegu do kafelkowania dużego świata: fragment tła z samym polem gry
+let _wzorSniegu = null;
+function wzorSniegu(ctx) {
+  if (_wzorSniegu) return _wzorSniegu;
+  const obraz = OBRAZY[TLO];
+  if (!obraz) return null;
+  const s = SPRITY[TLO];
+  const px = obraz.width / s.szer; // pikseli obrazka na jednostkę
+  const wycinek = document.createElement("canvas");
+  wycinek.width = Math.round(SZEROKOSC_POLA * px);
+  wycinek.height = Math.round(WYSOKOSC_POLA * px);
+  wycinek
+    .getContext("2d")
+    .drawImage(obraz, s.poleX * px, s.poleY * px, wycinek.width, wycinek.height, 0, 0, wycinek.width, wycinek.height);
+  _wzorSniegu = ctx.createPattern(wycinek, "repeat");
+  _wzorSniegu.setTransform(new DOMMatrix().scale(1 / px)); // piksele obrazka -> jednostki pola
+  return _wzorSniegu;
+}
 
-  // Kolor pod spodem (widać go tylko przed wczytaniem grafik albo na bardzo
-  // nietypowym ekranie, gdzie obrazek tła nie sięga do krawędzi)
+// Tło: śnieg na całym ekranie, przyciemnienie poza światem i przy jego brzegach.
+// Rysowane we współrzędnych świata (wywołuj po przesunięciu o kamerę).
+function rysujTlo(ctx) {
+  const sw = stan.swiat || { x0: 0, y0: 0, x1: SZEROKOSC_POLA, y1: WYSOKOSC_POLA };
+  const X0 = sw.x0;
+  const Y0 = sw.y0;
+  const W = sw.x1 - sw.x0;
+  const H = sw.y1 - sw.y0;
+  const g = j(CONFIG.glebokoscBrzegu);
+  const e = widokSwiata();
+  const ekranX = e.x0;
+  const ekranY = e.y0;
+  const ekranW = e.x1 - e.x0;
+  const ekranH = e.y1 - e.y0;
+
+  // Kolor pod spodem (widać go tylko przed wczytaniem grafik albo poza obrazkiem tła)
   ctx.fillStyle = CONFIG.kolorBrzegu;
   ctx.fillRect(ekranX, ekranY, ekranW, ekranH);
 
   const obraz = OBRAZY[TLO];
-  if (obraz) {
-    // Obrazek tła tak, żeby pole gry leżało dokładnie w miejscu z sprites.json
+  if (obraz && !jestWielka(stan)) {
+    // Arena: obrazek tła tak, żeby pole gry leżało dokładnie w miejscu z sprites.json
     const s = SPRITY[TLO];
     ctx.drawImage(obraz, -s.poleX, -s.poleY, s.szer, s.wys);
+  } else if (obraz) {
+    // Wielka arena: śnieg z tła powtórzony jak kafelki na cały ekran
+    ctx.fillStyle = wzorSniegu(ctx);
+    ctx.fillRect(ekranX, ekranY, ekranW, ekranH);
   } else {
     ctx.fillStyle = CONFIG.kolorSniegu;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(X0, Y0, W, H);
   }
 
-  // Przyciemnienie: poza polem półprzezroczysty niebieskawy kolor,
-  // a przy brzegach pola płynne przejście do przezroczystości
+  // Przyciemnienie: poza światem półprzezroczysty niebieskawy kolor,
+  // a przy jego brzegach płynne przejście do przezroczystości
   ctx.save();
   ctx.globalAlpha = CONFIG.silaPrzyciemnienia;
   ctx.fillStyle = CONFIG.kolorBrzegu;
-  ctx.fillRect(ekranX, ekranY, ekranW, -ekranY); // nad polem
-  ctx.fillRect(ekranX, H, ekranW, ekranY + ekranH - H); // pod polem
-  ctx.fillRect(ekranX, 0, -ekranX, H); // na lewo od pola
-  ctx.fillRect(W, 0, ekranX + ekranW - W, H); // na prawo od pola
+  ctx.fillRect(ekranX, ekranY, ekranW, Y0 - ekranY); // nad światem
+  ctx.fillRect(ekranX, Y0 + H, ekranW, ekranY + ekranH - Y0 - H); // pod światem
+  ctx.fillRect(ekranX, Y0, X0 - ekranX, H); // na lewo
+  ctx.fillRect(X0 + W, Y0, ekranX + ekranW - X0 - W, H); // na prawo
   const brzegi = [
-    [0, 0, 0, g, 0, 0, W, g], // góra
-    [0, H, 0, H - g, 0, H - g, W, g], // dół
-    [0, 0, g, 0, 0, 0, g, H], // lewo
-    [W, 0, W - g, 0, W - g, 0, g, H], // prawo
+    [X0, Y0, X0, Y0 + g, X0, Y0, W, g], // góra
+    [X0, Y0 + H, X0, Y0 + H - g, X0, Y0 + H - g, W, g], // dół
+    [X0, Y0, X0 + g, Y0, X0, Y0, g, H], // lewo
+    [X0 + W, Y0, X0 + W - g, Y0, X0 + W - g, Y0, g, H], // prawo
   ];
   for (const [x1, y1, x2, y2, rx, ry, rw, rh] of brzegi) {
     const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
@@ -305,7 +333,7 @@ function rysujZycia(ctx, z) {
   const odstep = rk * 3;
   const { wys } = rozmiarGrafiki(grafikaPostaci(z));
   // Nad głową, ale nie wyżej niż górna krawędź ekranu
-  const y = Math.max(stopyY(z) - wys - rk * 2, widoczny.y0 + rk * 1.5);
+  const y = Math.max(stopyY(z) - wys - rk * 2, widokSwiata().y0 + rk * 1.5);
   for (let i = 0; i < ile; i++) {
     const x = z.x + (i - (ile - 1) / 2) * odstep;
     ctx.beginPath();
@@ -579,6 +607,21 @@ function rysujSniezki(ctx, stan) {
 }
 
 function rysujScene(ctx, stan) {
+  // Świat rysujemy przesunięty o kamerę; pad i napisy na końcu, bez przesunięcia
+  ctx.save();
+  ctx.translate(-kamera.x, -kamera.y);
+  rysujSwiat(ctx, stan);
+  ctx.restore();
+  rysujPad(ctx);
+  rysujNapisy(ctx, stan);
+}
+
+// Rysujemy tylko to, co widać na ekranie (z zapasem na wysokie grafiki)
+function widac(x, y) {
+  return naEkranie(x, y, 150);
+}
+
+function rysujSwiat(ctx, stan) {
   rysujTlo(ctx);
   rysujCienieSniezek(ctx, stan);
 
@@ -593,11 +636,13 @@ function rysujScene(ctx, stan) {
   // Stojący zawodnicy i dekoracje razem, od góry do dołu według poziomu stóp/podstawy:
   // kto stoi niżej na ekranie (bliżej nas), zasłania tego, kto stoi wyżej
   const obiekty = [
-    ...stojacy.map((z) => ({ y: stopyY(z), rysuj: () => rysujZawodnika(ctx, z, z === stan.gracz) })),
-    ...przeszkody().map((p) => ({ y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
-    ...widoczneStanowiska(stan).map((st) => ({ y: st.y, rysuj: () => rysujStanowisko(ctx, st) })),
-    ...stan.bonusy.map((b) => ({ y: b.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujBonusNaPlanszy(ctx, stan, b) })),
-  ].sort((a, b) => a.y - b.y);
+    ...stojacy.map((z) => ({ x: z.x, y: stopyY(z), rysuj: () => rysujZawodnika(ctx, z, z === stan.gracz) })),
+    ...przeszkody().map((p) => ({ x: p.x, y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
+    ...widoczneStanowiska(stan).map((st) => ({ x: st.x, y: st.y, rysuj: () => rysujStanowisko(ctx, st) })),
+    ...stan.bonusy.map((b) => ({ x: b.x, y: b.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujBonusNaPlanszy(ctx, stan, b) })),
+  ]
+    .filter((o) => widac(o.x, o.y))
+    .sort((a, b) => a.y - b.y);
   for (const o of obiekty) o.rysuj();
   // Kropki z trafieniami na końcu, żeby żadna postać ich nie zasłoniła
   for (const z of stojacy) rysujZycia(ctx, z);
@@ -605,6 +650,4 @@ function rysujScene(ctx, stan) {
   rysujCelowanie(ctx, stan); // nad postaciami, żeby cel na przeciwniku był widoczny
   rysujSniezki(ctx, stan); // śnieżki są w powietrzu, więc nad postaciami
   rysujChmurki(ctx, stan);
-  rysujPad(ctx);
-  rysujNapisy(ctx, stan);
 }

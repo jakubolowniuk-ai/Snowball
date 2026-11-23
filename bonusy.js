@@ -50,7 +50,7 @@ function dobreMiejsceBonusu(stan, x, y) {
   // Nie na stanowisku (stos, armatka i miejsce stania)
   if (bliskoStanowiska(stan, x, y + stopy, r + j(B().zapasPrzeszkody))) return false;
   // Nie w strefie pada (pad liczony w jednostkach pola, dla obecnego ekranu)
-  const pad = pozycjaPada();
+  const pad = oknoNaSwiat(pozycjaPada()); // pad jest na ekranie, przeliczamy na świat
   if (odleglosc(x, y, pad.x, pad.y) < j(CONFIG.promienPadu) + j(CONFIG.promienDotykuPadu) + r) return false;
   // Nie za blisko żadnej postaci
   for (const z of [stan.gracz, ...stan.przeciwnicy]) {
