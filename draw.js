@@ -144,8 +144,9 @@ function punktReki(k, x, y, odbicie) {
 function rysujPostac(ctx, z, x, y) {
   const { dane, odbicie } = klatkaPostaci(z);
   if (!rysujKlatke(ctx, atlasPostaci(z), dane, x, y, odbicie)) return false;
+  // Śnieżka w dłoni: tylko w klatkach z dłonią i dopiero po przeładowaniu (po rzucie ręka pusta)
   const r = punktReki(dane, x, y, odbicie);
-  if (r) rysujSniezkeOPromieniu(ctx, r.x, r.y, r.promien);
+  if (r && !(z.przeladowanie > 0)) rysujSniezkeOPromieniu(ctx, r.x, r.y, r.promien);
   return true;
 }
 
@@ -463,24 +464,9 @@ function rysujZawodnika(ctx, z, toGracz) {
   }
   ctx.restore();
 
-  rysujUniesionaSniezke(ctx, z);
   rysujBanke(ctx, z);
 }
 
-// Przeciwnik przed rzutem unosi śnieżkę: od ręki aż nad głowę, im większa siła, tym wyżej.
-// (Grafika ma też śnieżkę w ręce; osobna grafika rzutu dojdzie później.)
-function rysujUniesionaSniezke(ctx, z) {
-  if (!z.ai || !z.ai.unoszenie) return;
-  const s = sila(z.ai.unoszenie.czas);
-  const { wys } = rozmiarPostaci(z);
-  // Startuje z dłoni obecnej klatki (albo ze środka postaci, gdy klatka nie ma dłoni)
-  const { dane, odbicie } = klatkaPostaci(z);
-  const reka = punktReki(dane, z.x, stopyY(z), odbicie) || { x: z.x, y: stopyY(z) - wys * 0.6 };
-  const nadGlowa = { x: z.x, y: stopyY(z) - wys - j(CONFIG.promienKropekZycia) * 5 };
-  const x = reka.x + (nadGlowa.x - reka.x) * s;
-  const y = reka.y + (nadGlowa.y - reka.y) * s;
-  rysujJednaSniezke(ctx, x, y);
-}
 
 // Po trafieniu: obłoczek śniegu i rozbryzg. Rosną i znikają w czasie czasChmurki.
 // Serduszko po Pierniczku: unosi się nad głową postaci i znika
