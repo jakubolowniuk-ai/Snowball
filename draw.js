@@ -100,6 +100,11 @@ function widokPostaci(z) {
 
 // Obecna klatka postaci: { dane, odbicie } (klatkę wybiera animacje.js)
 function klatkaPostaci(z) {
+  // Eliminacja jest zawsze z klatek przodu; czerwony leży głową w lewo (jak w grafice),
+  // zielony odbity (głową w prawo)
+  if (z.anim && z.anim.akcja && z.anim.akcja.typ === "eliminacja") {
+    return { dane: ZAWODNIK.klatki.przod[nazwaKlatki(z)], odbicie: z.druzyna !== "czerwoni" };
+  }
   const klatki = ZAWODNIK.klatki[widokPostaci(z)];
   return { dane: klatki[nazwaKlatki(z)] || klatki.stanie, odbicie: !!(z.anim && z.anim.odbicie) };
 }
@@ -141,9 +146,11 @@ function punktReki(k, x, y, odbicie) {
 }
 
 // Postać: klatka z atlasu plus śnieżka w dłoni rysowana kodem (grafiki jej nie mają)
-function rysujPostac(ctx, z, x, y) {
+function rysujPostac(ctx, z, x0, y) {
   const { dane, odbicie } = klatkaPostaci(z);
+  const x = x0 + drzenieTrafienia(z); // z tyłu trafiony drży
   if (!rysujKlatke(ctx, atlasPostaci(z), dane, x, y, odbicie)) return false;
+  rysujBlysk(ctx, z, dane, x, y, odbicie, silaBlysku(z));
   // Po wstawaniu: poprzednia klatka znika płynnie na wierzchu nowej
   const p = z.anim && z.anim.przenikanie;
   const stara = p && ZAWODNIK.klatki[widokPostaci(z)][p.klatka];
@@ -192,25 +199,56 @@ function stopyY(z) {
 // Wyeliminowany leży na ziemi: grafika postaci obrócona o 90 stopni
 // i lekko spłaszczona (widok skośnie z góry). Docelowo dojdzie osobna grafika.
 function rysujLezacego(ctx, z) {
-  const k = ZAWODNIK.klatki[widokPostaci(z)].stanie; // do kroku 6: obrócona klatka "stanie"
-  const { szer, wys } = rozmiarPostaci(z);
   const y = stopyY(z);
-  const splaszczenie = 0.7;
-
-  // Cień pod leżącym
+  const { dane, odbicie } = klatkaPostaci(z);
+  // Cień pod leżącym (szerszy, gdy już leży)
+  const szer = dane.szer * CONFIG.skalaGrafik;
   ctx.fillStyle = "rgba(60, 90, 130, 0.25)";
   ctx.beginPath();
-  ctx.ellipse(z.x, y, wys * 0.5, szer * 0.3, 0, 0, Math.PI * 2);
+  ctx.ellipse(z.x, y, szer * 0.5, szer * 0.18, 0, 0, Math.PI * 2);
   ctx.fill();
+  rysujKlatke(ctx, atlasPostaci(z), dane, z.x, y, odbicie);
+}
 
+// Z tyłu nie ma klatek trafienia: drżenie w poziomie (przesunięcie) i czerwony błysk
+function drzenieTrafienia(z) {
+  const a = z.anim;
+  if (!a || !a.akcja || a.akcja.typ !== "trafiony" || a.widok !== "tyl") return 0;
+  const zanik = Math.max(0, 1 - a.akcja.czas / CONFIG.animacje.czasDrzenia);
+  return Math.sin(a.akcja.czas * 60) * j(CONFIG.animacje.drzenie) * zanik;
+}
+
+function silaBlysku(z) {
+  const a = z.anim;
+  if (!a || !a.akcja || a.akcja.typ !== "trafiony" || a.widok !== "tyl") return 0;
+  return Math.max(0, 1 - a.akcja.czas / CONFIG.animacje.czasBlysku) * CONFIG.animacje.silaBlysku;
+}
+
+// Klatka zabarwiona na czerwono (błysk): rysujemy ją na osobnym małym canvasie,
+// barwimy tylko jej piksele i kładziemy na planszę
+const _blysk = document.createElement("canvas");
+function rysujBlysk(ctx, z, k, x, y, odbicie, sila) {
   const obraz = OBRAZY[atlasPostaci(z)];
-  if (!obraz) return;
+  if (!obraz || sila <= 0) return;
+  _blysk.width = k.aw;
+  _blysk.height = k.ah;
+  const c = _blysk.getContext("2d");
+  c.clearRect(0, 0, k.aw, k.ah);
+  c.drawImage(obraz, k.ax, k.ay, k.aw, k.ah, 0, 0, k.aw, k.ah);
+  c.globalCompositeOperation = "source-atop"; // farba tylko tam, gdzie jest postać
+  c.fillStyle = `rgba(230, 40, 40, ${sila})`;
+  c.fillRect(0, 0, k.aw, k.ah);
+  c.globalCompositeOperation = "source-over";
+  const szer = k.szer * CONFIG.skalaGrafik;
+  const wys = k.wys * CONFIG.skalaGrafik;
+  const kx = odbicie ? 1 - k.kotwicaX : k.kotwicaX;
   ctx.save();
-  ctx.translate(z.x, y - (szer / 2) * splaszczenie);
-  ctx.scale(1, splaszczenie);
-  // Czerwony leży głową w lewo, zielony głową w prawo
-  ctx.rotate(z.druzyna === "czerwoni" ? -Math.PI / 2 : Math.PI / 2);
-  ctx.drawImage(obraz, k.ax, k.ay, k.aw, k.ah, -szer / 2, -wys / 2, szer, wys);
+  ctx.translate(x - kx * szer, y - k.kotwicaY * wys);
+  if (odbicie) {
+    ctx.translate(szer, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.drawImage(_blysk, 0, 0, szer, wys);
   ctx.restore();
 }
 
@@ -437,8 +475,6 @@ function rysujZawodnika(ctx, z, toGracz) {
   const y = stopyY(z);
 
   ctx.save();
-  // Ogłuszony jest wyblakły
-  if (z.ogluszenie > 0) ctx.globalAlpha = 0.45;
 
   // Cień: spłaszczony owal pod postacią
   ctx.fillStyle = "rgba(60, 90, 130, 0.25)";

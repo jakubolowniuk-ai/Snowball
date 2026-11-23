@@ -199,6 +199,11 @@ const CONFIG = {
     progSchylania: 0.25, // gdy zostaje mniej sekund, zawodnik się nie schyla
     progPelnegoPrzeladowania: 0.9, // od tylu sekund pełne przeładowanie (z lepieniem), poniżej krótkie
     czasPrzenikania: 0.12, // płynne przejście z "wstawanie" do "stanie" (sekundy)
+    // Trafienie z tyłu (brak klatek): drżenie i czerwony błysk
+    drzenie: 0.004, // jak mocno drży w poziomie (ułamek szerokości pola)
+    czasDrzenia: 0.5, // jak długo drży (sekundy)
+    silaBlysku: 0.6, // jak mocny jest czerwony błysk (0-1)
+    czasBlysku: 0.35, // jak długo znika błysk (sekundy)
     lepionaSniezkaPromien: 6, // z tyłu: śnieżka przy stopach (jednostki pola) przy końcu lepienia
     lepionaSniezkaOd: 0.3, // na początku ma tyle swojej końcowej wielkości
     lepionaSniezkaX: 0.3, // przesunięcie w bok od stóp (ułamek szerokości postaci), żeby było ją widać
