@@ -144,6 +144,23 @@ function punktReki(k, x, y, odbicie) {
 function rysujPostac(ctx, z, x, y) {
   const { dane, odbicie } = klatkaPostaci(z);
   if (!rysujKlatke(ctx, atlasPostaci(z), dane, x, y, odbicie)) return false;
+  // Po wstawaniu: poprzednia klatka znika płynnie na wierzchu nowej
+  const p = z.anim && z.anim.przenikanie;
+  const stara = p && ZAWODNIK.klatki[widokPostaci(z)][p.klatka];
+  if (stara) {
+    ctx.save();
+    ctx.globalAlpha *= 1 - p.czas / CONFIG.animacje.czasPrzenikania;
+    rysujKlatke(ctx, atlasPostaci(z), stara, x, y, odbicie);
+    ctx.restore();
+  }
+  // Z tyłu schylony zawodnik nie ma widocznych dłoni: lepiona śnieżka rośnie przy stopach
+  if (widokPostaci(z) === "tyl" && przeladowanieTeraz(z)) {
+    const postep = 1 - z.przeladowanie / z.przeladowanieCalosc;
+    const a = CONFIG.animacje;
+    const promien = a.lepionaSniezkaPromien * (a.lepionaSniezkaOd + (1 - a.lepionaSniezkaOd) * postep);
+    const { szer } = rozmiarPostaci(z);
+    rysujSniezkeOPromieniu(ctx, x + szer * a.lepionaSniezkaX, y - promien, promien);
+  }
   // Śnieżka w dłoni: tylko w klatkach z dłonią i dopiero po przeładowaniu (po rzucie ręka pusta)
   const r = punktReki(dane, x, y, odbicie);
   if (r && !(z.przeladowanie > 0)) rysujSniezkeOPromieniu(ctx, r.x, r.y, r.promien);

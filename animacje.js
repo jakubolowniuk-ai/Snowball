@@ -3,6 +3,9 @@
 // Akcje (mają pierwszeństwo przed stanie/chod): "zamach" (celowanie: zamach_1, potem
 // zamach_2 trzymana do rzutu; u przeciwnika to ostrzeżenie przed rzutem) i "rzut"
 // (rzut, przedluzenie, powrot; śnieżka wylatuje od razu, w klatce "rzut").
+// Przeładowanie: schylanie i lepienie, gdy postać stoi w trakcie przeładowania (w ruchu
+// idzie z pustą ręką). Klatkę liczymy z postępu przeładowania, więc animacja zawsze
+// mieści się w czasie gry (czas gry się nie zmienia, to animacja się dopasowuje).
 // Stany ruchu: "stanie" i "chod". Klatka chodu zależy od przebytej drogi, nie od czasu,
 // więc nogi nadążają za prędkością (wolny chód = wolniejsze kroki).
 // Kierunek (widok): w dół = przód, w górę = tył, w bok = przód odbity w poziomie.
@@ -22,7 +25,49 @@ function nowaAnimacja(z) {
     widok: z.druzyna === "czerwoni" ? "tyl" : "przod",
     odbicie: false, // przód odbity w poziomie (ruch w lewo)
     akcja: null, // { typ: "zamach" | "rzut", czas } albo null
+    ostatniaKlatka: "stanie", // do wykrycia końca wstawania
+    przenikanie: null, // { klatka, czas }: poprzednia klatka znikająca płynnie (po wstawaniu)
   };
+}
+
+// Suma czasów listy klatek w sekundach
+function czasListy(klatki) {
+  return klatki.reduce((s, [, ms]) => s + ms / 1000, 0);
+}
+
+// Klatka przeładowania w chwili t (sekundy od końca animacji rzutu), gdy na przeładowanie
+// zostaje "dostepne" sekund. Zwraca nazwę klatki albo null (bez schylania).
+function klatkaPrzeladowania(widok, t, dostepne) {
+  if (t < 0 || dostepne < A().progSchylania) return null;
+  const anim = ZAWODNIK.animacje[widok];
+  if (dostepne < A().progPelnegoPrzeladowania) {
+    // Krótkie: wszystkie klatki rozciągnięte albo ściśnięte do dostępnego czasu
+    const lista = anim.przeladowanie_krotkie.klatki;
+    return klatkaZListy(lista, (t * czasListy(lista)) / dostepne).nazwa;
+  }
+  // Pełne: początek (schylenie, przysiad) i koniec (wstawanie) w swoich czasach,
+  // a środek (lepienie) powtarzany tyle, ile potrzeba
+  const lista = anim.przeladowanie_pelne.klatki;
+  const srodek = anim.przeladowanie_pelne.petlaSrodek;
+  const pierwszySrodek = lista.findIndex(([n]) => srodek.includes(n));
+  const poczatek = lista.slice(0, pierwszySrodek);
+  const koniec = lista.slice(pierwszySrodek + srodek.length);
+  const petla = lista.slice(pierwszySrodek, pierwszySrodek + srodek.length);
+  const tPoczatku = czasListy(poczatek);
+  const tKonca = czasListy(koniec);
+  if (t < tPoczatku) return klatkaZListy(poczatek, t).nazwa;
+  if (t >= dostepne - tKonca) return klatkaZListy(koniec, t - (dostepne - tKonca)).nazwa;
+  const tPetli = czasListy(petla);
+  return klatkaZListy(petla, (t - tPoczatku) % tPetli).nazwa;
+}
+
+// Czy postać jest teraz w klatce przeładowania (schylona)? Zwraca nazwę klatki albo null
+function przeladowanieTeraz(z) {
+  const a = z.anim;
+  if (!a || !(z.przeladowanie > 0) || a.stan !== "stanie") return null;
+  const tRzutu = czasListy(ZAWODNIK.animacje[a.widok].rzut.klatki);
+  const minelo = z.przeladowanieCalosc - z.przeladowanie;
+  return klatkaPrzeladowania(a.widok, minelo - tRzutu, z.przeladowanieCalosc - tRzutu);
 }
 
 // Wywoływane przy rzucie (wykonajRzut): zaczyna animację rzutu
@@ -108,6 +153,15 @@ function aktualizujAnimacje(stan, dt) {
       a.bezRuchu += dt;
       if (a.bezRuchu >= A().opoznienieStania) a.stan = "stanie";
     }
+
+    // Płynne przejście po wstawaniu (w "wstawanie" śnieżka jest w obu dłoniach, w "stanie" w jednej)
+    const teraz = nazwaKlatki(z);
+    if (a.ostatniaKlatka === "wstawanie" && teraz !== "wstawanie") a.przenikanie = { klatka: "wstawanie", czas: 0 };
+    a.ostatniaKlatka = teraz;
+    if (a.przenikanie) {
+      a.przenikanie.czas += dt;
+      if (a.przenikanie.czas >= A().czasPrzenikania) a.przenikanie = null;
+    }
   }
 }
 
@@ -118,6 +172,8 @@ function nazwaKlatki(z) {
     const lista = ZAWODNIK.animacje[a.widok][a.akcja.typ].klatki;
     return klatkaZListy(lista, a.akcja.czas).nazwa; // zamach: zamach_2 trzymana do rzutu
   }
+  const przeladowanie = przeladowanieTeraz(z);
+  if (przeladowanie) return przeladowanie;
   if (!a || a.stan === "stanie") return "stanie";
   // Chód: klatki z sprites.json (chod_1, chod_2, chod_3, chod_2), co drogaNaKlatkeChodu
   const klatki = ZAWODNIK.animacje.przod.chod.klatki;
