@@ -189,6 +189,13 @@ const CONFIG = {
 
   // Grafiki postaci i mnożnik ich wielkości (1 = rozmiar z sprites.json).
   // Mnożnik zmienia tylko wygląd; okrąg trafień ustawia rozmiarPostaci.
+  // Animacje zawodnika (tylko wygląd)
+  animacje: {
+    drogaNaKlatkeChodu: 0.04, // co tyle drogi (ułamek szerokości pola) następna klatka chodu
+    progRuchu: 0.02, // od tej prędkości (szerokości pola/s) postać "idzie"
+    opoznienieStania: 0.1, // po tylu sekundach bez ruchu wraca do "stanie" (bez migania przy krótkich postojach)
+  },
+
   // Kolory zawodników: nazwa atlasu w assets/gracze/atlasy/ (16 kolorów, lista w README_GRAFIKI)
   kolorGracza: "czerwony",
   kolorPrzeciwnika: "zielony",
