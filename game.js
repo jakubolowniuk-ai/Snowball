@@ -66,6 +66,7 @@ function zacznijPoziom(stan, poziom) {
   stan.sniezki = []; // śnieżki w locie
   stan.chmurki = []; // białe chmurki po trafieniach
   stan.koniec = null; // { wynik: "wygrana" | "przegrana", czas } po końcu poziomu
+  zacznijStanowiska(stan); // stos i armatka z pełną amunicją
   zacznijBonusy(stan); // bonusy na planszy znikają, licznik od nowa
 }
 zacznijPoziom(stan, 1);
@@ -254,8 +255,9 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania) {
     if (gwiazdka.rzuty <= 0) z.bonusy = z.bonusy.filter((ab) => ab !== gwiazdka);
   }
 
-  // Przeładowanie: stały czas plus czas ładowania siły
-  z.przeladowanie = CONFIG.czasPrzeladowania + Math.min(czasLadowania, CONFIG.MAX_CHARGE);
+  // Przeładowanie: stały czas plus czas ładowania siły; stos i armatka je skracają
+  const normalne = CONFIG.czasPrzeladowania + Math.min(czasLadowania, CONFIG.MAX_CHARGE);
+  z.przeladowanie = przeladowanieZeStanowiskiem(stan, z, normalne);
   z.przeladowanieCalosc = z.przeladowanie;
 }
 

@@ -52,12 +52,13 @@ const CONFIG = {
   //  przerwaMin/Max: przerwa między rzutami jednego przeciwnika (sekundy, losowo)
   //  silaMin/Max: siła rzutu (0-1) losowana z tego zakresu (gdy zasięg nie zależy od siły)
   //  szansaBonusu: szansa (0-1), że zamiast w gracza rzuci w bonus (bliższy jemu niż graczowi)
+  //  szansaStanowiska: szansa (0-1), że po rzucie pójdzie do wolnego stanowiska swojej drużyny
   poziomy: [
-    { przeciwnicy: 1, czasReakcji: 0.8, szansaUniku: 0.3, rozrzut: 0.04, przerwaMin: 1.5, przerwaMax: 3, silaMin: 0.1, silaMax: 0.5, szansaBonusu: 0.2 },
-    { przeciwnicy: 2, czasReakcji: 0.7, szansaUniku: 0.4, rozrzut: 0.035, przerwaMin: 2, przerwaMax: 3.5, silaMin: 0.2, silaMax: 0.6, szansaBonusu: 0.3 },
-    { przeciwnicy: 3, czasReakcji: 0.6, szansaUniku: 0.5, rozrzut: 0.03, przerwaMin: 2.5, przerwaMax: 4, silaMin: 0.3, silaMax: 0.75, szansaBonusu: 0.4 },
-    { przeciwnicy: 4, czasReakcji: 0.5, szansaUniku: 0.6, rozrzut: 0.025, przerwaMin: 3, przerwaMax: 4.5, silaMin: 0.4, silaMax: 0.9, szansaBonusu: 0.5 },
-    { przeciwnicy: 5, czasReakcji: 0.4, szansaUniku: 0.7, rozrzut: 0.02, przerwaMin: 3.5, przerwaMax: 5, silaMin: 0.5, silaMax: 1, szansaBonusu: 0.6 },
+    { przeciwnicy: 1, czasReakcji: 0.8, szansaUniku: 0.3, rozrzut: 0.04, przerwaMin: 1.5, przerwaMax: 3, silaMin: 0.1, silaMax: 0.5, szansaBonusu: 0.2, szansaStanowiska: 0.25 },
+    { przeciwnicy: 2, czasReakcji: 0.7, szansaUniku: 0.4, rozrzut: 0.035, przerwaMin: 2, przerwaMax: 3.5, silaMin: 0.2, silaMax: 0.6, szansaBonusu: 0.3, szansaStanowiska: 0.35 },
+    { przeciwnicy: 3, czasReakcji: 0.6, szansaUniku: 0.5, rozrzut: 0.03, przerwaMin: 2.5, przerwaMax: 4, silaMin: 0.3, silaMax: 0.75, szansaBonusu: 0.4, szansaStanowiska: 0.45 },
+    { przeciwnicy: 4, czasReakcji: 0.5, szansaUniku: 0.6, rozrzut: 0.025, przerwaMin: 3, przerwaMax: 4.5, silaMin: 0.4, silaMax: 0.9, szansaBonusu: 0.5, szansaStanowiska: 0.6 },
+    { przeciwnicy: 5, czasReakcji: 0.4, szansaUniku: 0.7, rozrzut: 0.02, przerwaMin: 3.5, przerwaMax: 5, silaMin: 0.5, silaMax: 1, szansaBonusu: 0.6, szansaStanowiska: 0.7 },
   ],
 
   // Zachowanie przeciwnika (na każdym poziomie takie samo)
@@ -107,6 +108,27 @@ const CONFIG = {
       // Pierniczek: od razu zdejmuje jedno trafienie (czasTrwania 0 = działa natychmiast)
       { id: "pierniczek", nazwa: "Pierniczek", kolor: "#b5733a", czasTrwania: 0, waga: 1, grafika: null },
     ],
+  },
+
+  // Stanowiska: stos gałek i armatka, osobno dla każdej drużyny. Nie blokują ruchu ani śnieżek.
+  stanowiska: {
+    // Stos: postać w promieniu ma przeładowanie razy mnoznikPrzeladowania; każdy taki rzut = 1 gałka
+    stos: { amunicjaMin: 7, amunicjaMax: 9, promien: 0.06, mnoznikPrzeladowania: 0.3, grafika: null },
+    // Armatka: postać w miejscu stania (za armatką) rzuca bez przeładowania, ale nie częściej
+    // niż co minOdstepStrzalow sekund; każdy rzut = 1 gałka; pusta zostaje jako dekoracja
+    armatka: {
+      amunicja: 20,
+      mnoznikPrzeladowania: 0,
+      minOdstepStrzalow: 0.2,
+      miejsceStania: { x: 0.025, y: 0.025 }, // przesunięcie od armatki (dla zielonych lustrzanie)
+      promienStania: 0.035,
+      grafika: null,
+    },
+    // Pozycje (punkt na ziemi, ułamki szerokości pola)
+    pozycje: {
+      czerwoni: { stos: { x: 0.54, y: 0.4 }, armatka: { x: 0.3, y: 0.42 } },
+      zieloni: { stos: { x: 0.46, y: 0.1 }, armatka: { x: 0.7, y: 0.08 } },
+    },
   },
 
   // Grafiki postaci i mnożnik ich wielkości (1 = rozmiar z sprites.json).

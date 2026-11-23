@@ -108,6 +108,115 @@ function rysujLezacego(ctx, z) {
   ctx.restore();
 }
 
+// --- Stanowiska ---
+
+// Delikatny okrąg strefy na ziemi, gdy w strefie stoi postać tej drużyny
+function rysujStrefeStanowiska(ctx, stan, st) {
+  if (st.amunicja <= 0) return;
+  const ktos = [stan.gracz, ...stan.przeciwnicy].some(
+    (z) => z.druzyna === st.druzyna && !z.wyeliminowany && wStrefieStanowiska(z, st)
+  );
+  if (!ktos) return;
+  const armatka = st.typ === "armatka";
+  const r = j(armatka ? CONFIG.stanowiska.armatka.promienStania : CONFIG.stanowiska.stos.promien);
+  ctx.save();
+  ctx.strokeStyle = "rgba(42, 111, 214, 0.45)";
+  ctx.fillStyle = "rgba(42, 111, 214, 0.08)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(armatka ? st.stoiX : st.x, armatka ? st.stoiY : st.y, r, r * 0.45, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Stos gałek: im mniej amunicji, tym mniejszy (6, 3 albo 1 kula)
+function rysujStos(ctx, st) {
+  const czesc = st.amunicja / st.amunicjaStart;
+  const cfg = CONFIG.stanowiska.stos;
+  const obraz = cfg.grafika && OBRAZY[cfg.grafika];
+  const rb = 9; // promień jednej kuli (jednostki pola)
+  // Cień
+  ctx.fillStyle = "rgba(60, 90, 130, 0.25)";
+  ctx.beginPath();
+  ctx.ellipse(st.x, st.y, rb * 3.4, rb * 1.2, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (obraz) {
+    const rozmiar = j(cfg.promien) * 1.6 * (0.5 + 0.5 * czesc);
+    ctx.drawImage(obraz, st.x - rozmiar / 2, st.y - rozmiar * 0.9, rozmiar, rozmiar);
+    return;
+  }
+  // Kule w piramidzie: dolny rząd, środkowy, górny
+  let kule;
+  if (czesc > 0.66) kule = [[-2, 0], [0, 0], [2, 0], [-1, -1.6], [1, -1.6], [0, -3.2]];
+  else if (czesc > 0.33) kule = [[-1, 0], [1, 0], [0, -1.6]];
+  else kule = [[0, 0]];
+  for (const [kx, ky] of kule) {
+    const x = st.x + kx * rb;
+    const y = st.y - rb + ky * rb;
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "rgba(60, 90, 130, 0.6)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(x, y, rb, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
+// Armatka: szary korpus z kołami i lufą skierowaną w stronę przeciwnika; nad nią licznik
+function rysujArmatke(ctx, st) {
+  const cfg = CONFIG.stanowiska.armatka;
+  const obraz = cfg.grafika && OBRAZY[cfg.grafika];
+  ctx.fillStyle = "rgba(60, 90, 130, 0.25)";
+  ctx.beginPath();
+  ctx.ellipse(st.x, st.y, 26, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+  if (obraz) {
+    const rozmiar = 56;
+    ctx.drawImage(obraz, st.x - rozmiar / 2, st.y - rozmiar * 0.9, rozmiar, rozmiar);
+  } else {
+    // Lufa: w lewo-górę u czerwonych, w prawo-dół u zielonych
+    const kierunek = st.druzyna === "czerwoni" ? -1 : 1;
+    const dx = 0.85 * kierunek;
+    const dy = 0.5 * kierunek;
+    const sx = st.x;
+    const sy = st.y - 14;
+    ctx.strokeStyle = "#5b6470";
+    ctx.lineCap = "round";
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx + dx * 30, sy + dy * 30);
+    ctx.stroke();
+    ctx.lineCap = "butt";
+    // Korpus i koła
+    ctx.fillStyle = "#7d8792";
+    ctx.beginPath();
+    ctx.ellipse(sx, sy, 16, 11, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#3f4650";
+    for (const kx of [-11, 11]) {
+      ctx.beginPath();
+      ctx.arc(sx + kx, st.y - 4, 6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // Licznik amunicji
+  if (st.amunicja > 0) {
+    ctx.fillStyle = "#2a4a66";
+    ctx.font = `bold 15px "Helvetica Neue", Roboto, "Segoe UI", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(String(st.amunicja), st.x, st.y - 42);
+  }
+}
+
+function rysujStanowisko(ctx, st) {
+  if (st.typ === "stos") rysujStos(ctx, st);
+  else rysujArmatke(ctx, st);
+}
+
 // --- Bonusy ---
 
 // Kula bonusu (albo obrazek, gdy typ ma grafikę) w punkcie (x, y) o promieniu r
@@ -479,12 +588,14 @@ function rysujScene(ctx, stan) {
   const lezacy = wszyscy.filter((z) => z.wyeliminowany);
   const stojacy = wszyscy.filter((z) => !z.wyeliminowany);
   for (const z of lezacy) rysujZawodnika(ctx, z, z === stan.gracz);
+  for (const st of widoczneStanowiska(stan)) rysujStrefeStanowiska(ctx, stan, st);
 
   // Stojący zawodnicy i dekoracje razem, od góry do dołu według poziomu stóp/podstawy:
   // kto stoi niżej na ekranie (bliżej nas), zasłania tego, kto stoi wyżej
   const obiekty = [
     ...stojacy.map((z) => ({ y: stopyY(z), rysuj: () => rysujZawodnika(ctx, z, z === stan.gracz) })),
     ...przeszkody().map((p) => ({ y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
+    ...widoczneStanowiska(stan).map((st) => ({ y: st.y, rysuj: () => rysujStanowisko(ctx, st) })),
     ...stan.bonusy.map((b) => ({ y: b.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujBonusNaPlanszy(ctx, stan, b) })),
   ].sort((a, b) => a.y - b.y);
   for (const o of obiekty) o.rysuj();

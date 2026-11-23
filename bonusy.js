@@ -47,6 +47,8 @@ function dobreMiejsceBonusu(stan, x, y) {
     const dy = (y + stopy - p.y) / (p.ry + zapas);
     if (dx * dx + dy * dy < 1) return false;
   }
+  // Nie na stanowisku (stos, armatka i miejsce stania)
+  if (bliskoStanowiska(stan, x, y + stopy, r + j(B().zapasPrzeszkody))) return false;
   // Nie w strefie pada (pad liczony w jednostkach pola, dla obecnego ekranu)
   const pad = pozycjaPada();
   if (odleglosc(x, y, pad.x, pad.y) < j(CONFIG.promienPadu) + j(CONFIG.promienDotykuPadu) + r) return false;
