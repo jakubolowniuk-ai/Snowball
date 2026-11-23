@@ -25,7 +25,8 @@ function wzorSniegu(ctx) {
 // Tło: śnieg na całym ekranie, przyciemnienie poza światem i przy jego brzegach.
 // Rysowane we współrzędnych świata (wywołuj po przesunięciu o kamerę).
 function rysujTlo(ctx) {
-  const sw = stan.swiat || { x0: 0, y0: 0, x1: SZEROKOSC_POLA, y1: WYSOKOSC_POLA };
+  // Przyciemnienie przy brzegach pełnego świata (zwężanie pokazuje zamieć, nie tło)
+  const sw = stan.swiatPelny || stan.swiat || { x0: 0, y0: 0, x1: SZEROKOSC_POLA, y1: WYSOKOSC_POLA };
   const X0 = sw.x0;
   const Y0 = sw.y0;
   const W = sw.x1 - sw.x0;
@@ -393,7 +394,9 @@ function rysujZawodnika(ctx, z, toGracz) {
   }
 
   // Postać z grafiki (podeszwy w punkcie stóp); gdy grafiki brak, kółko jak dawniej
-  if (!rysujSprite(ctx, grafikaPostaci(z), z.x, y)) {
+  // Niesiony wiatrem zamieci podskakuje (cień zostaje na ziemi)
+  const podskok = z.wiatr ? Math.abs(Math.sin(stan.czasPoziomu * 12)) * j(CONFIG.tryby.wielkaArena.wysokoscPodskoku) : 0;
+  if (!rysujSprite(ctx, grafikaPostaci(z), z.x, y - podskok)) {
     ctx.fillStyle = kolorDruzyny(z);
     ctx.beginPath();
     ctx.arc(z.x, z.y, r, 0, Math.PI * 2);
@@ -512,6 +515,8 @@ function rysujNapisy(ctx, stan) {
     rysujNapis(ctx, stan.koniec.wynik === "wygrana" ? "Wygrana!" : "Przegrana");
   } else if (stan.czasPoziomu <= CONFIG.czasNapisuLevel) {
     rysujNapis(ctx, `Level ${stan.poziom}`);
+  } else if (ostrzezenieZamieci(stan)) {
+    rysujNapis(ctx, "Zamieć się zbliża!");
   }
 }
 
@@ -652,4 +657,5 @@ function rysujSwiat(ctx, stan) {
   rysujCelowanie(ctx, stan); // nad postaciami, żeby cel na przeciwniku był widoczny
   rysujSniezki(ctx, stan); // śnieżki są w powietrzu, więc nad postaciami
   rysujChmurki(ctx, stan);
+  rysujZamiec(ctx, stan);
 }

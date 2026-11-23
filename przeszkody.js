@@ -25,6 +25,23 @@ function przeszkody() {
   return _przeszkody;
 }
 
+// Nowy poziom: lista przeszkód od nowa (zamieć mogła część usunąć)
+function resetPrzeszkod() {
+  _przeszkody = null;
+}
+
+// Zamieć: przeszkody poza granicą świata znikają z chmurką
+function usunPrzeszkodyPoza(stan) {
+  const lista = przeszkody();
+  for (let i = lista.length - 1; i >= 0; i--) {
+    const p = lista[i];
+    if (pozaGranica(stan, p.x, p.y, 0)) {
+      chmurkaZamieci(stan, p.x, p.y - 20);
+      lista.splice(i, 1);
+    }
+  }
+}
+
 // Czy odcinek (ax, ay)-(bx, by) przecina podstawę przeszkody p?
 // Liczymy w "spłaszczonych" współrzędnych, w których owal staje się kołem o promieniu 1.
 function odcinekPrzecinaPodstawe(p, ax, ay, bx, by) {

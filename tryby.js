@@ -16,14 +16,131 @@ function ustawSwiat(stan) {
   } else {
     stan.swiat = { x0: 0, y0: 0, x1: SZEROKOSC_POLA, y1: WYSOKOSC_POLA };
   }
+  // Pełny świat na starcie (zamieć zwęża stan.swiat, a ten zostaje bez zmian)
+  stan.swiatPelny = { ...stan.swiat };
+}
+
+// --- Zamieć (Wielka arena) ---
+// Po czasDoZwezania sekundach granice świata (stan.swiat) zwężają się liniowo
+// przez czasZwezania sekund do rozmiaru jednego pola, w stronę środka świata.
+
+function postepZamieci(stan) {
+  const t = stan.czasPoziomu - WA().czasDoZwezania;
+  return Math.min(Math.max(t / WA().czasZwezania, 0), 1); // 0 = pełny świat, 1 = jedno pole
+}
+
+// Czy punkt jest poza obecnymi granicami (z zapasem)?
+function pozaGranica(stan, x, y, zapas) {
+  const s = stan.swiat;
+  return x < s.x0 - zapas || x > s.x1 + zapas || y < s.y0 - zapas || y > s.y1 + zapas;
+}
+
+function chmurkaZamieci(stan, x, y) {
+  stan.chmurki.push({
+    x,
+    y,
+    czas: 0,
+    obloczek: `assets/efekty/obloczek_sniegu_${1 + Math.floor(Math.random() * 2)}.png`,
+    rozbryzg: null,
+  });
+}
+
+function aktualizujZamiec(stan, dt) {
+  if (!jestWielka(stan)) return;
+  // Nowe granice: liniowo od pełnego świata do jednego pola wokół środka
+  const p = postepZamieci(stan);
+  const P = stan.swiatPelny;
+  const sx = (P.x0 + P.x1) / 2;
+  const sy = (P.y0 + P.y1) / 2;
+  const koniec = { x0: sx - SZEROKOSC_POLA / 2, y0: sy - WYSOKOSC_POLA / 2, x1: sx + SZEROKOSC_POLA / 2, y1: sy + WYSOKOSC_POLA / 2 };
+  for (const k of ["x0", "y0", "x1", "y1"]) stan.swiat[k] = P[k] + (koniec[k] - P[k]) * p;
+  if (p <= 0) return;
+
+  // Przeszkody, stanowiska i bonusy poza granicą znikają z chmurką
+  usunPrzeszkodyPoza(stan);
+  for (const st of stan.stanowiska) {
+    if (st.amunicja >= 0 && !st.zniknelo && pozaGranica(stan, st.x, st.y, 0)) {
+      st.amunicja = 0; // przeciwnicy od razu je zostawią
+      st.zniknelo = true;
+      chmurkaZamieci(stan, st.x, st.y - 15);
+    }
+  }
+  stan.stanowiska = stan.stanowiska.filter((st) => !st.zniknelo);
+  for (const b of stan.bonusy) if (pozaGranica(stan, b.x, b.y, 0)) chmurkaZamieci(stan, b.x, b.y);
+  stan.bonusy = stan.bonusy.filter((b) => !pozaGranica(stan, b.x, b.y, 0));
+
+  // Wiatr: postać poza granicą jest spychana do środka (przez przeszkody, bez obrażeń)
+  const v = j(WA().predkoscWiatru) * dt;
+  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+    if (z.wyeliminowany) continue;
+    z.wiatr = pozaGranica(stan, z.x, z.y, -PROMIEN_POSTACI);
+    if (!z.wiatr) continue;
+    const dx = sx - z.x;
+    const dy = sy - z.y;
+    const d = Math.hypot(dx, dy) || 1;
+    z.x += (dx / d) * Math.min(v, d);
+    z.y += (dy / d) * Math.min(v, d);
+  }
+}
+
+// Ostrzeżenie: ostatnie sekundy przed zwężaniem
+function ostrzezenieZamieci(stan) {
+  if (!jestWielka(stan)) return false;
+  const doZwezania = WA().czasDoZwezania - stan.czasPoziomu;
+  return doZwezania > 0 && doZwezania <= WA().ostrzezenieZamieci;
+}
+
+// Zamieć na brzegu: poza granicą biała mgła, przy granicy płynne przejście
+function rysujZamiec(ctx, stan) {
+  if (!jestWielka(stan) || postepZamieci(stan) <= 0) return;
+  const s = stan.swiat;
+  const e = widokSwiata();
+  const g = j(WA().szerokoscZamieci);
+  const mgla = WA().gestoscZamieci;
+  const kolor = WA().kolorZamieci; // "r, g, b"
+  ctx.save();
+  ctx.fillStyle = `rgba(${kolor}, ${mgla})`;
+  ctx.fillRect(e.x0, e.y0, e.x1 - e.x0, s.y0 - e.y0); // nad granicą
+  ctx.fillRect(e.x0, s.y1, e.x1 - e.x0, e.y1 - s.y1); // pod
+  ctx.fillRect(e.x0, s.y0, s.x0 - e.x0, s.y1 - s.y0); // na lewo
+  ctx.fillRect(s.x1, s.y0, e.x1 - s.x1, s.y1 - s.y0); // na prawo
+  const brzegi = [
+    [s.x0, s.y0, s.x0, s.y0 + g, s.x0, s.y0, s.x1 - s.x0, g],
+    [s.x0, s.y1, s.x0, s.y1 - g, s.x0, s.y1 - g, s.x1 - s.x0, g],
+    [s.x0, s.y0, s.x0 + g, s.y0, s.x0, s.y0, g, s.y1 - s.y0],
+    [s.x1, s.y0, s.x1 - g, s.y0, s.x1 - g, s.y0, g, s.y1 - s.y0],
+  ];
+  for (const [x1, y1, x2, y2, rx, ry, rw, rh] of brzegi) {
+    const gr = ctx.createLinearGradient(x1, y1, x2, y2);
+    gr.addColorStop(0, `rgba(${kolor}, ${mgla})`);
+    gr.addColorStop(1, `rgba(${kolor}, 0)`);
+    ctx.fillStyle = gr;
+    ctx.fillRect(rx, ry, rw, rh);
+  }
+  // Płatki śniegu niesione wiatrem w mgle (proste kreski, przesuwają się z czasem)
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
+  ctx.lineWidth = 2;
+  const t = stan.czasPoziomu;
+  for (let i = 0; i < 80; i++) {
+    const x = e.x0 + ((i * 137.5 + t * 160) % (e.x1 - e.x0));
+    const y = e.y0 + ((i * 71.3 + t * 40) % (e.y1 - e.y0));
+    if (!pozaGranica(stan, x, y, -g * 0.5)) continue;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 10, y + 3);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 // --- Kamera ---
 const kamera = { x: 0, y: 0 };
 
-// Gdzie kamera chce być: gracz na środku okna, ale okno nie wychodzi poza świat
+// Gdzie kamera chce być: gracz na środku okna, ale okno nie wychodzi poza świat.
+// W trakcie zwężania trzyma się pełnego świata (żeby było widać zamieć),
+// po zwężeniu do jednego pola staje w miejscu.
 function celKamery(stan) {
-  const s = stan.swiat;
+  const s = jestWielka(stan) && postepZamieci(stan) < 1 ? stan.swiatPelny : stan.swiat;
   const x = stan.gracz.x - SZEROKOSC_POLA / 2;
   const y = stan.gracz.y - WYSOKOSC_POLA / 2;
   return {
