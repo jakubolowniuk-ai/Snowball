@@ -142,7 +142,7 @@ function rysujLezacego(ctx, z) {
 function rysujStrefeStanowiska(ctx, stan, st) {
   if (st.amunicja <= 0) return;
   const ktos = [stan.gracz, ...stan.przeciwnicy].some(
-    (z) => z.druzyna === st.druzyna && !z.wyeliminowany && wStrefieStanowiska(z, st)
+    (z) => stanowiskoDlaDruzyny(st, z) && !z.wyeliminowany && wStrefieStanowiska(z, st)
   );
   if (!ktos) return;
   const armatka = st.typ === "armatka";
@@ -205,7 +205,8 @@ function rysujArmatke(ctx, st) {
     ctx.drawImage(obraz, st.x - rozmiar / 2, st.y - rozmiar * 0.9, rozmiar, rozmiar);
   } else {
     // Lufa: w lewo-górę u czerwonych, w prawo-dół u zielonych
-    const kierunek = st.druzyna === "czerwoni" ? -1 : 1;
+    // (neutralna armatka w Wielkiej arenie celuje w lewo-górę, jak armatka gracza)
+    const kierunek = st.druzyna === "zieloni" ? 1 : -1;
     const dx = 0.85 * kierunek;
     const dy = 0.5 * kierunek;
     const sx = st.x;
@@ -612,6 +613,7 @@ function rysujScene(ctx, stan) {
   ctx.translate(-kamera.x, -kamera.y);
   rysujSwiat(ctx, stan);
   ctx.restore();
+  rysujStrzalki(ctx, stan);
   rysujPad(ctx);
   rysujNapisy(ctx, stan);
 }

@@ -143,6 +143,17 @@ const CONFIG = {
       odlegloscAI: 0.5, // z jakiej odległości od gracza przeciwnik chce rzucać
       maxOdlegloscRzutuAI: 0.9, // dalej nie rzuca
       marginesWidoku: 0.05, // przeciwnik rzuca tylko na ekranie gracza (z tym zapasem)
+      zasiegSniezki: 1, // śnieżka leci najwyżej tyle (szerokość widoku = 1), nie przez cały świat
+      bonusyMaxNaraz: [2, 3, 4], // ile bonusów naraz na poziomie 1, 2, 3 i dalej
+      // Odstęp między bonusami w Wielkiej arenie (krótszy niż w Arenie; przy 12-18 s
+      // i czasie życia 10 s na planszy nigdy nie byłoby więcej niż jeden bonus)
+      bonusyOdstepMin: 4,
+      bonusyOdstepMax: 7,
+      // Neutralne stanowiska (dla każdego, kto pierwszy dojdzie; amunicja wspólna)
+      stanowiska: { stos: { x: 1.0, y: 0.52 }, armatka: { x: 1.3, y: 0.3 } },
+      // Strzałki przy krawędzi ekranu do przeciwników poza widokiem
+      strzalkaRozmiar: 0.018,
+      strzalkaMargines: 0.03, // odstęp strzałki od krawędzi ekranu
       // Dekoracje (przeszkody) w całym świecie: x od 0 do 2, y od 0 do 1
       dekoracje: [
         { plik: "choinka_1", x: 0.1, y: 0.12 },

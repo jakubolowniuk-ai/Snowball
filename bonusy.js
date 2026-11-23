@@ -11,7 +11,7 @@ function typBonusu(id) {
 
 // Ile bonusów naraz może leżeć na planszy na tym poziomie
 function maxBonusowNaraz(stan) {
-  const lista = B().maxNaraz;
+  const lista = jestWielka(stan) ? CONFIG.tryby.wielkaArena.bonusyMaxNaraz : B().maxNaraz;
   return lista[Math.min(stan.poziom, lista.length) - 1];
 }
 
@@ -39,7 +39,8 @@ function dobreMiejsceBonusu(stan, x, y) {
   const stopy = PROMIEN_POSTACI * 0.85; // bonus "stoi" jak postać: ziemia jest niżej niż środek
   // W polu gry z marginesem
   const m = j(B().marginesKrawedzi);
-  if (x < m || x > SZEROKOSC_POLA - m || y < m || y > WYSOKOSC_POLA - m) return false;
+  const sw = stan.swiat;
+  if (x < sw.x0 + m || x > sw.x1 - m || y < sw.y0 + m || y > sw.y1 - m) return false;
   // Nie w podstawie przeszkody (plus zapas)
   const zapas = j(B().zapasPrzeszkody) + r;
   for (const p of przeszkody()) {
@@ -68,6 +69,7 @@ function dobreMiejsceBonusu(stan, x, y) {
 
 // Próbuje położyć nowy bonus w pasie wokół przekątnej. Zwraca true, gdy się udało.
 function polozBonus(stan) {
+  if (jestWielka(stan)) return polozBonusWielka(stan);
   const W = SZEROKOSC_POLA;
   const H = WYSOKOSC_POLA;
   const dl = Math.hypot(1 / W, 1 / H);
@@ -88,6 +90,20 @@ function polozBonus(stan) {
   return false;
 }
 
+// Wielka arena: losowy punkt w całym aktualnym świecie (te same reguły miejsca)
+function polozBonusWielka(stan) {
+  const sw = stan.swiat;
+  for (let proba = 0; proba < 30; proba++) {
+    const x = losuj(sw.x0, sw.x1);
+    const y = losuj(sw.y0, sw.y1);
+    if (dobreMiejsceBonusu(stan, x, y)) {
+      stan.bonusy.push({ typ: losujTypBonusu().id, x, y, zostalo: B().czasZycia });
+      return true;
+    }
+  }
+  return false;
+}
+
 // Co klatkę (poza napisem "Level N" i końcem poziomu): pojawianie, znikanie,
 // odliczanie aktywnych bonusów postaci
 function aktualizujBonusy(stan, dt) {
@@ -99,7 +115,10 @@ function aktualizujBonusy(stan, dt) {
   stan.doBonusu -= dt;
   if (stan.doBonusu <= 0 && stan.bonusy.length < maxBonusowNaraz(stan)) {
     if (polozBonus(stan)) {
-      stan.doBonusu = losuj(B().odstepMin, B().odstepMax);
+      const wa = CONFIG.tryby.wielkaArena;
+      stan.doBonusu = jestWielka(stan)
+        ? losuj(wa.bonusyOdstepMin, wa.bonusyOdstepMax)
+        : losuj(B().odstepMin, B().odstepMax);
     } else {
       stan.doBonusu = 1; // brak dobrego miejsca: spróbujemy za sekundę
     }

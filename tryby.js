@@ -121,6 +121,45 @@ function celWielkiejAreny(stan, z) {
   return cel;
 }
 
+// --- Strzałki do przeciwników poza ekranem ---
+
+// Rysowane w oknie ekranu (bez kamery): przy krawędzi, w stronę przeciwnika
+function rysujStrzalki(ctx, stan) {
+  if (!jestWielka(stan)) return;
+  const m = j(WA().strzalkaMargines);
+  const r = j(WA().strzalkaRozmiar);
+  const srodekX = (widoczny.x0 + widoczny.x1) / 2;
+  const srodekY = (widoczny.y0 + widoczny.y1) / 2;
+  for (const z of stan.przeciwnicy) {
+    if (z.wyeliminowany || naEkranie(z.x, z.y, 0)) continue;
+    // Kierunek od środka ekranu do przeciwnika (w oknie ekranu)
+    const dx = z.x - kamera.x - srodekX;
+    const dy = z.y - kamera.y - srodekY;
+    // Punkt na krawędzi ekranu (z marginesem) w tym kierunku
+    const polW = (widoczny.x1 - widoczny.x0) / 2 - m;
+    const polH = (widoczny.y1 - widoczny.y0) / 2 - m;
+    const k = Math.min(polW / Math.abs(dx || 1e-6), polH / Math.abs(dy || 1e-6));
+    const x = srodekX + dx * k;
+    const y = srodekY + dy * k;
+    const kat = Math.atan2(dy, dx);
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(kat);
+    ctx.fillStyle = CONFIG.kolorZielony;
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = r * 0.25;
+    ctx.beginPath();
+    ctx.moveTo(r * 1.2, 0);
+    ctx.lineTo(-r * 0.8, -r * 0.9);
+    ctx.lineTo(-r * 0.4, 0);
+    ctx.lineTo(-r * 0.8, r * 0.9);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
 // --- Menu ---
 
 const menu = document.getElementById("menu");

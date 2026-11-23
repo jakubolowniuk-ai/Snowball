@@ -74,11 +74,6 @@ function zacznijPoziom(stan, poziom) {
   stan.koniec = null; // { wynik: "wygrana" | "przegrana", czas } po końcu poziomu
   zacznijStanowiska(stan); // stos i armatka z pełną amunicją
   zacznijBonusy(stan); // bonusy na planszy znikają, licznik od nowa
-  if (wielka) {
-    // Krok W1: w Wielkiej arenie jeszcze bez stanowisk i bonusów (dojdą w W2)
-    stan.stanowiska = [];
-    stan.doBonusu = Infinity;
-  }
   ustawKamere(stan);
 }
 zacznijPoziom(stan, 1);
@@ -269,8 +264,12 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania) {
       startY: z.y,
       kierX: kx * Math.cos(a) - ky * Math.sin(a), // kierunek obrócony o kąt
       kierY: kx * Math.sin(a) + ky * Math.cos(a),
-      // Leci do celu; gdy zasięg zależy od siły, najwyżej do końca zasięgu
-      dlugosc: CONFIG.zasiegZalezyOdSily ? Math.min(d, zasieg(s)) : d,
+      // Leci do celu; gdy zasięg zależy od siły, najwyżej do końca zasięgu;
+      // w Wielkiej arenie najwyżej na szerokość widoku
+      dlugosc: Math.min(
+        CONFIG.zasiegZalezyOdSily ? Math.min(d, zasieg(s)) : d,
+        jestWielka(stan) ? j(CONFIG.tryby.wielkaArena.zasiegSniezki) : Infinity
+      ),
       predkosc: j(pomiedzy(CONFIG.predkoscSniezkiMin, CONFIG.predkoscSniezkiMax, s)),
       przebyte: 0,
     });
