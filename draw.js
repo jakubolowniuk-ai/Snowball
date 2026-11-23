@@ -97,14 +97,16 @@ function widokPostaci(z) {
   return z.druzyna === "czerwoni" ? "tyl" : "przod";
 }
 
-// Obecna klatka postaci: { dane, odbicie } (na razie zawsze "stanie")
+// Obecna klatka postaci: { dane, odbicie } (klatkę wybiera animacje.js)
 function klatkaPostaci(z) {
-  return { dane: ZAWODNIK.klatki[widokPostaci(z)].stanie, odbicie: false };
+  const klatki = ZAWODNIK.klatki[widokPostaci(z)];
+  return { dane: klatki[nazwaKlatki(z)] || klatki.stanie, odbicie: false };
 }
 
-// Rozmiar obecnej klatki w jednostkach pola (z mnożnikiem skali z config.js)
+// Rozmiar postaci w jednostkach pola (z mnożnikiem skali z config.js).
+// Bierzemy klatkę "stanie", żeby kropki nad głową i bańka nie skakały przy każdej klatce.
 function rozmiarPostaci(z) {
-  const k = klatkaPostaci(z).dane;
+  const k = ZAWODNIK.klatki[widokPostaci(z)].stanie;
   return { szer: k.szer * CONFIG.skalaGrafik, wys: k.wys * CONFIG.skalaGrafik };
 }
 
@@ -171,7 +173,7 @@ function stopyY(z) {
 // Wyeliminowany leży na ziemi: grafika postaci obrócona o 90 stopni
 // i lekko spłaszczona (widok skośnie z góry). Docelowo dojdzie osobna grafika.
 function rysujLezacego(ctx, z) {
-  const k = klatkaPostaci(z).dane;
+  const k = ZAWODNIK.klatki[widokPostaci(z)].stanie; // do kroku 6: obrócona klatka "stanie"
   const { szer, wys } = rozmiarPostaci(z);
   const y = stopyY(z);
   const splaszczenie = 0.7;

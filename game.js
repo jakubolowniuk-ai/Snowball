@@ -509,6 +509,9 @@ function aktualizuj(dt) {
 
   // Kamera podąża za graczem (tylko w Wielkiej arenie)
   aktualizujKamere(stan, dt);
+
+  // Animacje zawodników (stanie, chód)
+  aktualizujAnimacje(stan, dt);
 }
 
 // --- Pętla gry ---
