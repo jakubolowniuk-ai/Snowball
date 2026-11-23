@@ -96,6 +96,9 @@ Po wgraniu pliku ustaw w `config.js` w `bonusy.typy` pole `grafika` na ścieżk�
 | Plik | Bonus | Opis |
 | --- | --- | --- |
 | `assets/bonusy/bombka.png` | Bombka (tarcza na jedno trafienie) | okrągła bombka choinkowa z zawieszką |
+| `assets/bonusy/gwiazdka.png` | Gwiazdka (wachlarz 3 śnieżek) | złota gwiazda na choinkę |
+| `assets/bonusy/laska.png` | Laska cukrowa (szybszy bieg) | biało-czerwona laska cukrowa |
+| `assets/bonusy/pierniczek.png` | Pierniczek (zdejmuje jedno trafienie) | pierniczek w kształcie ludzika z lukrem |
 
 ## Znane wady i braki
 - **Tył zawodnika to wersja robocza:** kaptur wygląda jak piłka, korpus jest mniejszy niż z przodu.

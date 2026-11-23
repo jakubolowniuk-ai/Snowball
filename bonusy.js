@@ -117,6 +117,7 @@ function sniezkaZbieraBonusy(stan, sn) {
 // Rzucający z zdobywa bonus b: bonus znika z chmurką, postać dostaje (albo odnawia) bonus
 function zdobadzBonus(stan, z, b) {
   stan.bonusy = stan.bonusy.filter((x) => x !== b);
+  if (z.wyeliminowany) return; // rzucający odpadł, zanim śnieżka doleciała
   stan.chmurki.push({
     x: b.x,
     y: b.y,
@@ -125,9 +126,23 @@ function zdobadzBonus(stan, z, b) {
     rozbryzg: null,
   });
   const typ = typBonusu(b.typ);
+
+  // Pierniczek działa od razu: zdejmuje jedno trafienie (jeśli jest) i pokazuje serduszko
+  if (typ.id === "pierniczek") {
+    if (z.trafienia > 0) z.trafienia -= 1;
+    stan.chmurki.push({ serce: z, czas: 0, trwa: B().czasSerduszka });
+    return;
+  }
+
   const juz = z.bonusy.find((ab) => ab.typ === b.typ);
-  if (juz) juz.pozostalo = typ.czasTrwania; // ponowne zdobycie odnawia czas
-  else z.bonusy.push({ typ: b.typ, pozostalo: typ.czasTrwania });
+  if (juz) {
+    juz.pozostalo = typ.czasTrwania; // ponowne zdobycie odnawia czas
+    if (typ.rzuty) juz.rzuty = typ.rzuty;
+  } else {
+    const nowy = { typ: b.typ, pozostalo: typ.czasTrwania };
+    if (typ.rzuty) nowy.rzuty = typ.rzuty; // Gwiazdka: ile rzutów wachlarzem zostało
+    z.bonusy.push(nowy);
+  }
 }
 
 // Bombka (tarcza): pochłania jedno trafienie. Zwraca true, gdy pochłonęła.

@@ -47,7 +47,12 @@ function aktualizujPrzeciwnika(stan, z, dt) {
   if (ai.unoszenie) {
     ai.unoszenie.czas += dt;
     if (ai.unoszenie.czas >= ai.unoszenie.calosc) {
-      rzucWGracza(stan, z, param);
+      const b = ai.unoszenie.bonus;
+      if (b && stan.bonusy.includes(b)) {
+        wykonajRzut(stan, z, b.x, b.y, ai.unoszenie.czas); // w bonus: dokładnie, bez rozrzutu
+      } else {
+        rzucWGracza(stan, z, param); // bonus zniknął albo celuje w gracza
+      }
       ai.unoszenie = null;
       ai.przerwa = losuj(param.przerwaMin, param.przerwaMax);
     }
@@ -69,7 +74,9 @@ function aktualizujPrzeciwnika(stan, z, dt) {
       // Śnieżka i tak doleci, więc siła (czyli prędkość) jest losowa z zakresu poziomu
       calosc = losuj(param.silaMin, param.silaMax) * CONFIG.MAX_CHARGE;
     }
-    ai.unoszenie = { czas: 0, calosc };
+    // Z szansą szansaBonusu celuje w bonus zamiast w gracza
+    const bonus = Math.random() < param.szansaBonusu ? wybierzBonusDlaPrzeciwnika(stan, z) : null;
+    ai.unoszenie = { czas: 0, calosc, bonus };
     return;
   }
 
@@ -79,7 +86,7 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     const przedY = z.y;
     const doszedl = idzDo(z, ai.cel.x, ai.cel.y, dt);
     // Prawie stoi w miejscu (np. opiera się o przeszkodę): odpuszcza ten cel
-    const ruszyl = Math.hypot(z.x - przedX, z.y - przedY) > j(CONFIG.predkoscZawodnika) * dt * 0.2;
+    const ruszyl = Math.hypot(z.x - przedX, z.y - przedY) > predkoscPostaci(z) * dt * 0.2;
     if (doszedl || !ruszyl) {
       ai.cel = null;
       ai.postoj = losuj(CONFIG.postojMin, CONFIG.postojMax);
@@ -130,6 +137,25 @@ function odskocz(z, sn) {
   ograniczDoSwojejStrony(cel);
   z.ai.cel = { x: cel.x, y: cel.y };
   z.ai.unoszenie = null; // unik ważniejszy niż rzut
+}
+
+// Bonus, w który przeciwnik może rzucić: z czystą linią (bez przeszkody)
+// i bliższy jemu niż graczowi; z takich najbliższy jemu. Brak takiego = null.
+function wybierzBonusDlaPrzeciwnika(stan, z) {
+  const g = stan.gracz;
+  const stopy = PROMIEN_POSTACI * 0.85;
+  let najlepszy = null;
+  let najblizej = Infinity;
+  for (const b of stan.bonusy) {
+    const dz = odleglosc(z.x, z.y, b.x, b.y);
+    if (dz >= odleglosc(g.x, g.y, b.x, b.y)) continue;
+    if (przeszkodaNaOdcinku(z.x, z.y + stopy, b.x, b.y + stopy)) continue;
+    if (dz < najblizej) {
+      najblizej = dz;
+      najlepszy = b;
+    }
+  }
+  return najlepszy;
 }
 
 // Rzut w gracza z losowym błędem (rozrzut)

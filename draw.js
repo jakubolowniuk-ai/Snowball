@@ -285,8 +285,34 @@ function rysujUniesionaSniezke(ctx, z) {
 }
 
 // Po trafieniu: obłoczek śniegu i rozbryzg. Rosną i znikają w czasie czasChmurki.
+// Serduszko po Pierniczku: unosi się nad głową postaci i znika
+function rysujSerduszko(ctx, ch) {
+  const z = ch.serce;
+  const t = ch.czas / ch.trwa; // od 0 do 1
+  const { wys } = rozmiarGrafiki(grafikaPostaci(z));
+  const r = j(CONFIG.promienKropekZycia) * 1.6;
+  const x = z.x;
+  const y = stopyY(z) - wys - r * 6 - t * r * 4;
+  ctx.save();
+  ctx.globalAlpha = 1 - t;
+  ctx.fillStyle = "#e0304a";
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = r * 0.3;
+  ctx.beginPath();
+  ctx.moveTo(x, y + r * 1.2);
+  ctx.bezierCurveTo(x - r * 2, y, x - r * 1.2, y - r * 1.4, x, y - r * 0.5);
+  ctx.bezierCurveTo(x + r * 1.2, y - r * 1.4, x + r * 2, y, x, y + r * 1.2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+}
+
 function rysujChmurki(ctx, stan) {
   for (const ch of stan.chmurki) {
+    if (ch.serce) {
+      rysujSerduszko(ctx, ch);
+      continue;
+    }
     const t = ch.czas / CONFIG.czasChmurki; // od 0 do 1
     ctx.save();
     ctx.globalAlpha = 1 - t * t; // na początku wyraźne, pod koniec szybko znikają

@@ -51,12 +51,13 @@ const CONFIG = {
   //  rozrzut: jak bardzo chybia (promień losowego błędu celowania)
   //  przerwaMin/Max: przerwa między rzutami jednego przeciwnika (sekundy, losowo)
   //  silaMin/Max: siła rzutu (0-1) losowana z tego zakresu (gdy zasięg nie zależy od siły)
+  //  szansaBonusu: szansa (0-1), że zamiast w gracza rzuci w bonus (bliższy jemu niż graczowi)
   poziomy: [
-    { przeciwnicy: 1, czasReakcji: 0.8, szansaUniku: 0.3, rozrzut: 0.04, przerwaMin: 1.5, przerwaMax: 3, silaMin: 0.1, silaMax: 0.5 },
-    { przeciwnicy: 2, czasReakcji: 0.7, szansaUniku: 0.4, rozrzut: 0.035, przerwaMin: 2, przerwaMax: 3.5, silaMin: 0.2, silaMax: 0.6 },
-    { przeciwnicy: 3, czasReakcji: 0.6, szansaUniku: 0.5, rozrzut: 0.03, przerwaMin: 2.5, przerwaMax: 4, silaMin: 0.3, silaMax: 0.75 },
-    { przeciwnicy: 4, czasReakcji: 0.5, szansaUniku: 0.6, rozrzut: 0.025, przerwaMin: 3, przerwaMax: 4.5, silaMin: 0.4, silaMax: 0.9 },
-    { przeciwnicy: 5, czasReakcji: 0.4, szansaUniku: 0.7, rozrzut: 0.02, przerwaMin: 3.5, przerwaMax: 5, silaMin: 0.5, silaMax: 1 },
+    { przeciwnicy: 1, czasReakcji: 0.8, szansaUniku: 0.3, rozrzut: 0.04, przerwaMin: 1.5, przerwaMax: 3, silaMin: 0.1, silaMax: 0.5, szansaBonusu: 0.2 },
+    { przeciwnicy: 2, czasReakcji: 0.7, szansaUniku: 0.4, rozrzut: 0.035, przerwaMin: 2, przerwaMax: 3.5, silaMin: 0.2, silaMax: 0.6, szansaBonusu: 0.3 },
+    { przeciwnicy: 3, czasReakcji: 0.6, szansaUniku: 0.5, rozrzut: 0.03, przerwaMin: 2.5, przerwaMax: 4, silaMin: 0.3, silaMax: 0.75, szansaBonusu: 0.4 },
+    { przeciwnicy: 4, czasReakcji: 0.5, szansaUniku: 0.6, rozrzut: 0.025, przerwaMin: 3, przerwaMax: 4.5, silaMin: 0.4, silaMax: 0.9, szansaBonusu: 0.5 },
+    { przeciwnicy: 5, czasReakcji: 0.4, szansaUniku: 0.7, rozrzut: 0.02, przerwaMin: 3.5, przerwaMax: 5, silaMin: 0.5, silaMax: 1, szansaBonusu: 0.6 },
   ],
 
   // Zachowanie przeciwnika (na każdym poziomie takie samo)
@@ -93,10 +94,18 @@ const CONFIG = {
     marginesKrawedzi: 0.05, // odstęp od krawędzi pola
     odstepOdPostaci: 0.08, // nie bliżej żadnej postaci niż tyle
     zapasPrzeszkody: 0.02, // nie bliżej podstawy przeszkody niż tyle
-    przeciwnicyZbierajaBonusy: false, // false: śnieżki przeciwników przelatują przez bonusy
+    przeciwnicyZbierajaBonusy: true, // false: śnieżki przeciwników przelatują przez bonusy
+    czasSerduszka: 1, // ile sekund widać serduszko po zjedzeniu Pierniczka
     typy: [
       // grafika: ścieżka do obrazka (np. "assets/bonusy/bombka.png") albo null = kula zastępcza
-      { id: "bombka", nazwa: "Bombka", kolor: "#d93a6a", czasTrwania: 12, waga: 1, grafika: null },
+      // Bombka: tarcza, pochłania jedno trafienie
+      { id: "bombka", nazwa: "Bombka", kolor: "#3a7de0", czasTrwania: 12, waga: 3, grafika: null },
+      // Gwiazdka: następne rzuty (najwyżej "rzuty", najdłużej czasTrwania s) to wachlarz śnieżek
+      { id: "gwiazdka", nazwa: "Gwiazdka", kolor: "#f2c417", czasTrwania: 8, waga: 3, grafika: null, rzuty: 3, katyWachlarza: [-10, 0, 10] },
+      // Laska cukrowa: szybszy bieg
+      { id: "laska", nazwa: "Laska cukrowa", kolor: "#e03a3a", czasTrwania: 6, waga: 3, grafika: null, mnoznikPredkosci: 1.4 },
+      // Pierniczek: od razu zdejmuje jedno trafienie (czasTrwania 0 = działa natychmiast)
+      { id: "pierniczek", nazwa: "Pierniczek", kolor: "#b5733a", czasTrwania: 0, waga: 1, grafika: null },
     ],
   },
 
