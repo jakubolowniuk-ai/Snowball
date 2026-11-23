@@ -92,15 +92,16 @@ function atlasPostaci(z) {
   return ZAWODNIK.atlas(z.druzyna === "czerwoni" ? CONFIG.kolorGracza : CONFIG.kolorPrzeciwnika);
 }
 
-// Widok postaci: gracz z tyłu, przeciwnicy z przodu (jak dotąd)
+// Widok postaci ("przod" albo "tyl"), ustawia go animacje.js wg kierunku ruchu i celowania
 function widokPostaci(z) {
+  if (z.anim) return z.anim.widok;
   return z.druzyna === "czerwoni" ? "tyl" : "przod";
 }
 
 // Obecna klatka postaci: { dane, odbicie } (klatkę wybiera animacje.js)
 function klatkaPostaci(z) {
   const klatki = ZAWODNIK.klatki[widokPostaci(z)];
-  return { dane: klatki[nazwaKlatki(z)] || klatki.stanie, odbicie: false };
+  return { dane: klatki[nazwaKlatki(z)] || klatki.stanie, odbicie: !!(z.anim && z.anim.odbicie) };
 }
 
 // Rozmiar postaci w jednostkach pola (z mnożnikiem skali z config.js).
