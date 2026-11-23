@@ -12,7 +12,10 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
   let palecPada = null; // numer palca na joysticku (null = nikt)
   let palecCelu = null; // numer palca, który celuje (null = nikt)
 
+  // Punkty z ekranNaPlansze są w oknie ekranu (bez kamery): tak sprawdzamy pad.
+  // Celowanie samo przelicza je na punkty świata (z przesunięciem kamery).
   canvas.addEventListener("pointerdown", (e) => {
+    if (stan.wMenu) return;
     const p = ekranNaPlansze(e.clientX, e.clientY);
 
     if (palecPada === null && naPadzie(p)) {
@@ -35,10 +38,7 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
     const p = ekranNaPlansze(e.clientX, e.clientY);
     if (e.pointerId === palecPada) ustawWychylenie(p);
     // Po trafieniu gra sama przerywa celowanie; wtedy ruchy palca pomijamy
-    if (e.pointerId === palecCelu && stan.celowanie) {
-      stan.celowanie.x = p.x;
-      stan.celowanie.y = p.y;
-    }
+    if (e.pointerId === palecCelu && stan.celowanie) przesunCelowanie(stan, p);
   });
 
   canvas.addEventListener("pointerup", (e) => {

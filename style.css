@@ -19,6 +19,54 @@ html, body {
   touch-action: none; /* wyłącza przewijanie i powiększanie gestem */
 }
 
+/* Menu startowe: przyciski na środku ekranu */
+#menu {
+  display: none;
+  position: fixed;
+  inset: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(207, 225, 241, 0.55);
+  font-family: "Helvetica Neue", Roboto, "Segoe UI", sans-serif;
+}
+
+#menu h1 {
+  margin: 0 0 8px;
+  color: #2a6fd6;
+  font-weight: 300;
+  font-size: 40px;
+}
+
+#menu button,
+#przyciskMenu {
+  min-width: 220px;
+  padding: 12px 24px;
+  border: 2px solid #2a6fd6;
+  border-radius: 24px;
+  background: #ffffff;
+  color: #2a6fd6;
+  font: 600 20px "Helvetica Neue", Roboto, "Segoe UI", sans-serif;
+}
+
+#menu button:disabled {
+  border-color: #b8c4d0;
+  color: #b8c4d0;
+}
+
+/* Przycisk "Menu" na ekranie końca poziomu: mały, na dole na środku */
+#przyciskMenu {
+  display: none;
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  min-width: 0;
+  padding: 8px 20px;
+  font-size: 16px;
+}
+
 /* Napis widoczny tylko przy pionowym telefonie */
 #obroc {
   display: none;

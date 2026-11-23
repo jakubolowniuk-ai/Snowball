@@ -131,6 +131,42 @@ const CONFIG = {
     },
   },
 
+  // Tryby gry. Arena działa jak dotąd (świat = pole). Wielka arena: większy świat i kamera.
+  tryby: {
+    wielkaArena: {
+      swiatSzerokosc: 2, // świat ma tyle szerokości pola
+      swiatWysokosc: 2, // i tyle wysokości pola
+      wygladzanieKamery: 4, // jak szybko kamera dogania gracza (większe = szybciej)
+      startGracz: { x: 1.6, y: 0.82 }, // prawa dolna część świata
+      liniaPrzeciwnikow: 0.55, // przeciwnicy na linii w lewej górnej części (0 = róg)
+      mnoznikPrzeciwnikow: 1, // liczba przeciwników = poziomy[N].przeciwnicy razy to
+      odlegloscAI: 0.5, // z jakiej odległości od gracza przeciwnik chce rzucać
+      maxOdlegloscRzutuAI: 0.9, // dalej nie rzuca
+      marginesWidoku: 0.05, // przeciwnik rzuca tylko na ekranie gracza (z tym zapasem)
+      // Dekoracje (przeszkody) w całym świecie: x od 0 do 2, y od 0 do 1
+      dekoracje: [
+        { plik: "choinka_1", x: 0.1, y: 0.12 },
+        { plik: "fort_1", x: 0.45, y: 0.2 },
+        { plik: "balwan_1", x: 0.85, y: 0.1 },
+        { plik: "plot_1", x: 1.3, y: 0.15 },
+        { plik: "choinka_2", x: 1.75, y: 0.12 },
+        { plik: "balwan_2", x: 0.2, y: 0.45 },
+        { plik: "plot_2", x: 0.7, y: 0.42 },
+        { plik: "choinka_3", x: 1.05, y: 0.35 },
+        { plik: "fort_2", x: 1.45, y: 0.45 },
+        { plik: "balwan_3", x: 1.9, y: 0.4 },
+        { plik: "fort_3", x: 0.35, y: 0.72 },
+        { plik: "choinka_4", x: 0.8, y: 0.68 },
+        { plik: "balwan_4", x: 1.15, y: 0.75 },
+        { plik: "plot_3", x: 1.55, y: 0.65 },
+        { plik: "choinka_1", x: 0.08, y: 0.92 },
+        { plik: "plot_4", x: 0.6, y: 0.92 },
+        { plik: "fort_4", x: 1.1, y: 0.93 },
+        { plik: "choinka_2", x: 1.92, y: 0.88 },
+      ],
+    },
+  },
+
   // Grafiki postaci i mnożnik ich wielkości (1 = rozmiar z sprites.json).
   // Mnożnik zmienia tylko wygląd; okrąg trafień ustawia rozmiarPostaci.
   grafikaGracza: "assets/gracze/czerwony_tyl.png", // gracz na dole, widać go z tyłu

@@ -86,7 +86,9 @@ function aktualizujPrzeciwnika(stan, z, dt) {
 
   // Czy pora zacząć rzut?
   const g = stan.gracz;
-  if (ai.przerwa <= 0 && z.przeladowanie <= 0 && !g.wyeliminowany && !ai.cel) {
+  // W Wielkiej arenie rzuca tylko, gdy jest na ekranie gracza, w zasięgu i z czystą linią
+  const wolnoRzucic = !jestWielka(stan) || mozeRzucicWielka(stan, z);
+  if (ai.przerwa <= 0 && z.przeladowanie <= 0 && !g.wyeliminowany && !ai.cel && wolnoRzucic) {
     // Dobór siły. Unoszenie trwa tyle, ile ładowanie siły (silniejszy = dłużej).
     let calosc;
     if (CONFIG.zasiegZalezyOdSily) {
@@ -120,7 +122,11 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     }
   } else {
     ai.postoj -= dt;
-    if (ai.postoj <= 0) {
+    if (ai.postoj <= 0 && jestWielka(stan)) {
+      // Wielka arena: podchodzi do gracza na odległość rzutu i trzyma dystans
+      const cel = celWielkiejAreny(stan, z);
+      if (!stopyWPrzeszkodzie(cel.x, cel.y + PROMIEN_POSTACI * 0.85)) ai.cel = { x: cel.x, y: cel.y };
+    } else if (ai.postoj <= 0) {
       const kat = Math.random() * Math.PI * 2;
       const odl = j(CONFIG.wedrowka) * losuj(0.3, 1);
       const cel = { druzyna: z.druzyna, x: z.x + Math.cos(kat) * odl, y: z.y + Math.sin(kat) * odl };
