@@ -70,6 +70,14 @@ function przeladowanieTeraz(z) {
   return klatkaPrzeladowania(a.widok, minelo - tRzutu, z.przeladowanieCalosc - tRzutu);
 }
 
+// Wywoływane przy trafieniu: ogłuszenie (trafiony, potem ogluszony_a/b na zmianę, tak
+// długo jak trwa ogłuszenie w grze) albo eliminacja (trafiony, upadek, siedzi, lezy na stałe)
+function zacznijAnimacjeTrafienia(z, eliminacja) {
+  if (!z.anim) z.anim = nowaAnimacja(z);
+  z.anim.akcja = { typ: eliminacja ? "eliminacja" : "trafiony", czas: 0 };
+  z.anim.przenikanie = null;
+}
+
 // Wywoływane przy rzucie (wykonajRzut): zaczyna animację rzutu
 function zacznijAnimacjeRzutu(z) {
   if (!z.anim) z.anim = nowaAnimacja(z);
@@ -121,13 +129,19 @@ function aktualizujAnimacje(stan, dt) {
     const d = Math.hypot(dx, dy);
     a.poprzX = z.x;
     a.poprzY = z.y;
-    if (z.wyeliminowany) continue;
+    if (z.wyeliminowany) {
+      if (a.akcja && a.akcja.typ === "eliminacja") a.akcja.czas += dt;
+      continue;
+    }
 
     // Rusza się, gdy prędkość przekracza próg (drobne wypchnięcia przez przeszkody się nie liczą)
     const rusza = dt > 0 && d / dt > j(A().progRuchu);
-    // Akcje: celowanie = zamach; rzut trwa do końca swoich klatek
+    // Akcje: trafienie trwa tyle, co ogłuszenie; celowanie = zamach; rzut do końca klatek
     const cel = wektorCelowania(stan, z);
-    if (cel) {
+    if (a.akcja && a.akcja.typ === "trafiony") {
+      a.akcja.czas += dt;
+      if (!(z.ogluszenie > 0)) a.akcja = null;
+    } else if (cel) {
       if (!a.akcja || a.akcja.typ !== "zamach") a.akcja = { typ: "zamach", czas: 0 };
       a.akcja.czas += dt;
     } else if (a.akcja && a.akcja.typ === "zamach") {
@@ -139,8 +153,9 @@ function aktualizujAnimacje(stan, dt) {
 
     // Kierunek: celowanie ma pierwszeństwo, potem kierunek ruchu; w bezruchu bez zmian.
     // W trakcie rzutu kierunek stoi (rzucająca ręka zostaje po tej samej stronie).
-    if (cel) ustawKierunek(a, cel.dx, cel.dy);
-    else if (rusza && !(a.akcja && a.akcja.typ === "rzut")) ustawKierunek(a, dx, dy);
+    const kierunekStoi = a.akcja && (a.akcja.typ === "rzut" || a.akcja.typ === "trafiony");
+    if (cel && !kierunekStoi) ustawKierunek(a, cel.dx, cel.dy);
+    else if (rusza && !kierunekStoi) ustawKierunek(a, dx, dy);
 
     if (rusza) {
       a.bezRuchu = 0;
@@ -166,8 +181,22 @@ function aktualizujAnimacje(stan, dt) {
 }
 
 // Nazwa klatki z atlasu dla obecnego stanu animacji
+// Klatka trafienia: "trafiony", potem ogluszony_a i ogluszony_b na zmianę (z tyłu: "stanie")
+function klatkaTrafienia(a) {
+  if (a.widok === "tyl") return "stanie"; // z tyłu nie ma tych klatek: drżenie i błysk rysuje draw.js
+  const lista = ZAWODNIK.animacje.przod.trafiony.klatki;
+  const t1 = lista[0][1] / 1000;
+  if (a.akcja.czas < t1) return lista[0][0];
+  const petla = lista.slice(1);
+  return klatkaZListy(petla, (a.akcja.czas - t1) % czasListy(petla)).nazwa;
+}
+
 function nazwaKlatki(z) {
   const a = z.anim;
+  if (a && a.akcja && a.akcja.typ === "trafiony") return klatkaTrafienia(a);
+  if (a && a.akcja && a.akcja.typ === "eliminacja") {
+    return klatkaZListy(ZAWODNIK.animacje.przod.eliminacja.klatki, a.akcja.czas).nazwa; // "lezy" zostaje
+  }
   if (a && a.akcja) {
     const lista = ZAWODNIK.animacje[a.widok][a.akcja.typ].klatki;
     return klatkaZListy(lista, a.akcja.czas).nazwa; // zamach: zamach_2 trzymana do rzutu

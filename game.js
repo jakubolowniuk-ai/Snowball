@@ -96,6 +96,7 @@ function trafienie(stan, z) {
   } else {
     z.ogluszenie = CONFIG.czasOgluszenia;
   }
+  zacznijAnimacjeTrafienia(z, z.wyeliminowany); // ogłuszenie albo upadek
   // Obłoczek i rozbryzg na wysokości tułowia, losowo wybrane grafiki
   const tulow = stopyY(z) - rozmiarPostaci(z).wys * 0.45;
   stan.chmurki.push({
@@ -485,6 +486,9 @@ function aktualizuj(dt) {
   for (const ch of stan.chmurki) ch.czas += dt;
   stan.chmurki = stan.chmurki.filter((ch) => ch.czas < (ch.trwa || CONFIG.czasChmurki));
 
+  // Animacje zawodników (także po końcu poziomu, żeby upadek wyeliminowanego się odegrał)
+  aktualizujAnimacje(stan, dt);
+
   // Koniec poziomu: napis, a po chwili automatyczny restart
   sprawdzKoniec(stan);
   if (stan.koniec) {
@@ -512,8 +516,6 @@ function aktualizuj(dt) {
   // Kamera podąża za graczem (tylko w Wielkiej arenie)
   aktualizujKamere(stan, dt);
 
-  // Animacje zawodników (stanie, chód)
-  aktualizujAnimacje(stan, dt);
 }
 
 // --- Pętla gry ---
