@@ -100,9 +100,41 @@ Aktywowane trafieniem śnieżką (rzut w miejsce bonusu).
 - Laska cukrowa: szybszy bieg na kilka sekund.
 - Gwiazdka: podwójny rzut.
 - Pierniczek: przywraca jedno trafienie (zdejmuje ogłuszenie lub trafienie).
-- Gorące kakao: zamrożenie przeciwników na 2–3 s.
-- Mocny rzut: następne 3 śnieżki mocniejsze.
+- (Gorące kakao i Mocny rzut z dawnej listy zastąpiły bonusy Kakao i Pełna siła, patrz niżej.)
 - Pomysł: bonusy negatywne.
+
+### Planowane bonusy (ustalone na czacie, jeszcze niezrobione)
+Razem 13 bonusów: 4 obecne (Bombka, Gwiazdka, Laska cukrowa, Pierniczek) i 9 nowych. Każdy działa na tej samej zasadzie co obecne: zdobywa go, kto trafi go śnieżką. Ikony to propozycje (grafiki dorobimy później, na razie kolorowa kula). Bonus jest mały na planszy, więc każdy ma mieć inny kształt i kolor. Mocne bonusy (Wieżyczka, Sojusznik, Niewidzialność) mają mieć mniejszą wagę losowania. Kolejność robienia: najpierw łatwe (spowolnienia, Pełna siła, Upicie, Kakao), potem Niewidzialność, Miotacz, a na końcu Wieżyczka i Sojusznik (nowe obiekty w kodzie).
+
+**Atak**
+- **Gwiazdka** (jest): 3 rzuty albo 8 s to wachlarz 3 śnieżek. Ikona: żółta gwiazda.
+- **Miotacz** (armatka ręczna): 20 gałek; przytrzymany palec strzela ciągle jak miotacz ognia (bez podnoszenia palca). Przerwa między strzałami: propozycja 0,3 s, do ustalenia. Ikona: pomarańczowa lufa ze śnieżką.
+- **Pełna siła:** 10 s albo 10 rzutów (co pierwsze); każdy rzut, nawet po krótkim dotknięciu, leci z maksymalną siłą (czyli prędkością). Ikona: błyskawica.
+- **Wieżyczka** (armatka automatyczna): po trafieniu bonusu pojawia się w jego miejscu. Ma 3 życia (przeciwnicy mogą ją zniszczyć) i 30 gałek. Strzela co ok. 3 s losowo, najczęściej w najbliższych przeciwników. Ikona: mała wieżyczka z lufą.
+
+**Obrona**
+- **Bombka** (jest, zmiana): tarcza na jedno trafienie, max 12 s; w nowej wersji **odbija śnieżkę w rzucającego** zamiast ją pochłaniać. Ikona: niebieska bombka.
+- **Pierniczek** (jest, rzadki): zdejmuje jedno trafienie. Ikona: pierniczek-ludzik.
+- **Niewidzialność:** postać jest półprzezroczysta (dla siebie też). Rzut **nie** odsłania. Po upływie czasu postać znów jest widoczna. W trakcie komputer rzuca w losowy punkt w pewnym zakresie wokół miejsca, gdzie ostatnio widział postać. Czas trwania do ustalenia (propozycja 6 s). Ikona: lodowy płatek śniegu.
+- **Sojusznik:** zawodnik sterowany przez komputer, w czerwonej kurtce (czerwony oznacza naszą drużynę), 3 życia, do końca poziomu. Parametry i umiejętności bierze od jednego z kolorów przeciwników (patrz „Typy przeciwników"). Wymaga: przeciwnicy muszą umieć celować też w sojusznika, ustalenia warunku przegranej (czy przegrywamy tylko po wyeliminowaniu gracza). Ikona: czerwona czapka.
+
+**Osłabianie przeciwników**
+- **Spowolnienie przeciwników:** 8 s; spowalnia **chodzenie i ładowanie** (przeładowanie). Ikona: sopel lodu.
+- **Spowolnienie śnieżek:** 8 s; śnieżki przeciwników lecą o połowę wolniej (daje czas na prawdziwy unik). Ikona: klepsydra.
+- **Upicie:** trafiony bonus **wybucha** i w kręgu o pewnym promieniu (do ustalenia) **wszystkich** w środku (każdej drużyny, także bossów) upija na 10 s: chodzą, gdzie chcą, a nie tam, gdzie powinni. Ikona: spirala jak w oczach.
+
+**Ruch i szybkość**
+- **Laska cukrowa** (jest): bieg ×1,4 przez 6 s. Ikona: czerwono-biała laska.
+- **Kakao:** przeładowanie ×0,3 przez 10 s (jak stos gałek, ale w ruchu). Ikona: kubek z parą.
+
+**Nazwy:** stanowiska drużyn nadal nazywają się „armatka" i „stos". Bonusowe to „Miotacz" i „Wieżyczka", żeby się nie myliły.
+
+### Typy przeciwników (w planowaniu, nic nie ustalone poza zasadami)
+- Zamiast tabeli poziomów, w której zmienia się naraz 8 parametrów, każdy **typ przeciwnika ma stałe parametry**, a poziom to skład (ile i jakich typów). Wyższe poziomy: więcej przeciwników albo typy z wyższymi parametrami.
+- **Typów jest tyle, ile kolorów kurtek poza czerwonym** (czerwony to nasza drużyna). Każdy kolor = inne parametry **i** inna rola/umiejętność (np. Strzelec, Unikacz, Artylerzysta, Zbieracz, Twardziel; do rozpisania).
+- Sojusznik (bonus) bierze parametry któregoś z kolorów, ale ma czerwoną kurtkę.
+- Do rozpisania: lista typów i ich parametrów (życia, czas ogłuszenia, prędkość chodzenia, przeładowanie, czas reakcji, szansa uniku, rozrzut, siła rzutu, szansa na bonus/stanowisko), sposób oznaczenia typu na ekranie (przy tylu kolorach sam kolor może nie wystarczyć), układanie poziomów (ręcznie albo punkty budżetu), limit przeciwników naraz, poziom 6+. Życia, czas ogłuszenia i prędkość chodzenia są teraz wspólne dla gracza i przeciwników, trzeba je rozdzielić.
+- Powód zmiany: poziom 5 jest za ciężki, bo tam wszystkie parametry osiągają maksimum naraz (5 przeciwników × 3 trafienia przeciw 3 trafieniom gracza).
 
 ### Odłożone na później
 - Drużyna 3 zawodników: zaznaczanie zawodnika, zaznaczanie celów, automatyczne uniki i rzuty niezaznaczonych.
