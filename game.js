@@ -254,6 +254,8 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania) {
   const kx = (celX - z.x) / d;
   const ky = (celY - z.y) / d;
 
+  zacznijAnimacjeRzutu(z); // rzut, przedłużenie, powrót (śnieżka wylatuje teraz)
+
   // Gwiazdka: wachlarz śnieżek (kąty z config.js), bez niej jedna śnieżka prosto
   const gwiazdka = z.bonusy.find((ab) => ab.typ === "gwiazdka");
   const katy = gwiazdka ? typBonusu("gwiazdka").katyWachlarza : [0];

@@ -195,6 +195,13 @@ const CONFIG = {
     progRuchu: 0.02, // od tej prędkości (szerokości pola/s) postać "idzie"
     opoznienieStania: 0.1, // po tylu sekundach bez ruchu wraca do "stanie" (bez migania przy krótkich postojach)
     katBoku: 30, // ruch do tylu stopni od poziomu = widok z boku (przód odbity), dalej przód albo tył
+    // Przeładowanie (animacja wypełnia czas przeładowania, który zostaje po animacji rzutu)
+    progSchylania: 0.25, // gdy zostaje mniej sekund, zawodnik się nie schyla
+    progPelnegoPrzeladowania: 0.9, // od tylu sekund pełne przeładowanie (z lepieniem), poniżej krótkie
+    czasPrzenikania: 0.12, // płynne przejście z "wstawanie" do "stanie" (sekundy)
+    lepionaSniezkaPromien: 6, // z tyłu: śnieżka przy stopach (jednostki pola) przy końcu lepienia
+    lepionaSniezkaOd: 0.3, // na początku ma tyle swojej końcowej wielkości
+    lepionaSniezkaX: 0.3, // przesunięcie w bok od stóp (ułamek szerokości postaci), żeby było ją widać
   },
 
   // Kolory zawodników: nazwa atlasu w assets/gracze/atlasy/ (16 kolorów, lista w README_GRAFIKI)
