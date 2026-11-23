@@ -66,6 +66,7 @@ function zacznijPoziom(stan, poziom) {
   stan.sniezki = []; // śnieżki w locie
   stan.chmurki = []; // białe chmurki po trafieniach
   stan.koniec = null; // { wynik: "wygrana" | "przegrana", czas } po końcu poziomu
+  zacznijStanowiska(stan); // stos i armatka z pełną amunicją
   zacznijBonusy(stan); // bonusy na planszy znikają, licznik od nowa
 }
 zacznijPoziom(stan, 1);
@@ -229,20 +230,34 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania) {
   const d = odleglosc(z.x, z.y, celX, celY);
   if (d === 0) return;
   const s = sila(czasLadowania);
-  stan.sniezki.push({
-    rzucajacy: z, // rzucającego śnieżka nie trafia
-    startX: z.x,
-    startY: z.y,
-    kierX: (celX - z.x) / d,
-    kierY: (celY - z.y) / d,
-    // Leci do celu; gdy zasięg zależy od siły, najwyżej do końca zasięgu
-    dlugosc: CONFIG.zasiegZalezyOdSily ? Math.min(d, zasieg(s)) : d,
-    predkosc: j(pomiedzy(CONFIG.predkoscSniezkiMin, CONFIG.predkoscSniezkiMax, s)),
-    przebyte: 0,
-  });
+  const kx = (celX - z.x) / d;
+  const ky = (celY - z.y) / d;
 
-  // Przeładowanie: stały czas plus czas ładowania siły
-  z.przeladowanie = CONFIG.czasPrzeladowania + Math.min(czasLadowania, CONFIG.MAX_CHARGE);
+  // Gwiazdka: wachlarz śnieżek (kąty z config.js), bez niej jedna śnieżka prosto
+  const gwiazdka = z.bonusy.find((ab) => ab.typ === "gwiazdka");
+  const katy = gwiazdka ? typBonusu("gwiazdka").katyWachlarza : [0];
+  for (const katStopnie of katy) {
+    const a = (katStopnie * Math.PI) / 180;
+    stan.sniezki.push({
+      rzucajacy: z, // rzucającego śnieżka nie trafia
+      startX: z.x,
+      startY: z.y,
+      kierX: kx * Math.cos(a) - ky * Math.sin(a), // kierunek obrócony o kąt
+      kierY: kx * Math.sin(a) + ky * Math.cos(a),
+      // Leci do celu; gdy zasięg zależy od siły, najwyżej do końca zasięgu
+      dlugosc: CONFIG.zasiegZalezyOdSily ? Math.min(d, zasieg(s)) : d,
+      predkosc: j(pomiedzy(CONFIG.predkoscSniezkiMin, CONFIG.predkoscSniezkiMax, s)),
+      przebyte: 0,
+    });
+  }
+  if (gwiazdka) {
+    gwiazdka.rzuty -= 1;
+    if (gwiazdka.rzuty <= 0) z.bonusy = z.bonusy.filter((ab) => ab !== gwiazdka);
+  }
+
+  // Przeładowanie: stały czas plus czas ładowania siły; stos i armatka je skracają
+  const normalne = CONFIG.czasPrzeladowania + Math.min(czasLadowania, CONFIG.MAX_CHARGE);
+  z.przeladowanie = przeladowanieZeStanowiskiem(stan, z, normalne);
   z.przeladowanieCalosc = z.przeladowanie;
 }
 
@@ -283,12 +298,18 @@ function ograniczDoSwojejStrony(z) {
   }
 }
 
+// Prędkość postaci w jednostkach na sekundę (Laska cukrowa ją zwiększa)
+function predkoscPostaci(z) {
+  const laska = z.bonusy.some((ab) => ab.typ === "laska");
+  return j(CONFIG.predkoscZawodnika) * (laska ? typBonusu("laska").mnoznikPredkosci : 1);
+}
+
 // Krok postaci w stronę punktu, z limitem prędkości. Zwraca true, gdy doszła.
 function idzDo(z, celX, celY, dt) {
   const dx = celX - z.x;
   const dy = celY - z.y;
   const dystans = Math.hypot(dx, dy);
-  const krok = j(CONFIG.predkoscZawodnika) * dt;
+  const krok = predkoscPostaci(z) * dt;
   let doszla = false;
   if (dystans <= krok) {
     z.x = celX;
@@ -363,7 +384,7 @@ function ruchZPada(z, dt) {
   const martwa = CONFIG.strefaMartwaPadu;
   if (m <= martwa) return;
   const sila = Math.min((m - martwa) / (1 - martwa), 1);
-  const krok = j(CONFIG.predkoscZawodnika) * sila * dt;
+  const krok = predkoscPostaci(z) * sila * dt; // pełne wychylenie = pełna prędkość (z Laską też)
   z.x += (pad.wychylX / m) * krok;
   z.y += (pad.wychylY / m) * krok;
   ograniczDoSwojejStrony(z);
@@ -428,7 +449,7 @@ function aktualizuj(dt) {
 
   // Chmurki śniegu znikają po chwili
   for (const ch of stan.chmurki) ch.czas += dt;
-  stan.chmurki = stan.chmurki.filter((ch) => ch.czas < CONFIG.czasChmurki);
+  stan.chmurki = stan.chmurki.filter((ch) => ch.czas < (ch.trwa || CONFIG.czasChmurki));
 
   // Koniec poziomu: napis, a po chwili automatyczny restart
   sprawdzKoniec(stan);

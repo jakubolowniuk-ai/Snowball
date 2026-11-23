@@ -96,6 +96,18 @@ Po wgraniu pliku ustaw w `config.js` w `bonusy.typy` pole `grafika` na ścieżk�
 | Plik | Bonus | Opis |
 | --- | --- | --- |
 | `assets/bonusy/bombka.png` | Bombka (tarcza na jedno trafienie) | okrągła bombka choinkowa z zawieszką |
+| `assets/bonusy/gwiazdka.png` | Gwiazdka (wachlarz 3 śnieżek) | złota gwiazda na choinkę |
+| `assets/bonusy/laska.png` | Laska cukrowa (szybszy bieg) | biało-czerwona laska cukrowa |
+| `assets/bonusy/pierniczek.png` | Pierniczek (zdejmuje jedno trafienie) | pierniczek w kształcie ludzika z lukrem |
+
+## Stanowiska (grafiki do zrobienia)
+Do czasu dodania gra rysuje kształty zastępcze (białe kule, szara armatka). Przezroczysty PNG, ok. 128 x 128 px, bez cienia.
+Po wgraniu ustaw w `config.js` w `stanowiska.stos.grafika` i `stanowiska.armatka.grafika` ścieżki plików.
+
+| Plik | Co to | Opis |
+| --- | --- | --- |
+| `assets/stanowiska/stos_sniegu.png` | Stos gałek (krótsze przeładowanie) | piramida śnieżek; gra zmniejsza obrazek, gdy ubywa gałek |
+| `assets/stanowiska/armatka.png` | Armatka na śnieżki (szybki ogień) | mała armatka na kołach, lufa skierowana w lewo-górę (dla zielonych gra ją odwraca tylko w kształcie zastępczym) |
 
 ## Znane wady i braki
 - **Tył zawodnika to wersja robocza:** kaptur wygląda jak piłka, korpus jest mniejszy niż z przodu.

@@ -79,6 +79,7 @@ function wczytajObrazy(gotowe) {
   const sciezki = [
     ...Object.keys(SPRITY),
     ...CONFIG.bonusy.typy.filter((t) => t.grafika).map((t) => t.grafika),
+    ...[CONFIG.stanowiska.stos, CONFIG.stanowiska.armatka].filter((t) => t.grafika).map((t) => t.grafika),
   ];
   let zostalo = sciezki.length;
   const jedenGotowy = () => {

@@ -17,7 +17,14 @@ function nowyStanAI(param) {
     unoszenie: null, // { czas, calosc } gdy unosi śnieżkę nad głowę (ładuje siłę)
     unik: null, // { za, sn } zaplanowany unik przed śnieżką sn za "za" sekund
     widziane: new Set(), // śnieżki, które już ocenił (każdą ocenia tylko raz)
+    stanowisko: null, // stanowisko, do którego idzie albo przy którym stoi
   };
+}
+
+// Przeciwnik odchodzi od stanowiska (koniec amunicji, ogłuszenie, nie da się dojść)
+function zwolnijStanowisko(z) {
+  if (z.ai.stanowisko) z.ai.stanowisko.zajety = null;
+  z.ai.stanowisko = null;
 }
 
 function aktualizujPrzeciwnika(stan, z, dt) {
@@ -25,12 +32,15 @@ function aktualizujPrzeciwnika(stan, z, dt) {
   const ai = z.ai;
   const param = parametryPoziomu(stan);
 
-  // Ogłuszony: stoi i nic nie robi
+  // Ogłuszony: stoi i nic nie robi (i odchodzi od stanowiska)
   if (z.ogluszenie > 0) {
     ai.unoszenie = null;
     ai.cel = null;
+    zwolnijStanowisko(z);
     return;
   }
+  // Stanowisko bez amunicji: odchodzi
+  if (ai.stanowisko && ai.stanowisko.amunicja <= 0) zwolnijStanowisko(z);
 
   zauwazSniezki(stan, z, param);
 
@@ -47,15 +57,34 @@ function aktualizujPrzeciwnika(stan, z, dt) {
   if (ai.unoszenie) {
     ai.unoszenie.czas += dt;
     if (ai.unoszenie.czas >= ai.unoszenie.calosc) {
-      rzucWGracza(stan, z, param);
+      const b = ai.unoszenie.bonus;
+      if (b && stan.bonusy.includes(b)) {
+        wykonajRzut(stan, z, b.x, b.y, ai.unoszenie.czas); // w bonus: dokładnie, bez rozrzutu
+      } else {
+        rzucWGracza(stan, z, param); // bonus zniknął albo celuje w gracza
+      }
       ai.unoszenie = null;
-      ai.przerwa = losuj(param.przerwaMin, param.przerwaMax);
+      ai.przerwa = przerwaPoRzucie(stan, z, param);
     }
     return;
   }
 
-  // Czy pora zacząć rzut?
   ai.przerwa -= dt;
+
+  // Idzie do swojego stanowiska; w drodze nie rzuca
+  if (ai.stanowisko && !wStrefieStanowiska(z, ai.stanowisko)) {
+    const st = ai.stanowisko;
+    const celX = st.typ === "armatka" ? st.stoiX : st.x;
+    const celY = (st.typ === "armatka" ? st.stoiY : st.y) - PROMIEN_POSTACI * 0.85; // stopy na miejscu
+    const przedX = z.x;
+    const przedY = z.y;
+    idzDo(z, celX, celY, dt);
+    const ruszyl = Math.hypot(z.x - przedX, z.y - przedY) > predkoscPostaci(z) * dt * 0.2;
+    if (!ruszyl && !wStrefieStanowiska(z, st)) zwolnijStanowisko(z); // nie da się dojść
+    return;
+  }
+
+  // Czy pora zacząć rzut?
   const g = stan.gracz;
   if (ai.przerwa <= 0 && z.przeladowanie <= 0 && !g.wyeliminowany && !ai.cel) {
     // Dobór siły. Unoszenie trwa tyle, ile ładowanie siły (silniejszy = dłużej).
@@ -69,9 +98,14 @@ function aktualizujPrzeciwnika(stan, z, dt) {
       // Śnieżka i tak doleci, więc siła (czyli prędkość) jest losowa z zakresu poziomu
       calosc = losuj(param.silaMin, param.silaMax) * CONFIG.MAX_CHARGE;
     }
-    ai.unoszenie = { czas: 0, calosc };
+    // Z szansą szansaBonusu celuje w bonus zamiast w gracza
+    const bonus = Math.random() < param.szansaBonusu ? wybierzBonusDlaPrzeciwnika(stan, z) : null;
+    ai.unoszenie = { czas: 0, calosc, bonus };
     return;
   }
+
+  // Przy stanowisku stoi w miejscu (nie chodzi losowo)
+  if (ai.stanowisko) return;
 
   // Losowe chodzenie: idzie do punktu, stoi chwilę, wybiera następny
   if (ai.cel) {
@@ -79,7 +113,7 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     const przedY = z.y;
     const doszedl = idzDo(z, ai.cel.x, ai.cel.y, dt);
     // Prawie stoi w miejscu (np. opiera się o przeszkodę): odpuszcza ten cel
-    const ruszyl = Math.hypot(z.x - przedX, z.y - przedY) > j(CONFIG.predkoscZawodnika) * dt * 0.2;
+    const ruszyl = Math.hypot(z.x - przedX, z.y - przedY) > predkoscPostaci(z) * dt * 0.2;
     if (doszedl || !ruszyl) {
       ai.cel = null;
       ai.postoj = losuj(CONFIG.postojMin, CONFIG.postojMax);
@@ -108,7 +142,8 @@ function zauwazSniezki(stan, z, param) {
     const koniecY = sn.startY + sn.kierY * sn.dlugosc;
     const blisko = odlegloscOdOdcinka(z.x, z.y, sn.startX, sn.startY, koniecX, koniecY);
     if (blisko > PROMIEN_POSTACI * 1.5) continue;
-    if (Math.random() < param.szansaUniku) {
+    // Przy stanowisku nie robi uników (inaczej od razu by je zostawił)
+    if (!ai.stanowisko && Math.random() < param.szansaUniku) {
       ai.unik = { za: param.czasReakcji, sn };
     }
   }
@@ -130,6 +165,48 @@ function odskocz(z, sn) {
   ograniczDoSwojejStrony(cel);
   z.ai.cel = { x: cel.x, y: cel.y };
   z.ai.unoszenie = null; // unik ważniejszy niż rzut
+}
+
+// Bonus, w który przeciwnik może rzucić: z czystą linią (bez przeszkody)
+// i bliższy jemu niż graczowi; z takich najbliższy jemu. Brak takiego = null.
+function wybierzBonusDlaPrzeciwnika(stan, z) {
+  const g = stan.gracz;
+  const stopy = PROMIEN_POSTACI * 0.85;
+  let najlepszy = null;
+  let najblizej = Infinity;
+  for (const b of stan.bonusy) {
+    const dz = odleglosc(z.x, z.y, b.x, b.y);
+    if (dz >= odleglosc(g.x, g.y, b.x, b.y)) continue;
+    if (przeszkodaNaOdcinku(z.x, z.y + stopy, b.x, b.y + stopy)) continue;
+    if (dz < najblizej) {
+      najblizej = dz;
+      najlepszy = b;
+    }
+  }
+  return najlepszy;
+}
+
+// Przerwa po rzucie. Przy stanowisku krótsza (jak przeładowanie gracza):
+// stos mnoży przerwę, armatka zostawia tylko minOdstepStrzalow.
+// Bez stanowiska: z szansą szansaStanowiska wybiera wolne stanowisko swojej drużyny.
+function przerwaPoRzucie(stan, z, param) {
+  const ai = z.ai;
+  const zwykla = losuj(param.przerwaMin, param.przerwaMax);
+  const st = ai.stanowisko;
+  if (st && wStrefieStanowiska(z, st)) {
+    if (st.typ === "armatka") return CONFIG.stanowiska.armatka.minOdstepStrzalow;
+    return zwykla * CONFIG.stanowiska.stos.mnoznikPrzeladowania;
+  }
+  if (!st && Math.random() < param.szansaStanowiska) {
+    const wolne = wolneStanowiska(stan, z);
+    if (wolne.length) {
+      const wybrane = wolne[Math.floor(Math.random() * wolne.length)];
+      wybrane.zajety = z;
+      ai.stanowisko = wybrane;
+      ai.cel = null;
+    }
+  }
+  return zwykla;
 }
 
 // Rzut w gracza z losowym błędem (rozrzut)
