@@ -8,6 +8,10 @@ const ST = () => CONFIG.stanowiska; // skrót do ustawień stanowisk
 // Na początku poziomu: nowe stanowiska z pełną amunicją
 function zacznijStanowiska(stan) {
   stan.stanowiska = [];
+  if (jestWielka(stan)) {
+    zacznijStanowiskaNeutralne(stan);
+    return;
+  }
   for (const druzyna of ["czerwoni", "zieloni"]) {
     const poz = ST().pozycje[druzyna];
     const znak = druzyna === "czerwoni" ? 1 : -1; // miejsce stania lustrzanie dla zielonych
@@ -35,6 +39,38 @@ function zacznijStanowiska(stan) {
   }
 }
 
+// Wielka arena: jeden stos i jedna armatka dla każdego (druzyna: null = neutralne,
+// amunicja wspólna, korzysta ten, kto pierwszy dojdzie)
+function zacznijStanowiskaNeutralne(stan) {
+  const poz = CONFIG.tryby.wielkaArena.stanowiska;
+  const iloscStosu = Math.round(losuj(ST().stos.amunicjaMin - 0.49, ST().stos.amunicjaMax + 0.49));
+  stan.stanowiska.push({
+    typ: "stos",
+    druzyna: null,
+    x: j(poz.stos.x),
+    y: j(poz.stos.y),
+    amunicja: iloscStosu,
+    amunicjaStart: iloscStosu,
+    zajety: null,
+  });
+  stan.stanowiska.push({
+    typ: "armatka",
+    druzyna: null,
+    x: j(poz.armatka.x),
+    y: j(poz.armatka.y),
+    stoiX: j(poz.armatka.x + ST().armatka.miejsceStania.x),
+    stoiY: j(poz.armatka.y + ST().armatka.miejsceStania.y),
+    amunicja: ST().armatka.amunicja,
+    amunicjaStart: ST().armatka.amunicja,
+    zajety: null,
+  });
+}
+
+// Czy postać może używać stanowiska? (swoje albo neutralne)
+function stanowiskoDlaDruzyny(st, z) {
+  return st.druzyna === null || st.druzyna === z.druzyna;
+}
+
 // Stopy postaci (tu sprawdzamy strefy stanowisk)
 function stopyPostaci(z) {
   return { x: z.x, y: z.y + PROMIEN_POSTACI * 0.85 };
@@ -49,7 +85,7 @@ function wStrefieStanowiska(z, st) {
 
 // Stanowisko z amunicją, które działa przy rzucie postaci z (armatka ma pierwszeństwo), albo null
 function stanowiskoDlaRzutu(stan, z) {
-  const moje = stan.stanowiska.filter((st) => st.druzyna === z.druzyna && st.amunicja > 0 && wStrefieStanowiska(z, st));
+  const moje = stan.stanowiska.filter((st) => stanowiskoDlaDruzyny(st, z) && st.amunicja > 0 && wStrefieStanowiska(z, st));
   return moje.find((st) => st.typ === "armatka") || moje.find((st) => st.typ === "stos") || null;
 }
 
@@ -95,7 +131,7 @@ function bliskoStanowiska(stan, x, y, zapas) {
 function wolneStanowiska(stan, z) {
   return stan.stanowiska.filter(
     (st) =>
-      st.druzyna === z.druzyna &&
+      stanowiskoDlaDruzyny(st, z) &&
       st.amunicja > 0 &&
       (!st.zajety || st.zajety === z || st.zajety.wyeliminowany)
   );
