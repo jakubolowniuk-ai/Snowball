@@ -136,6 +136,24 @@ Razem 13 bonusów: 4 obecne (Bombka, Gwiazdka, Laska cukrowa, Pierniczek) i 9 no
 - Do rozpisania: lista typów i ich parametrów (życia, czas ogłuszenia, prędkość chodzenia, przeładowanie, czas reakcji, szansa uniku, rozrzut, siła rzutu, szansa na bonus/stanowisko), sposób oznaczenia typu na ekranie (przy tylu kolorach sam kolor może nie wystarczyć), układanie poziomów (ręcznie albo punkty budżetu), limit przeciwników naraz, poziom 6+. Życia, czas ogłuszenia i prędkość chodzenia są teraz wspólne dla gracza i przeciwników, trzeba je rozdzielić.
 - Powód zmiany: poziom 5 jest za ciężki, bo tam wszystkie parametry osiągają maksimum naraz (5 przeciwników × 3 trafienia przeciw 3 trafieniom gracza).
 
+#### Ustalenia o typach
+- 15 kolorów kurtek poza czerwonym = 15 oddzielnych typów (bez „rodzin"). Żadnej roli na razie nie wyrzucamy. Czerwony to nasza drużyna.
+- Umiejętności z bonusów działają **stale** (nie okresowo). Każda stała umiejętność ma mieć cenę w innych liczbach typu (np. rzadsze rzuty, słabsza celność).
+- Typ ma stałe parametry. Wyjątek: życia mogą zależeć od poziomu (patrz Zielony).
+- Parametry typu wpływające na trudność: życia, czas ogłuszenia, rozmiar postaci, prędkość chodzenia, wędrówka i postój, odskok, szansa uniku, czas reakcji, przerwa między rzutami (min/max), siła rzutu (min/max), czas zamachu (osobno, nie z siły), rozrzut, wyprzedzanie (0–1, nowe), mnożnik przeładowania, odległość rzutu, szansa na bonus, szansa na stanowisko, mnożnik amunicji stanowisk, mnożnik czasu bonusów, stałe umiejętności, tarcza na start. Dziś część z nich jest wspólna dla wszystkich i dla gracza (życia, ogłuszenie, rozmiar, chodzenie, wędrówka/postój, odskok, przeładowanie); trzeba je rozdzielić. Nie istnieją jeszcze: wyprzedzanie, osobny zamach, mnożniki czasu bonusów i amunicji, stałe umiejętności, tarcza na start, podchodzenie w zwykłej Arenie.
+- Wskazówka do strojenia rozrzutu: błąd celowania jest losowy w kole o promieniu rozrzut; trafienie w stojącego, gdy błąd jest mniejszy niż ok. 0,038 (promień postaci plus śnieżki). Szansa trafienia P ≈ (0,038 / rozrzut)², więc rozrzut ≈ 0,038 / √P. Rozrzut poniżej 0,038 = zawsze trafia stojącego. Przeciw poruszającemu się graczowi prawie nigdy nie trafia, bo nie ma wyprzedzania.
+
+#### Karty typów
+**Zielony (najsłabszy, Rekrut)**
+- Życia zależne od poziomu: 1–2: 2 życia, 3–4: 3, od 5: 4.
+- Ogłuszenie 1,5 s. Rozmiar postaci ×1,15 (do potwierdzenia).
+- Chodzenie ×0,7, krótkie kroki w stronę gracza, postój 1–1,5 s po kroku.
+- Rzuca z odległości 5–6 ludzików (0,31–0,375 szerokości pola). Zasada awaryjna: po ok. 5 s bez możliwości podejścia rzuca z największej możliwej odległości. Wymaga nowego zachowania w zwykłej Arenie (podchodzenie jest teraz tylko w Wielkiej arenie), bo nie przekracza przekątnej.
+- Przerwa między rzutami 3–4,5 s. Siła rzutu 0,05–0,15 (śnieżka ok. 0,65–0,75 szerokości pola na sekundę). Zamach min. 0,5 s niezależnie od siły.
+- Celuje tylko w punkt, w którym stoi gracz, bez wyprzedzania; rozrzut ok. 0,045 (ok. 70% trafień w stojącego gracza).
+- Unik 15%, czas reakcji 0,5 s (w praktyce kilka procent, bo rzuca z bliska).
+- Bonusy: szansa 10%. Stanowiska: 0%. Umiejętności: brak.
+
 ### Odłożone na później
 - Drużyna 3 zawodników: zaznaczanie zawodnika, zaznaczanie celów, automatyczne uniki i rzuty niezaznaczonych.
 - Kampania: boss, inne cele (flaga, fort, przetrwaj 60 s), gwiazdki, odblokowywanie skórek.
