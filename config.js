@@ -100,7 +100,7 @@ const CONFIG = {
     // Upicie: promień wybuchu (ułamek szerokości pola), czas, największy skręt ruchu (stopnie)
     // i co ile sekund (od-do) losuje się nowy skręt
     upicie: { promien: 0.12, czasTrwania: 10, maxSkret: 80, zmianaCo: [0.3, 0.6] },
-    wymusTyp: "kakao", // do testów: id bonusu (np. "kakao"), wtedy każdy nowy bonus jest tego typu; null = losowo
+    wymusTyp: "pelnaSila", // do testów: id bonusu (np. "kakao"), wtedy każdy nowy bonus jest tego typu; null = losowo
     typy: [
       // grafika: ścieżka do obrazka (np. "assets/bonusy/bombka.png") albo null = kula zastępcza
       // Bombka: tarcza na jedno trafienie. odbija: true = odbija śnieżkę w rzucającego,
