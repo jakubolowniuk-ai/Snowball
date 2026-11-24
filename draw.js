@@ -433,7 +433,7 @@ function rysujIkonyBonusow(ctx, z, yKropek) {
     const x = z.x + (i - (z.bonusy.length - 1) / 2) * ri * 2.8;
     rysujKuleBonusu(ctx, typ, x, y, ri);
     // Odliczanie: biały łuk znika zgodnie z ruchem wskazówek zegara
-    const czesc = ab.pozostalo / typ.czasTrwania;
+    const czesc = ab.pozostalo / czasTrwaniaTypu(typ);
     ctx.strokeStyle = "rgba(40, 60, 90, 0.8)";
     ctx.lineWidth = ri * 0.35;
     ctx.beginPath();
@@ -544,10 +544,32 @@ function rysujSerduszko(ctx, ch) {
   ctx.restore();
 }
 
+// Wybuch Upicia: fioletowy krąg rośnie do promienia wybuchu i znika (przez czasChmurki)
+function rysujWybuchUpicia(ctx, ch) {
+  const t = ch.czas / CONFIG.czasChmurki; // od 0 do 1
+  const r = ch.promien * Math.min(1, t * 2); // w pierwszej połowie rośnie do pełnego promienia
+  ctx.save();
+  ctx.globalAlpha = 1 - t;
+  ctx.fillStyle = ch.kolor;
+  ctx.globalAlpha *= 0.3;
+  ctx.beginPath();
+  ctx.arc(ch.x, ch.y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha /= 0.3;
+  ctx.strokeStyle = ch.kolor;
+  ctx.lineWidth = j(CONFIG.gruboscPierscienia);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function rysujChmurki(ctx, stan) {
   for (const ch of stan.chmurki) {
     if (ch.serce) {
       rysujSerduszko(ctx, ch);
+      continue;
+    }
+    if (ch.wybuch) {
+      rysujWybuchUpicia(ctx, ch);
       continue;
     }
     const t = ch.czas / CONFIG.czasChmurki; // od 0 do 1
