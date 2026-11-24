@@ -89,13 +89,20 @@ function stanowiskoDlaRzutu(stan, z) {
   return moje.find((st) => st.typ === "armatka") || moje.find((st) => st.typ === "stos") || null;
 }
 
-// Przeładowanie po rzucie postaci z, z uwzględnieniem stanowiska (zużywa jedną gałkę)
+// Przeładowanie po rzucie postaci z, z uwzględnieniem stanowiska (zużywa jedną gałkę) i Kakao.
+// Mnożniki się nie mnożą: bierzemy najmniejszy z (stos albo armatka, Kakao).
+// Na końcu mnożymy przez Spowolnienie przeciwników (×2, gdy postać jest spowolniona).
 function przeladowanieZeStanowiskiem(stan, z, normalne) {
+  return przeladowanieBezSpowolnienia(stan, z, normalne) * mnoznikSpowolnieniaPrzeladowania(z);
+}
+
+function przeladowanieBezSpowolnienia(stan, z, normalne) {
+  const bonus = mnoznikPrzeladowaniaBonusow(z);
   const st = stanowiskoDlaRzutu(stan, z);
-  if (!st) return normalne;
+  if (!st) return normalne * bonus;
   st.amunicja -= 1;
   if (st.typ === "armatka") {
-    return Math.max(normalne * ST().armatka.mnoznikPrzeladowania, ST().armatka.minOdstepStrzalow);
+    return Math.max(normalne * Math.min(ST().armatka.mnoznikPrzeladowania, bonus), ST().armatka.minOdstepStrzalow);
   }
   // Stos: skrócone przeładowanie; pusty stos znika z chmurką śniegu
   if (st.amunicja <= 0) {
@@ -107,7 +114,7 @@ function przeladowanieZeStanowiskiem(stan, z, normalne) {
       rozbryzg: null,
     });
   }
-  return normalne * ST().stos.mnoznikPrzeladowania;
+  return normalne * Math.min(ST().stos.mnoznikPrzeladowania, bonus);
 }
 
 // Stanowiska widoczne na planszy (pusty stos już nie istnieje, pusta armatka zostaje)

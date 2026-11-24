@@ -195,13 +195,20 @@ function wybierzBonusDlaPrzeciwnika(stan, z) {
 // Przerwa po rzucie. Przy stanowisku krótsza (jak przeładowanie gracza):
 // stos mnoży przerwę, armatka zostawia tylko minOdstepStrzalow.
 // Bez stanowiska: z szansą szansaStanowiska wybiera wolne stanowisko swojej drużyny.
+// Kakao skraca przerwę tak samo (ze stosem: najmniejszy mnożnik, nie iloczyn),
+// Spowolnienie przeciwników na końcu ją wydłuża.
 function przerwaPoRzucie(stan, z, param) {
+  return przerwaBezSpowolnienia(stan, z, param) * mnoznikSpowolnieniaPrzeladowania(z);
+}
+
+function przerwaBezSpowolnienia(stan, z, param) {
   const ai = z.ai;
+  const bonus = mnoznikPrzeladowaniaBonusow(z);
   const zwykla = losuj(param.przerwaMin, param.przerwaMax);
   const st = ai.stanowisko;
   if (st && wStrefieStanowiska(z, st)) {
     if (st.typ === "armatka") return CONFIG.stanowiska.armatka.minOdstepStrzalow;
-    return zwykla * CONFIG.stanowiska.stos.mnoznikPrzeladowania;
+    return zwykla * Math.min(CONFIG.stanowiska.stos.mnoznikPrzeladowania, bonus);
   }
   if (!st && Math.random() < param.szansaStanowiska) {
     const wolne = wolneStanowiska(stan, z);
@@ -212,7 +219,7 @@ function przerwaPoRzucie(stan, z, param) {
       ai.cel = null;
     }
   }
-  return zwykla;
+  return zwykla * bonus;
 }
 
 // Rzut w gracza z losowym błędem (rozrzut)

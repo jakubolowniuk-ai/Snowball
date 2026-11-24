@@ -7,7 +7,7 @@ Każdy prompt wklejasz osobno, w osobnej rozmowie z agentem, i sprawdzasz grę n
 2. **A2** śnieżka nie trafia swoich
 3. **A3** Limonkowy + poziomy 4–6
 4. **A4** poziomy 7–12, rozmieszczenie, bonusy na wysokich poziomach
-5. **B1** sześć bonusów (Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śnieżek, Bombka odbijająca, Upicie); kroki 5 i 6 wygodniej po A2
+5. **B1** sześć bonusów: **już zrobione i scalone w `main`** (nie wklejaj). Prompt zostaje tylko jako zapis.
 6. **B2** Niewidzialność
 7. **B3** Miotacz
 8. **B4** Wieżyczka
@@ -138,7 +138,7 @@ PO ZMIANIE
 
 ---
 
-## B1. Sześć bonusów
+## B1. Sześć bonusów (ZROBIONE, nie wklejaj)
 
 ```
 Zadanie: dodaj 5 nowych bonusów i zmień Bombkę. Najpierw przeczytaj CLAUDE.md i docs/snowcraft-plan.md (sekcja "Planowane bonusy"), potem bonusy.js, config.js (sekcja bonusy), game.js i ai.js.

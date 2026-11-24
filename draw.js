@@ -146,10 +146,34 @@ function punktReki(k, x, y, odbicie) {
 }
 
 // Postać: klatka z atlasu plus śnieżka w dłoni rysowana kodem (grafiki jej nie mają)
+// Upity kołysze się na boki (obrót wokół stóp)
+function katKolysania(z) {
+  if (!z.bonusy.some((ab) => ab.typ === "upicie")) return 0;
+  const b = CONFIG.bonusy;
+  return (Math.sin(stan.czasPoziomu * b.szybkoscKolysaniaUpicia + z.x) * b.kolysanieUpicia * Math.PI) / 180;
+}
+
 function rysujPostac(ctx, z, x0, y) {
+  const kat = katKolysania(z);
+  if (kat) {
+    ctx.save();
+    ctx.translate(x0, y);
+    ctx.rotate(kat);
+    ctx.translate(-x0, -y);
+  }
+  const wynik = rysujPostacProsto(ctx, z, x0, y);
+  if (kat) ctx.restore();
+  return wynik;
+}
+
+function rysujPostacProsto(ctx, z, x0, y) {
   const { dane, odbicie } = klatkaPostaci(z);
   const x = x0 + drzenieTrafienia(z); // z tyłu trafiony drży
   if (!rysujKlatke(ctx, atlasPostaci(z), dane, x, y, odbicie)) return false;
+  // Spowolniona postać ma niebieskawy odcień
+  if (z.bonusy.some((ab) => ab.typ === "spowolnieniePrzeciwnikow")) {
+    rysujBlysk(ctx, z, dane, x, y, odbicie, CONFIG.bonusy.silaOdcieniaSpowolnienia, CONFIG.bonusy.odcienSpowolnienia);
+  }
   rysujBlysk(ctx, z, dane, x, y, odbicie, silaBlysku(z));
   // Po wstawaniu: poprzednia klatka znika płynnie na wierzchu nowej
   const p = z.anim && z.anim.przenikanie;
@@ -227,7 +251,7 @@ function silaBlysku(z) {
 // Klatka zabarwiona na czerwono (błysk): rysujemy ją na osobnym małym canvasie,
 // barwimy tylko jej piksele i kładziemy na planszę
 const _blysk = document.createElement("canvas");
-function rysujBlysk(ctx, z, k, x, y, odbicie, sila) {
+function rysujBlysk(ctx, z, k, x, y, odbicie, sila, kolor = "230, 40, 40") {
   const obraz = OBRAZY[atlasPostaci(z)];
   if (!obraz || sila <= 0) return;
   _blysk.width = k.aw;
@@ -236,7 +260,7 @@ function rysujBlysk(ctx, z, k, x, y, odbicie, sila) {
   c.clearRect(0, 0, k.aw, k.ah);
   c.drawImage(obraz, k.ax, k.ay, k.aw, k.ah, 0, 0, k.aw, k.ah);
   c.globalCompositeOperation = "source-atop"; // farba tylko tam, gdzie jest postać
-  c.fillStyle = `rgba(230, 40, 40, ${sila})`;
+  c.fillStyle = `rgba(${kolor}, ${sila})`;
   c.fillRect(0, 0, k.aw, k.ah);
   c.globalCompositeOperation = "source-over";
   const szer = k.szer * CONFIG.skalaGrafik;
@@ -364,11 +388,10 @@ function rysujStanowisko(ctx, st) {
 
 // --- Bonusy ---
 
-// Kula bonusu (albo obrazek, gdy typ ma grafikę) w punkcie (x, y) o promieniu r
-function rysujKuleBonusu(ctx, typ, x, y, r) {
+// Ikona bonusu (środek w (x, y), bok kwadratu "rozmiar"); bez ikony kolorowa kula o promieniu r
+function rysujKuleBonusu(ctx, typ, x, y, r, rozmiar) {
   const obraz = typ.grafika && OBRAZY[typ.grafika];
   if (obraz) {
-    const rozmiar = r * 2.6;
     ctx.drawImage(obraz, x - rozmiar / 2, y - rozmiar / 2, rozmiar, rozmiar);
     return;
   }
@@ -386,7 +409,8 @@ function rysujKuleBonusu(ctx, typ, x, y, r) {
   ctx.fill();
 }
 
-// Bonus na planszy: miękki cień na ziemi i kula lekko unosząca się w górę i w dół.
+// Bonus na planszy: miękki cień na ziemi i ikona lekko unosząca się w górę i w dół
+// (cień i unoszenie rysuje kod, grafiki ich nie mają). Okrąg trafienia bez zmian.
 // W ostatnich sekundach życia miga.
 function rysujBonusNaPlanszy(ctx, stan, b) {
   if (b.zostalo < CONFIG.bonusy.miganieOstatnie && Math.floor(b.zostalo * 6) % 2 === 0) return;
@@ -397,7 +421,7 @@ function rysujBonusNaPlanszy(ctx, stan, b) {
   ctx.beginPath();
   ctx.ellipse(b.x, ziemia, r * 1.1, r * 0.4, 0, 0, Math.PI * 2);
   ctx.fill();
-  rysujKuleBonusu(ctx, typBonusu(b.typ), b.x, b.y + unoszenie, r);
+  rysujKuleBonusu(ctx, typBonusu(b.typ), b.x, b.y + unoszenie, r, j(CONFIG.bonusy.rozmiarIkony));
 }
 
 // Bańka wokół postaci z Bombką (tarczą)
@@ -423,17 +447,32 @@ function rysujBanke(ctx, z) {
   ctx.restore();
 }
 
-// Ikony aktywnych bonusów nad kropkami trafień, z kołowym odliczaniem
+// Ikony aktywnych bonusów nad kropkami trafień, z kołowym odliczaniem czasu
+// i liczbą pozostałych rzutów (Gwiazdka, Pełna siła)
 function rysujIkonyBonusow(ctx, z, yKropek) {
   if (!z.bonusy.length) return;
   const ri = j(CONFIG.promienKropekZycia) * 1.4;
   const y = yKropek - ri * 2.6;
   z.bonusy.forEach((ab, i) => {
     const typ = typBonusu(ab.typ);
-    const x = z.x + (i - (z.bonusy.length - 1) / 2) * ri * 2.8;
-    rysujKuleBonusu(ctx, typ, x, y, ri);
+    const odstep = Math.max(ri * 2.8, j(CONFIG.bonusy.rozmiarIkonyAktywnej) * 1.35); // miejsce na liczbę rzutów
+    const x = z.x + (i - (z.bonusy.length - 1) / 2) * odstep;
+    rysujKuleBonusu(ctx, typ, x, y, ri, j(CONFIG.bonusy.rozmiarIkonyAktywnej));
+    if (ab.rzuty !== undefined) {
+      // Liczba pozostałych rzutów w prawym dolnym rogu ikony
+      ctx.save();
+      ctx.font = `bold ${ri * 1.2}px sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineWidth = ri * 0.35;
+      ctx.strokeStyle = "rgba(20, 30, 60, 0.9)";
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeText(ab.rzuty, x + ri * 0.95, y + ri * 0.85);
+      ctx.fillText(ab.rzuty, x + ri * 0.95, y + ri * 0.85);
+      ctx.restore();
+    }
     // Odliczanie: biały łuk znika zgodnie z ruchem wskazówek zegara
-    const czesc = ab.pozostalo / typ.czasTrwania;
+    const czesc = ab.pozostalo / czasTrwaniaTypu(typ);
     ctx.strokeStyle = "rgba(40, 60, 90, 0.8)";
     ctx.lineWidth = ri * 0.35;
     ctx.beginPath();
@@ -449,8 +488,10 @@ function rysujZycia(ctx, z) {
   const rk = j(CONFIG.promienKropekZycia);
   const odstep = rk * 3;
   const { wys } = rozmiarPostaci(z);
-  // Nad głową, ale nie wyżej niż górna krawędź ekranu
-  const y = Math.max(stopyY(z) - wys - rk * 2, widokSwiata().y0 + rk * 1.5);
+  // Nad głową, ale nie wyżej niż górna krawędź ekranu (z miejscem na ikony bonusów nad kropkami)
+  const ri = rk * 1.4;
+  const zapasIkon = z.bonusy.length ? ri * 2.6 + Math.max(ri * 1.45, j(CONFIG.bonusy.rozmiarIkonyAktywnej) / 2) : 0;
+  const y = Math.max(stopyY(z) - wys - rk * 2, widokSwiata().y0 + rk * 1.5 + zapasIkon);
   for (let i = 0; i < ile; i++) {
     const x = z.x + (i - (ile - 1) / 2) * odstep;
     ctx.beginPath();
@@ -544,10 +585,32 @@ function rysujSerduszko(ctx, ch) {
   ctx.restore();
 }
 
+// Wybuch Upicia: fioletowy krąg rośnie do promienia wybuchu i znika (przez czasChmurki)
+function rysujWybuchUpicia(ctx, ch) {
+  const t = ch.czas / CONFIG.czasChmurki; // od 0 do 1
+  const r = ch.promien * Math.min(1, t * 2); // w pierwszej połowie rośnie do pełnego promienia
+  ctx.save();
+  ctx.globalAlpha = 1 - t;
+  ctx.fillStyle = ch.kolor;
+  ctx.globalAlpha *= 0.3;
+  ctx.beginPath();
+  ctx.arc(ch.x, ch.y, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha /= 0.3;
+  ctx.strokeStyle = ch.kolor;
+  ctx.lineWidth = j(CONFIG.gruboscPierscienia);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function rysujChmurki(ctx, stan) {
   for (const ch of stan.chmurki) {
     if (ch.serce) {
       rysujSerduszko(ctx, ch);
+      continue;
+    }
+    if (ch.wybuch) {
+      rysujWybuchUpicia(ctx, ch);
       continue;
     }
     const t = ch.czas / CONFIG.czasChmurki; // od 0 do 1
@@ -710,6 +773,13 @@ function rysujSniezkeOPromieniu(ctx, x, y, promien) {
 function rysujSniezki(ctx, stan) {
   for (const sn of stan.sniezki) {
     const p = pozycjaSniezki(sn);
+    if (mnoznikPredkosciSniezki(stan, sn) < 1) {
+      // Spowolniona śnieżka: delikatna turkusowa poświata
+      ctx.fillStyle = CONFIG.bonusy.poswiataSpowolnionejSniezki;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y - p.wysokosc, j(CONFIG.promienSniezki) * CONFIG.skalaSniezki * 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
     rysujJednaSniezke(ctx, p.x, p.y - p.wysokosc);
   }
 }

@@ -24,6 +24,7 @@ function zacznijBonusy(stan) {
 // Losowanie typu według wag
 function losujTypBonusu() {
   const typy = B().typy;
+  if (B().wymusTyp) return typBonusu(B().wymusTyp); // tryb testowy: zawsze ten typ
   const suma = typy.reduce((s, t) => s + t.waga, 0);
   let r = Math.random() * suma;
   for (const t of typy) {
@@ -125,7 +126,10 @@ function aktualizujBonusy(stan, dt) {
   }
 
   for (const z of [stan.gracz, ...stan.przeciwnicy]) {
-    for (const ab of z.bonusy) ab.pozostalo -= dt;
+    for (const ab of z.bonusy) {
+      ab.pozostalo -= dt;
+      if (ab.typ === "upicie") aktualizujUpicie(ab, dt);
+    }
     z.bonusy = z.bonusy.filter((ab) => ab.pozostalo > 0);
   }
 }
@@ -135,18 +139,72 @@ function sniezkaZbieraBonusy(stan, sn) {
   return sn.rzucajacy === stan.gracz || B().przeciwnicyZbierajaBonusy;
 }
 
-// Rzucający z zdobywa bonus b: bonus znika z chmurką, postać dostaje (albo odnawia) bonus
-function zdobadzBonus(stan, z, b) {
-  stan.bonusy = stan.bonusy.filter((x) => x !== b);
-  if (z.wyeliminowany) return; // rzucający odpadł, zanim śnieżka doleciała
+// Ile sekund trwa efekt danego typu (Upicie ma ustawienia we własnej sekcji)
+function czasTrwaniaTypu(typ) {
+  return typ.id === "upicie" ? B().upicie.czasTrwania : typ.czasTrwania;
+}
+
+// Daje postaci z efekt typu id albo odnawia jego czas (jeden danego typu naraz)
+function dodajEfekt(z, id) {
+  const typ = typBonusu(id);
+  let ab = z.bonusy.find((x) => x.typ === id);
+  if (!ab) {
+    ab = { typ: id };
+    z.bonusy.push(ab);
+  }
+  ab.pozostalo = czasTrwaniaTypu(typ);
+  if (typ.rzuty) ab.rzuty = typ.rzuty; // Gwiazdka, Pełna siła: ile rzutów zostało
+  return ab;
+}
+
+// Czy postać ma teraz efekt typu id?
+function maEfekt(z, id) {
+  return z.bonusy.some((ab) => ab.typ === id);
+}
+
+// Rzut postaci z zużywa jeden rzut efektu id (gdy rzuty się skończą, efekt znika)
+function zuzyjRzutEfektu(z, id) {
+  const ab = z.bonusy.find((x) => x.typ === id);
+  if (!ab) return;
+  ab.rzuty -= 1;
+  if (ab.rzuty <= 0) z.bonusy = z.bonusy.filter((x) => x !== ab);
+}
+
+// Biały obłoczek śniegu w punkcie (x, y)
+function chmurkaSniegu(stan, x, y) {
   stan.chmurki.push({
-    x: b.x,
-    y: b.y,
+    x,
+    y,
     czas: 0,
     obloczek: `assets/efekty/obloczek_sniegu_${1 + Math.floor(Math.random() * 2)}.png`,
     rozbryzg: null,
   });
+}
+
+// Rzucający z zdobywa bonus b: bonus znika z chmurką, postać dostaje (albo odnawia) bonus
+function zdobadzBonus(stan, z, b) {
+  stan.bonusy = stan.bonusy.filter((x) => x !== b);
   const typ = typBonusu(b.typ);
+
+  // Upicia nikt nie zbiera: wybucha w miejscu bonusu i upija wszystkich żywych w kręgu
+  // (wszystkie drużyny, także rzucającego, jeśli stoi w kręgu)
+  if (typ.id === "upicie") {
+    const promien = j(B().upicie.promien);
+    stan.chmurki.push({ wybuch: true, x: b.x, y: b.y, promien, kolor: typ.kolor, czas: 0 });
+    for (const p of [stan.gracz, ...stan.przeciwnicy]) {
+      if (p.wyeliminowany || odleglosc(p.x, p.y, b.x, b.y) > promien) continue;
+      const ab = dodajEfekt(p, "upicie");
+      if (ab.kat === undefined) {
+        ab.kat = 0; // obecny skręt ruchu (radiany)
+        ab.katCel = 0; // skręt, do którego kąt płynnie dochodzi
+        ab.doZmiany = 0; // za ile sekund nowy losowy skręt
+      }
+    }
+    return;
+  }
+
+  if (z.wyeliminowany) return; // rzucający odpadł, zanim śnieżka doleciała
+  chmurkaSniegu(stan, b.x, b.y);
 
   // Pierniczek działa od razu: zdejmuje jedno trafienie (jeśli jest) i pokazuje serduszko
   if (typ.id === "pierniczek") {
@@ -155,29 +213,86 @@ function zdobadzBonus(stan, z, b) {
     return;
   }
 
-  const juz = z.bonusy.find((ab) => ab.typ === b.typ);
-  if (juz) {
-    juz.pozostalo = typ.czasTrwania; // ponowne zdobycie odnawia czas
-    if (typ.rzuty) juz.rzuty = typ.rzuty;
-  } else {
-    const nowy = { typ: b.typ, pozostalo: typ.czasTrwania };
-    if (typ.rzuty) nowy.rzuty = typ.rzuty; // Gwiazdka: ile rzutów wachlarzem zostało
-    z.bonusy.push(nowy);
+  // Spowolnienie przeciwników: efekt dostają wszyscy żywi z drużyny przeciwnej
+  if (typ.id === "spowolnieniePrzeciwnikow") {
+    for (const p of [stan.gracz, ...stan.przeciwnicy]) {
+      if (!p.wyeliminowany && p.druzyna !== z.druzyna) dodajEfekt(p, typ.id);
+    }
+    return;
   }
+
+  dodajEfekt(z, typ.id);
 }
 
-// Bombka (tarcza): pochłania jedno trafienie. Zwraca true, gdy pochłonęła.
-function tarczaPochlania(stan, z) {
+// Upicie: skręt ruchu płynnie dochodzi do losowego kąta, nowy kąt co zmianaCo s
+function aktualizujUpicie(ab, dt) {
+  const u = B().upicie;
+  ab.doZmiany -= dt;
+  if (ab.doZmiany <= 0) {
+    ab.katCel = (losuj(-u.maxSkret, u.maxSkret) * Math.PI) / 180;
+    ab.doZmiany = losuj(u.zmianaCo[0], u.zmianaCo[1]);
+  }
+  // Tak, żeby kąt doszedł do celu dokładnie w chwili następnej zmiany
+  ab.kat += (ab.katCel - ab.kat) * Math.min(1, dt / ab.doZmiany);
+}
+
+// Kierunek ruchu (dx, dy) obrócony o skręt upicia (bez upicia bez zmian)
+function kierunekPoUpiciu(z, dx, dy) {
+  const ab = z.bonusy.find((x) => x.typ === "upicie");
+  if (!ab) return { dx, dy };
+  const c = Math.cos(ab.kat);
+  const s = Math.sin(ab.kat);
+  return { dx: dx * c - dy * s, dy: dx * s + dy * c };
+}
+
+// Bombka (tarcza) na jedno trafienie. Zwraca true, gdy zatrzymała trafienie.
+// Z odbija: true śnieżka sn wraca do miejsca, gdzie teraz stoi rzucający (ta sama prędkość),
+// a pierwotna znika. Odbita śnieżka nie odbija się drugi raz: trafia normalnie, mimo Bombki.
+// Z odbija: false Bombka tylko pochłania trafienie (stare zachowanie).
+function tarczaPochlania(stan, z, sn) {
   const tarcza = z.bonusy.find((ab) => ab.typ === "bombka");
   if (!tarcza) return false;
+  const odbija = typBonusu("bombka").odbija;
+  if (odbija && sn && sn.odbita) return false;
   z.bonusy = z.bonusy.filter((ab) => ab !== tarcza);
   // Bańka pęka: chmurka śniegu na wysokości tułowia
-  stan.chmurki.push({
-    x: z.x,
-    y: stopyY(z) - rozmiarPostaci(z).wys * 0.45,
-    czas: 0,
-    obloczek: `assets/efekty/obloczek_sniegu_${1 + Math.floor(Math.random() * 2)}.png`,
-    rozbryzg: null,
-  });
+  chmurkaSniegu(stan, z.x, stopyY(z) - rozmiarPostaci(z).wys * 0.45);
+  const r = sn && sn.rzucajacy;
+  if (odbija && r && !r.wyeliminowany) {
+    const d = odleglosc(z.x, z.y, r.x, r.y);
+    if (d > 0) {
+      stan.sniezki.push({
+        rzucajacy: z, // odbijającego nie trafia; bonus po drodze dostaje odbijający
+        startX: z.x,
+        startY: z.y,
+        kierX: (r.x - z.x) / d,
+        kierY: (r.y - z.y) / d,
+        dlugosc: d,
+        predkosc: sn.predkosc,
+        przebyte: 0,
+        odbita: true,
+      });
+    }
+  }
   return true;
+}
+
+// Mnożnik prędkości śnieżki sn: Spowolnienie śnieżek u kogoś żywego z drużyny przeciwnej
+// rzucającemu. Liczony co klatkę, więc działa też na śnieżki już w locie.
+function mnoznikPredkosciSniezki(stan, sn) {
+  const druzyna = sn.rzucajacy.druzyna;
+  const ktos = [stan.gracz, ...stan.przeciwnicy].some(
+    (p) => !p.wyeliminowany && p.druzyna !== druzyna && maEfekt(p, "spowolnienieSniezek")
+  );
+  return ktos ? typBonusu("spowolnienieSniezek").mnoznikPredkosci : 1;
+}
+
+// Mnożnik przeładowania z Kakao (1 = bez zmian). Ze stanowiskiem bierzemy najmniejszy.
+function mnoznikPrzeladowaniaBonusow(z) {
+  return maEfekt(z, "kakao") ? typBonusu("kakao").mnoznikPrzeladowania : 1;
+}
+
+// Mnożnik spowolnienia przeładowania (Spowolnienie przeciwników); mnożymy przez niego na końcu
+function mnoznikSpowolnieniaPrzeladowania(z) {
+  return maEfekt(z, "spowolnieniePrzeciwnikow") ? typBonusu("spowolnieniePrzeciwnikow").mnoznikPrzeladowania : 1;
 }
