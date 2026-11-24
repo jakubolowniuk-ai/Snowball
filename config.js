@@ -100,28 +100,36 @@ const CONFIG = {
     // Upicie: promień wybuchu (ułamek szerokości pola), czas, największy skręt ruchu (stopnie)
     // i co ile sekund (od-do) losuje się nowy skręt
     upicie: { promien: 0.12, czasTrwania: 10, maxSkret: 80, zmianaCo: [0.3, 0.6] },
+    rozmiarIkony: 0.034, // ikona bonusu leżącego na planszy (zawodnik ma ok. 0.072 wysokości)
+    rozmiarIkonyAktywnej: 0.022, // ikona aktywnego bonusu nad głową postaci
+    // Efekty widoczne na postaciach i śnieżkach
+    odcienSpowolnienia: "120, 200, 255", // niebieskawy odcień spowolnionej postaci (R, G, B)
+    silaOdcieniaSpowolnienia: 0.35, // 0 = brak, 1 = cała postać w tym kolorze
+    kolysanieUpicia: 8, // upity kołysze się na boki o tyle stopni
+    szybkoscKolysaniaUpicia: 3, // jak szybko (większe = szybciej)
+    poswiataSpowolnionejSniezki: "rgba(58, 207, 176, 0.45)", // poświata wolniejszych śnieżek
     wymusTyp: null, // do testów: id bonusu (np. "kakao"), wtedy każdy nowy bonus jest tego typu; null = losowo
     typy: [
-      // grafika: ścieżka do obrazka (np. "assets/bonusy/bombka.png") albo null = kula zastępcza
+      // grafika: ikona bonusu (to jedyne miejsce przypisania bonus -> ikona) albo null = kula zastępcza
       // Bombka: tarcza na jedno trafienie. odbija: true = odbija śnieżkę w rzucającego,
       // false = tylko pochłania trafienie (stare zachowanie)
-      { id: "bombka", nazwa: "Bombka", kolor: "#3a7de0", czasTrwania: 12, waga: 3, grafika: null, odbija: true },
+      { id: "bombka", nazwa: "Bombka", kolor: "#3a7de0", czasTrwania: 12, waga: 3, grafika: "assets/bonusy/bombka.png", odbija: true },
       // Gwiazdka: następne rzuty (najwyżej "rzuty", najdłużej czasTrwania s) to wachlarz śnieżek
-      { id: "gwiazdka", nazwa: "Gwiazdka", kolor: "#f2c417", czasTrwania: 8, waga: 3, grafika: null, rzuty: 3, katyWachlarza: [-10, 0, 10] },
+      { id: "gwiazdka", nazwa: "Gwiazdka", kolor: "#f2c417", czasTrwania: 8, waga: 3, grafika: "assets/bonusy/gwiazdka.png", rzuty: 3, katyWachlarza: [-10, 0, 10] },
       // Laska cukrowa: szybszy bieg
-      { id: "laska", nazwa: "Laska cukrowa", kolor: "#e03a3a", czasTrwania: 6, waga: 3, grafika: null, mnoznikPredkosci: 1.4 },
+      { id: "laska", nazwa: "Laska cukrowa", kolor: "#e03a3a", czasTrwania: 6, waga: 3, grafika: "assets/bonusy/laska_cukrowa.png", mnoznikPredkosci: 1.4 },
       // Pierniczek: od razu zdejmuje jedno trafienie (czasTrwania 0 = działa natychmiast)
-      { id: "pierniczek", nazwa: "Pierniczek", kolor: "#b5733a", czasTrwania: 0, waga: 1, grafika: null },
+      { id: "pierniczek", nazwa: "Pierniczek", kolor: "#b5733a", czasTrwania: 0, waga: 1, grafika: "assets/bonusy/pierniczek.png" },
       // Kakao: krótsze przeładowanie (ze stosem/armatką liczy się najmniejszy mnożnik, nie iloczyn)
-      { id: "kakao", nazwa: "Kakao", kolor: "#6b3f26", czasTrwania: 10, waga: 3, grafika: null, mnoznikPrzeladowania: 0.3 },
+      { id: "kakao", nazwa: "Kakao", kolor: "#6b3f26", czasTrwania: 10, waga: 3, grafika: "assets/bonusy/kakao.png", mnoznikPrzeladowania: 0.3 },
       // Pełna siła: najwyżej "rzuty" rzutów albo czasTrwania s każdy rzut z maksymalną prędkością
-      { id: "pelnaSila", nazwa: "Pełna siła", kolor: "#ff8c1a", czasTrwania: 10, waga: 3, grafika: null, rzuty: 10 },
+      { id: "pelnaSila", nazwa: "Pełna siła", kolor: "#ff8c1a", czasTrwania: 10, waga: 3, grafika: "assets/bonusy/pelna_sila.png", rzuty: 10 },
       // Spowolnienie przeciwników: wszyscy żywi z drużyny przeciwnej wolniej chodzą i przeładowują
-      { id: "spowolnieniePrzeciwnikow", nazwa: "Spowolnienie przeciwników", kolor: "#7fd6ff", czasTrwania: 8, waga: 2, grafika: null, mnoznikPredkosci: 0.5, mnoznikPrzeladowania: 2 },
+      { id: "spowolnieniePrzeciwnikow", nazwa: "Spowolnienie przeciwników", kolor: "#7fd6ff", czasTrwania: 8, waga: 2, grafika: "assets/bonusy/spowolnienie_przeciwnikow.png", mnoznikPredkosci: 0.5, mnoznikPrzeladowania: 2 },
       // Spowolnienie śnieżek: śnieżki drużyny przeciwnej lecą wolniej (także te już w locie)
-      { id: "spowolnienieSniezek", nazwa: "Spowolnienie śnieżek", kolor: "#3acfb0", czasTrwania: 8, waga: 2, grafika: null, mnoznikPredkosci: 0.5 },
+      { id: "spowolnienieSniezek", nazwa: "Spowolnienie śnieżek", kolor: "#3acfb0", czasTrwania: 8, waga: 2, grafika: "assets/bonusy/spowolnienie_sniezek.png", mnoznikPredkosci: 0.5 },
       // Upicie: bonus wybucha, wszyscy żywi w kręgu idą krzywo (czas i reszta w sekcji upicie wyżej)
-      { id: "upicie", nazwa: "Upicie", kolor: "#a64ad6", waga: 2, grafika: null },
+      { id: "upicie", nazwa: "Upicie", kolor: "#a64ad6", waga: 2, grafika: "assets/bonusy/upicie.png" },
     ],
   },
 
