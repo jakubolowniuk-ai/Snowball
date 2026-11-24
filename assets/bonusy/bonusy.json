@@ -1,0 +1,122 @@
+{
+ "uwaga": "Ikony bonusów 128x128 px (64 jednostki pola przy 2 px = 1 jednostka). Ikona jest wyśrodkowana w kwadracie, kotwica = środek. Rysuj zwykle mniejsze (np. 30-40 jednostek).",
+ "ikony": {
+  "assets/bonusy/bombka.png": {
+   "nazwa": "Bombka (niebieska)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/gwiazdka.png": {
+   "nazwa": "Gwiazdka (żółta)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/laska_cukrowa.png": {
+   "nazwa": "Laska cukrowa",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/pierniczek.png": {
+   "nazwa": "Pierniczek",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/kakao.png": {
+   "nazwa": "Kakao",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/czapka.png": {
+   "nazwa": "Sojusznik (czerwona czapka)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/miotacz.png": {
+   "nazwa": "Miotacz (armatka ręczna)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/wiezyczka.png": {
+   "nazwa": "Wieżyczka (armatka automatyczna)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/pelna_sila.png": {
+   "nazwa": "Pełna siła (błyskawica)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/niewidzialnosc.png": {
+   "nazwa": "Niewidzialność (płatek śniegu)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/spowolnienie_przeciwnikow.png": {
+   "nazwa": "Spowolnienie przeciwników (sopel)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/spowolnienie_sniezek.png": {
+   "nazwa": "Spowolnienie śnieżek (klepsydra)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "assets/bonusy/upicie.png": {
+   "nazwa": "Upicie (spirala)",
+   "szer_px": 128,
+   "wys_px": 128,
+   "kotwica": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  }
+ }
+}
