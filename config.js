@@ -97,11 +97,15 @@ const CONFIG = {
     zapasPrzeszkody: 0.02, // nie bliżej podstawy przeszkody niż tyle
     przeciwnicyZbierajaBonusy: true, // false: śnieżki przeciwników przelatują przez bonusy
     czasSerduszka: 1, // ile sekund widać serduszko po zjedzeniu Pierniczka
+    // Upicie: promień wybuchu (ułamek szerokości pola), czas, największy skręt ruchu (stopnie)
+    // i co ile sekund (od-do) losuje się nowy skręt
+    upicie: { promien: 0.12, czasTrwania: 10, maxSkret: 80, zmianaCo: [0.3, 0.6] },
     wymusTyp: null, // do testów: id bonusu (np. "kakao"), wtedy każdy nowy bonus jest tego typu; null = losowo
     typy: [
       // grafika: ścieżka do obrazka (np. "assets/bonusy/bombka.png") albo null = kula zastępcza
-      // Bombka: tarcza, pochłania jedno trafienie
-      { id: "bombka", nazwa: "Bombka", kolor: "#3a7de0", czasTrwania: 12, waga: 3, grafika: null },
+      // Bombka: tarcza na jedno trafienie. odbija: true = odbija śnieżkę w rzucającego,
+      // false = tylko pochłania trafienie (stare zachowanie)
+      { id: "bombka", nazwa: "Bombka", kolor: "#3a7de0", czasTrwania: 12, waga: 3, grafika: null, odbija: true },
       // Gwiazdka: następne rzuty (najwyżej "rzuty", najdłużej czasTrwania s) to wachlarz śnieżek
       { id: "gwiazdka", nazwa: "Gwiazdka", kolor: "#f2c417", czasTrwania: 8, waga: 3, grafika: null, rzuty: 3, katyWachlarza: [-10, 0, 10] },
       // Laska cukrowa: szybszy bieg
@@ -110,6 +114,14 @@ const CONFIG = {
       { id: "pierniczek", nazwa: "Pierniczek", kolor: "#b5733a", czasTrwania: 0, waga: 1, grafika: null },
       // Kakao: krótsze przeładowanie (ze stosem/armatką liczy się najmniejszy mnożnik, nie iloczyn)
       { id: "kakao", nazwa: "Kakao", kolor: "#6b3f26", czasTrwania: 10, waga: 3, grafika: null, mnoznikPrzeladowania: 0.3 },
+      // Pełna siła: najwyżej "rzuty" rzutów albo czasTrwania s każdy rzut z maksymalną prędkością
+      { id: "pelnaSila", nazwa: "Pełna siła", kolor: "#ff8c1a", czasTrwania: 10, waga: 3, grafika: null, rzuty: 10 },
+      // Spowolnienie przeciwników: wszyscy żywi z drużyny przeciwnej wolniej chodzą i przeładowują
+      { id: "spowolnieniePrzeciwnikow", nazwa: "Spowolnienie przeciwników", kolor: "#7fd6ff", czasTrwania: 8, waga: 2, grafika: null, mnoznikPredkosci: 0.5, mnoznikPrzeladowania: 2 },
+      // Spowolnienie śnieżek: śnieżki drużyny przeciwnej lecą wolniej (także te już w locie)
+      { id: "spowolnienieSniezek", nazwa: "Spowolnienie śnieżek", kolor: "#3acfb0", czasTrwania: 8, waga: 2, grafika: null, mnoznikPredkosci: 0.5 },
+      // Upicie: bonus wybucha, wszyscy żywi w kręgu idą krzywo (czas i reszta w sekcji upicie wyżej)
+      { id: "upicie", nazwa: "Upicie", kolor: "#a64ad6", waga: 2, grafika: null },
     ],
   },
 

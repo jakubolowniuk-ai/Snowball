@@ -86,13 +86,15 @@ function graczMozeSterowac(stan) {
 
 // --- Trafienia ---
 
-function trafienie(stan, z) {
-  // Bombka (tarcza) pochłania trafienie: bez zliczenia i bez ogłuszenia
-  if (tarczaPochlania(stan, z)) return;
+// sn: śnieżka, która trafiła (Bombka może ją odbić); może być pusta
+function trafienie(stan, z, sn) {
+  // Bombka (tarcza) zatrzymuje trafienie (odbija albo pochłania): bez zliczenia i ogłuszenia
+  if (tarczaPochlania(stan, z, sn)) return;
   z.trafienia += 1;
   if (z.trafienia >= CONFIG.trafieniaDoEliminacji) {
     z.wyeliminowany = true;
     z.ogluszenie = 0;
+    z.bonusy = []; // wyeliminowanych efekty bonusów nie obejmują
   } else {
     z.ogluszenie = CONFIG.czasOgluszenia;
   }
@@ -130,7 +132,9 @@ function odlegloscOdOdcinka(px, py, ax, ay, bx, by) {
 // Zwraca true, gdy śnieżka ma zniknąć.
 function lotSniezki(stan, sn, dt) {
   const przed = pozycjaSniezki(sn);
-  sn.przebyte = Math.min(sn.przebyte + sn.predkosc * dt, sn.dlugosc);
+  // Spowolnienie śnieżek zmienia tylko prędkość, więc po końcu efektu śnieżka nie skacze
+  const predkosc = sn.predkosc * mnoznikPredkosciSniezki(stan, sn);
+  sn.przebyte = Math.min(sn.przebyte + predkosc * dt, sn.dlugosc);
   const po = pozycjaSniezki(sn);
 
   const zasiegTrafienia = PROMIEN_POSTACI + j(CONFIG.promienSniezki);
@@ -182,7 +186,7 @@ function lotSniezki(stan, sn, dt) {
     return true;
   }
   if (pierwszy) {
-    trafienie(stan, pierwszy);
+    trafienie(stan, pierwszy, sn);
     return true;
   }
   return sn.przebyte >= sn.dlugosc;
@@ -251,7 +255,9 @@ function rzuc(stan, pOkno) {
 function wykonajRzut(stan, z, celX, celY, czasLadowania) {
   const d = odleglosc(z.x, z.y, celX, celY);
   if (d === 0) return;
-  const s = sila(czasLadowania);
+  // Pełna siła: każdy rzut z maksymalną prędkością (przeładowanie i tak od czasu ładowania)
+  const pelna = maEfekt(z, "pelnaSila");
+  const s = pelna ? 1 : sila(czasLadowania);
   const kx = (celX - z.x) / d;
   const ky = (celY - z.y) / d;
 
@@ -278,12 +284,12 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania) {
       przebyte: 0,
     });
   }
-  if (gwiazdka) {
-    gwiazdka.rzuty -= 1;
-    if (gwiazdka.rzuty <= 0) z.bonusy = z.bonusy.filter((ab) => ab !== gwiazdka);
-  }
+  // Wachlarz to jeden rzut, także dla Pełnej siły
+  if (gwiazdka) zuzyjRzutEfektu(z, "gwiazdka");
+  if (pelna) zuzyjRzutEfektu(z, "pelnaSila");
 
-  // Przeładowanie: stały czas plus czas ładowania siły; stos i armatka je skracają
+  // Przeładowanie: stały czas plus faktyczny czas ładowania siły (także z Pełną siłą);
+  // stos, armatka i Kakao je skracają, Spowolnienie przeciwników wydłuża
   const normalne = CONFIG.czasPrzeladowania + Math.min(czasLadowania, CONFIG.MAX_CHARGE);
   z.przeladowanie = przeladowanieZeStanowiskiem(stan, z, normalne);
   z.przeladowanieCalosc = z.przeladowanie;
@@ -330,10 +336,11 @@ function ograniczDoSwojejStrony(z) {
   }
 }
 
-// Prędkość postaci w jednostkach na sekundę (Laska cukrowa ją zwiększa)
+// Prędkość postaci w jednostkach na sekundę (Laska cukrowa zwiększa, Spowolnienie zmniejsza)
 function predkoscPostaci(z) {
-  const laska = z.bonusy.some((ab) => ab.typ === "laska");
-  return j(CONFIG.predkoscZawodnika) * (laska ? typBonusu("laska").mnoznikPredkosci : 1);
+  const laska = maEfekt(z, "laska") ? typBonusu("laska").mnoznikPredkosci : 1;
+  const wolno = maEfekt(z, "spowolnieniePrzeciwnikow") ? typBonusu("spowolnieniePrzeciwnikow").mnoznikPredkosci : 1;
+  return j(CONFIG.predkoscZawodnika) * laska * wolno;
 }
 
 // Krok postaci w stronę punktu, z limitem prędkości. Zwraca true, gdy doszła.
@@ -348,8 +355,9 @@ function idzDo(z, celX, celY, dt) {
     z.y = celY;
     doszla = true;
   } else {
-    z.x += (dx / dystans) * krok;
-    z.y += (dy / dystans) * krok;
+    const k = kierunekPoUpiciu(z, dx / dystans, dy / dystans); // upity idzie krzywo
+    z.x += k.dx * krok;
+    z.y += k.dy * krok;
   }
   ograniczDoSwojejStrony(z);
   if (!z.wiatr) wypchnijZPrzeszkod(z); // przez przeszkody nie da się przejść (wiatr przenosi)
@@ -417,8 +425,9 @@ function ruchZPada(z, dt) {
   if (m <= martwa) return;
   const sila = Math.min((m - martwa) / (1 - martwa), 1);
   const krok = predkoscPostaci(z) * sila * dt; // pełne wychylenie = pełna prędkość (z Laską też)
-  z.x += (pad.wychylX / m) * krok;
-  z.y += (pad.wychylY / m) * krok;
+  const k = kierunekPoUpiciu(z, pad.wychylX / m, pad.wychylY / m); // upity idzie krzywo
+  z.x += k.dx * krok;
+  z.y += k.dy * krok;
   ograniczDoSwojejStrony(z);
   if (!z.wiatr) wypchnijZPrzeszkod(z);
 }
@@ -473,8 +482,12 @@ function aktualizuj(dt) {
     przesunCelowanie(stan, { x: stan.celowanie.oknoX, y: stan.celowanie.oknoY });
   }
 
-  // Lot śnieżek: znikają po trafieniu albo na końcu lotu
-  stan.sniezki = stan.sniezki.filter((sn) => !lotSniezki(stan, sn, dt));
+  // Lot śnieżek: znikają po trafieniu albo na końcu lotu.
+  // Śnieżki odbite przez Bombkę w tej klatce trafiają do nowej listy i też zostają.
+  const lecace = stan.sniezki;
+  stan.sniezki = [];
+  const zostaja = lecace.filter((sn) => !lotSniezki(stan, sn, dt));
+  stan.sniezki = zostaja.concat(stan.sniezki);
 
   // Odliczanie ogłuszenia i przeładowania (niezależnie od siebie)
   for (const z of [stan.gracz, ...stan.przeciwnicy]) {

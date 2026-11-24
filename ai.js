@@ -195,8 +195,13 @@ function wybierzBonusDlaPrzeciwnika(stan, z) {
 // Przerwa po rzucie. Przy stanowisku krótsza (jak przeładowanie gracza):
 // stos mnoży przerwę, armatka zostawia tylko minOdstepStrzalow.
 // Bez stanowiska: z szansą szansaStanowiska wybiera wolne stanowisko swojej drużyny.
-// Kakao skraca przerwę tak samo (ze stosem: najmniejszy mnożnik, nie iloczyn).
+// Kakao skraca przerwę tak samo (ze stosem: najmniejszy mnożnik, nie iloczyn),
+// Spowolnienie przeciwników na końcu ją wydłuża.
 function przerwaPoRzucie(stan, z, param) {
+  return przerwaBezSpowolnienia(stan, z, param) * mnoznikSpowolnieniaPrzeladowania(z);
+}
+
+function przerwaBezSpowolnienia(stan, z, param) {
   const ai = z.ai;
   const bonus = mnoznikPrzeladowaniaBonusow(z);
   const zwykla = losuj(param.przerwaMin, param.przerwaMax);

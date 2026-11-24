@@ -91,7 +91,12 @@ function stanowiskoDlaRzutu(stan, z) {
 
 // Przeładowanie po rzucie postaci z, z uwzględnieniem stanowiska (zużywa jedną gałkę) i Kakao.
 // Mnożniki się nie mnożą: bierzemy najmniejszy z (stos albo armatka, Kakao).
+// Na końcu mnożymy przez Spowolnienie przeciwników (×2, gdy postać jest spowolniona).
 function przeladowanieZeStanowiskiem(stan, z, normalne) {
+  return przeladowanieBezSpowolnienia(stan, z, normalne) * mnoznikSpowolnieniaPrzeladowania(z);
+}
+
+function przeladowanieBezSpowolnienia(stan, z, normalne) {
   const bonus = mnoznikPrzeladowaniaBonusow(z);
   const st = stanowiskoDlaRzutu(stan, z);
   if (!st) return normalne * bonus;
