@@ -143,6 +143,13 @@ Razem 13 bonusów: 4 obecne (Bombka, Gwiazdka, Laska cukrowa, Pierniczek) i 9 no
 - Parametry typu wpływające na trudność: życia, czas ogłuszenia, rozmiar postaci, prędkość chodzenia, wędrówka i postój, odskok, szansa uniku, czas reakcji, przerwa między rzutami (min/max), siła rzutu (min/max), czas zamachu (osobno, nie z siły), rozrzut, wyprzedzanie (0–1, nowe), mnożnik przeładowania, odległość rzutu, szansa na bonus, szansa na stanowisko, mnożnik amunicji stanowisk, mnożnik czasu bonusów, stałe umiejętności, tarcza na start. Dziś część z nich jest wspólna dla wszystkich i dla gracza (życia, ogłuszenie, rozmiar, chodzenie, wędrówka/postój, odskok, przeładowanie); trzeba je rozdzielić. Nie istnieją jeszcze: wyprzedzanie, osobny zamach, mnożniki czasu bonusów i amunicji, stałe umiejętności, tarcza na start, podchodzenie w zwykłej Arenie.
 - Wskazówka do strojenia rozrzutu: błąd celowania jest losowy w kole o promieniu rozrzut; trafienie w stojącego, gdy błąd jest mniejszy niż ok. 0,038 (promień postaci plus śnieżki). Szansa trafienia P ≈ (0,038 / rozrzut)², więc rozrzut ≈ 0,038 / √P. Rozrzut poniżej 0,038 = zawsze trafia stojącego. Przeciw poruszającemu się graczowi prawie nigdy nie trafia, bo nie ma wyprzedzania.
 
+#### Poziomy Areny (plan, jeszcze niezrobione)
+- Poziom N = N przeciwników, **wszyscy wchodzą od razu** (bez limitu naraz i bez kolejki). Do poziomu 12 (ew. dalej).
+- **Zawieszona zasada trafiania swoich:** śnieżka nie trafia członków własnej drużyny (dotyczy wszystkich trybów, także Sojusznika). Nadal trafia przeciwników, postacie drużyny przeciwnej i bonusy. Skutki: przeciwnik nie osłania innego własnym ciałem, a pijany (bonus Upicie) nie trafi swoich.
+- Skład (Z = Zielony, L = Limonkowy): 1: 1Z · 2: 2Z · 3: 3Z · 4: 3Z+1L · 5: 3Z+2L · 6: 3Z+3L · 7: 3Z+4L · 8: 4Z+4L · 9: 4Z+5L · 10: 5Z+5L · 11: 5Z+6L · 12: 6Z+6L. Kolejne typy mają wchodzić od ok. poziomu 6–7 w miejsce części Zielonych i Limonkowych.
+- Do rozwiązania: ustawienie 12 przeciwników na starcie (jedna linia nie wystarczy, potrzebne 2–3 rzędy równoległe do przekątnej), sprawdzić, czy postacie się blokują, opcjonalny limit `maxNaraz` w config (domyślnie bez limitu), więcej bonusów naraz na wysokich poziomach, rozłożenie pierwszych rzutów w czasie.
+- Kolejność robienia: (1) system typów + Zielony na poziomach 1–3, (2) Limonkowy, (3) poziomy 4–12 i rozmieszczenie.
+
 #### Karty typów
 **Zielony (najsłabszy, Rekrut)**
 - Życia zależne od poziomu: 1–2: 2 życia, 3–4: 3, od 5: 4.
