@@ -1,6 +1,6 @@
 # Prompty dla agenta (Claude Code)
 
-Każdy prompt wklejasz osobno, w osobnej rozmowie z agentem, i sprawdzasz grę na telefonie przed następnym. Agent czyta CLAUDE.md i docs/snowcraft-plan.md z `main`, więc **najpierw scal gałąź z dokumentacją** (pull request), inaczej nie zobaczy ustaleń.
+Każdy prompt wklejasz osobno, w osobnej rozmowie z agentem, i sprawdzasz grę na telefonie przed następnym. Agent czyta CLAUDE.md i docs/snowcraft-plan.md z `main`, więc **najpierw scal gałąź z dokumentacją** (pull request), inaczej nie zobaczy ustaleń. Po scaleniu zamiast wklejać cały prompt możesz napisać agentowi: „Wykonaj krok A1 z docs/PROMPTY_DLA_AGENTA.md".
 
 ## Zalecana kolejność
 1. **A1** typy + Zielony na poziomach 1–3
@@ -28,7 +28,10 @@ CO ZROBIĆ
 1. W config.js nowa sekcja `typy` z typem `zielony` (wartości niżej). Każdy przeciwnik dostaje `typ`, a jego parametry czytane są z typu, nie ze wspólnych ustawień. Gracz dalej używa wspólnych ustawień (nie zmieniaj jego zasad).
 2. Parametry typu, które dziś są wspólne albo ustawiane na poziom, a mają być per typ: życia, czasOgluszenia, mnoznikPredkosci (przez istniejącą funkcję predkoscPostaci), postoj, krok, odlegloscRzutu, czasAwaryjny, przerwa, sila, zamachMin, rozrzut, szansaUniku, czasReakcji, mnoznikPrzeladowania, szansaBonusu, szansaStanowiska.
 3. Poziomy 1–3 używają typu Zielony: poziom 1: 1 przeciwnik, 2: 2, 3: 3. Poziomy 4 i dalej mają działać DOKŁADNIE jak dotąd (zostają na tabeli `poziomy`), to rozwiązanie tymczasowe. Wygodnie zrobić to przez `skladPoziomow` w config (poziom → lista {typ, ile}); poziom bez wpisu = stare zachowanie.
-4. Wielka arena: bez zmian w jej zasadach podchodzenia (zostaje odlegloscAI). Zielony ma tam po prostu działać z resztą parametrów typu.
+4. Wielka arena: bez zmian w jej zasadach podchodzenia (zostaje odlegloscAI). Zielony ma tam po prostu działać z resztą parametrów typu. To świadoma różnica na ten krok (tam podchodzi na ok. 0,5, a nie na 5–6 ludzików); wspomnij o niej Jakubowi.
+5. Rysowanie: draw.js (ok. linii 92) i animacje.js wybierają atlas postaci po drużynie (kolorGracza / kolorPrzeciwnika). Dodaj postaci pole `kolor` (z typu; gracz: kolorGracza) i użyj go przy rysowaniu. W obrazy.js ładuj atlasy dla kolorGracza i dla wszystkich kolorów z config.typy (sprites.json ma wszystkie 16 kolorów, a pliki assets/gracze/atlasy/<kolor>.webp istnieją).
+6. Kropki żyć w draw.js (ok. linii 486) czytają dziś CONFIG.trafieniaDoEliminacji: zamień na liczbę żyć danej postaci.
+7. trafienie() w game.js (ok. linii 90–101) używa CONFIG.trafieniaDoEliminacji i CONFIG.czasOgluszenia: zamień na wartości postaci (gracz dostaje je ze wspólnych ustawień, bez zmiany zasad).
 
 ZIELONY (najsłabszy, Rekrut), WARTOŚCI DO config.js
 - zycia: początkowe 2, +1 co 2 poziomy, max 4 (poziomy 1–2: 2, 3–4: 3, 5+: 4). Liczone z numeru poziomu przy starcie poziomu.
@@ -49,10 +52,12 @@ ZIELONY (najsłabszy, Rekrut), WARTOŚCI DO config.js
 WAŻNE PUŁAPKI W KODZIE
 - wykonajRzut(stan, z, celX, celY, czasLadowania) wylicza siłę z czasu ładowania (sila(czasLadowania)). Siła i czas zamachu mają być teraz dwiema osobnymi liczbami: przeciwnik losuje siłę z typu, a czas zamachu jest osobny. Nie zmieniaj tego dla gracza (jego siła dalej wynika z czasu przytrzymania). Przeładowanie przeciwnika liczone jak dotąd: czasPrzeladowania × mnoznikPrzeladowania + czas równoważny sile (sila × MAX_CHARGE).
 - Życia i ogłuszenie zapisz na postaci (np. z.maxTrafien, z.czasOgluszenia), żeby nie ruszać zasad gracza.
+- Miejsca, gdzie powstają przeciwnicy i czytane są parametry: nowaPostac(druzyna, start) (game.js ok. linii 17), zacznijPoziom (ok. linii 54–70), nowyStanAI(param) (ai.js ok. linii 11) i parametryPoziomu(stan), używane w ai.js (ok. linii 33) oraz game.js.
+- Łańcuch mnożników przeładowania i przerwy (przeladowanieZeStanowiskiem, przerwaPoRzucie, mnoznikPrzeladowaniaBonusow, mnoznikSpowolnieniaPrzeladowania w bonusy.js) ma działać jak dziś. Mnożnik typu dochodzi do niego, nie zastępuje go. Bonus Pełna siła (wykonajRzut) nadal wymusza siłę 1.
 - Poziomy 4+ i gracz muszą działać bez zmian. Po zmianie sprawdź, że poziom 4 i 5 zachowują się jak wcześniej.
 
 PO ZMIANIE
-- Zaktualizuj CLAUDE.md (sekcja Przeciwnicy) i docs/snowcraft-plan.md: opis typu Zielony przenieś z "planowanych" do "obecnych", zaznacz, że poziomy 4+ są jeszcze na starej tabeli.
+- Zaktualizuj CLAUDE.md (sekcja Przeciwnicy) i docs/snowcraft-plan.md (sekcje "Przeciwnicy według poziomów", 9. punkt mechaniki i "Karty typów"): opis typu Zielony przenieś z "planowanych" do "obecnych", zaznacz, że poziomy 4+ są jeszcze na starej tabeli.
 - Powiedz Jakubowi, jak sprawdzić na telefonie:
   Arena, poziom 1: przeciwnik idzie w twoją stronę krótkimi krokami, staje na 1–1,5 s, zamachuje się (min. 0,5 s widoczny zamach) i rzuca z odległości ok. 5–6 ludzików. Śnieżka jest wolna. Stojącego gracza trafia mniej więcej 7 razy na 10, poruszającego się prawie nigdy. Dwa trafienia eliminują go na poziomie 1, a ogłuszony stoi 1,5 s.
   Poziom 3: trzech przeciwników, każdy ma 3 życia.
@@ -69,7 +74,7 @@ Zadanie: zawieś zasadę, że śnieżka trafia własną drużynę. Od teraz śni
 Najpierw przeczytaj CLAUDE.md i docs/snowcraft-plan.md (sekcja "Poziomy Areny"), potem game.js (lot śnieżki, sprawdzanie trafień). Pracuj wg zasad z CLAUDE.md: pokaż Jakubowi krótki plan i poczekaj na zgodę; potem jeden commit po polsku i powiedz, jak sprawdzić na telefonie. Komentarze po polsku. Liczby i przełączniki w config.js. Nie dodawaj niczego, o co nie prosiłem.
 
 CO ZROBIĆ
-- W sprawdzaniu trafień pomijaj postacie z tej samej drużyny (pole `druzyna`) co rzucający. Dotyczy wszystkich trybów (Arena i Wielka arena) i wszystkich przeciwników, także stanów ogłuszenia i leżących wyeliminowanych.
+- W lotSniezki (game.js, pętla po postaciach ok. linii 143–145, dziś pomija tylko rzucającego) pomijaj postacie z tej samej drużyny (pole `druzyna`) co rzucający. Odbite śnieżki Bombki mają `rzucajacy` = odbijający, więc zadziała to poprawnie. Przy okazji popraw nieaktualny komentarz o bonusach w tej funkcji. Dotyczy wszystkich trybów (Arena i Wielka arena) i wszystkich przeciwników, także stanów ogłuszenia i leżących wyeliminowanych.
 - Nadal działa: trafianie drużyny przeciwnej, rozbijanie się o przeszkody, trafianie bonusów przez dowolną śnieżkę (tak jak dziś). Wachlarz Gwiazdki działa tak samo.
 - W config.js przełącznik `trafianieSwoich: false` (true przywraca stare zachowanie).
 - Sprawdź ai.js: jeśli coś zakłada, że swój przeciwnik blokuje linię rzutu, popraw to. Jeśli nic takiego nie ma, nie zmieniaj AI.
@@ -89,7 +94,7 @@ Zadanie: dodaj typ Limonkowy (Zwiadowca) i użyj go na poziomach 4–6 Areny raz
 Najpierw przeczytaj CLAUDE.md i docs/snowcraft-plan.md ("Typy przeciwników", "Karty typów", "Poziomy Areny"), potem config.js (sekcja typy i skladPoziomow) i ai.js. Pracuj wg zasad z CLAUDE.md: pokaż Jakubowi krótki plan i poczekaj na zgodę; potem jeden commit po polsku i powiedz, jak sprawdzić na telefonie. Komentarze po polsku. Liczby w config.js. Nie dodawaj niczego, o co nie prosiłem.
 
 CO ZROBIĆ
-1. W config.js, w sekcji `typy`, dodaj typ `limonkowy` (kolor kurtki "limonkowy", atlas assets/gracze/atlasy/limonkowy.webp, sprawdź, że przeciwnik z tego atlasu poprawnie się rysuje i animuje; jeśli trzeba, dopisz go do listy ładowanych obrazów w obrazy.js).
+1. W config.js, w sekcji `typy`, dodaj typ `limonkowy` (kolor kurtki "limonkowy"; atlas assets/gracze/atlasy/limonkowy.webp ładuje i rysuje już mechanizm z kroku A1, tylko sprawdź, że Limonkowy poprawnie się rysuje i animuje).
 2. W `skladPoziomow`: poziom 4: 3 Zielone + 1 Limonkowy, poziom 5: 3 Z + 2 L, poziom 6: 3 Z + 3 L. Poziomy 7 i dalej zostają na starej tabeli `poziomy` (jak dotąd).
 
 LIMONKOWY, WARTOŚCI
@@ -200,7 +205,7 @@ Zadanie: dodaj bonus Niewidzialność.
 Najpierw przeczytaj CLAUDE.md i docs/snowcraft-plan.md (sekcja "Planowane bonusy"), potem bonusy.js, game.js, ai.js, draw.js, config.js. Pracuj wg zasad z CLAUDE.md: pokaż Jakubowi krótki plan i poczekaj na zgodę; jeden commit po polsku; powiedz, jak sprawdzić na telefonie. Komentarze po polsku. Liczby w config.js. Nie dodawaj niczego, o co nie prosiłem. Jeśli w config.js jest opcja bonusy.wymusTyp, użyj jej do testów.
 
 OPIS
-- id "niewidzialnosc", kolor zastępczy #bfe9ff, waga 1 (rzadki). Ikona na mapie: lodowy płatek śniegu (na razie kolorowa kula).
+- id "niewidzialnosc", waga 1 (rzadki). Ikona jest już w assets/bonusy/niewidzialnosc.png (patrz docs/README_BONUSY.md): ustaw ją w polu `grafika` typu w config.js; kolor zastępczy #bfe9ff zostaje na wypadek braku obrazka.
 - Zbiera go ten, kto go trafi śnieżką, jak inne bonusy. Działa na zbierającego przez czasTrwania (propozycja 6 s, w config).
 - Wygląd: zbierający jest półprzezroczysty (alfa ok. 0.35, w config). Gracz widzi siebie półprzezroczystego. Gdy niewidzialny jest przeciwnik, gracz też widzi go półprzezroczystego (nie znika całkowicie).
 - Rzut nie odsłania niewidzialności. Po upływie czasu postać znów jest w pełni widoczna.
@@ -223,7 +228,7 @@ Zadanie: dodaj bonus Miotacz (armatka ręczna).
 Najpierw przeczytaj CLAUDE.md i docs/snowcraft-plan.md (sekcja "Planowane bonusy"), potem bonusy.js, game.js, input.js, ai.js, config.js. Pracuj wg zasad z CLAUDE.md: pokaż Jakubowi krótki plan i poczekaj na zgodę; jeden commit po polsku; powiedz, jak sprawdzić na telefonie. Komentarze po polsku. Liczby w config.js. Nie dodawaj niczego, o co nie prosiłem. Jeśli w config.js jest opcja bonusy.wymusTyp, użyj jej do testów.
 
 OPIS
-- id "miotacz", kolor zastępczy #ff9a2e, waga 2. Ikona: pomarańczowa lufa ze śnieżką.
+- id "miotacz", waga 2. Ikona jest już w assets/bonusy/miotacz.png (patrz docs/README_BONUSY.md): ustaw ją w polu `grafika` typu w config.js; kolor zastępczy #ff9a2e zostaje na wypadek braku obrazka.
 - Zbierający dostaje 20 gałek (amunicja w config).
 - Sterowanie: drugi palec dotyka punktu planszy i trzyma. Dopóki trzyma, postać strzela co odstepStrzalow (propozycja 0.3 s) w punkt pod palcem; jeśli palec się przesuwa, celuje w aktualny punkt. Puszczenie palca = koniec strzelania, amunicja zostaje.
 - Bez ładowania siły: każdy strzał leci z siłą silaStrzalu (propozycja 0.7, w config). Bez przeładowania między strzałami, ale po zakończeniu bonusu wraca zwykłe przeładowanie.
@@ -247,7 +252,7 @@ Zadanie: dodaj bonus Wieżyczka (armatka automatyczna).
 Najpierw przeczytaj CLAUDE.md i docs/snowcraft-plan.md (sekcja "Planowane bonusy"), potem bonusy.js, stanowiska.js, game.js, draw.js, config.js. Pracuj wg zasad z CLAUDE.md: pokaż Jakubowi krótki plan i poczekaj na zgodę; jeden commit po polsku; powiedz, jak sprawdzić na telefonie. Komentarze po polsku. Liczby w config.js. Nie dodawaj niczego, o co nie prosiłem. Jeśli w config.js jest opcja bonusy.wymusTyp, użyj jej do testów. To nowy rodzaj obiektu w grze: jeśli plan wyjdzie duży, zaproponuj podział na dwa commity i poczekaj na zgodę.
 
 OPIS
-- id "wiezyczka", kolor zastępczy #6e6e7a, waga 1 (rzadki). Ikona: mała wieżyczka z lufą.
+- id "wiezyczka", waga 1 (rzadki). Ikona bonusu jest już w assets/bonusy/wiezyczka.png (patrz docs/README_BONUSY.md): ustaw ją w polu `grafika` typu w config.js; kolor zastępczy #6e6e7a zostaje na wypadek braku obrazka. Samą wieżyczkę na planszy na razie rysuj kodem (prosta bryła), bez grafiki.
 - Trafiony bonus nie jest "zbierany": w jego miejscu pojawia się wieżyczka drużyny tego, kto trafił.
 - Wieżyczka ma 3 życia (trafienie przeciwnika odejmuje życie, nie ogłusza; po trzecim znika z chmurką) i 30 gałek. Strzela co odstepStrzalow (3 s, w config) w losowy żywy cel przeciwnej drużyny, z większym prawdopodobieństwem w najbliższego (np. 60% najbliższy, reszta losowo), z siłą silaStrzalu 0.5 i rozrzutem 0.05 (propozycje, w config). Śnieżki rozbijają się o przeszkody jak każde inne.
 - Nie blokuje ruchu ani śnieżek własnej drużyny. Śnieżki drużyny przeciwnej ją trafiają (promień trafienia 0.025). Własnej drużyny nie trafia (jeśli włączona jest zasada niehitowania swoich).
@@ -271,7 +276,7 @@ Zadanie: dodaj bonus Sojusznik (zawodnik sterowany przez komputer po stronie zbi
 Najpierw przeczytaj CLAUDE.md i docs/snowcraft-plan.md ("Planowane bonusy", "Typy przeciwników", "Karty typów"), potem bonusy.js, game.js, ai.js, draw.js, animacje.js, config.js. To największy krok: jeśli plan wyjdzie za duży, zaproponuj podział na dwa commity (1: sojusznik jako postać z AI, 2: przeciwnicy celują też w niego) i poczekaj na zgodę. Pracuj wg zasad z CLAUDE.md: pokaż Jakubowi krótki plan i poczekaj na zgodę; jeden commit po polsku; powiedz, jak sprawdzić na telefonie. Komentarze po polsku. Liczby w config.js. Nie dodawaj niczego, o co nie prosiłem. Jeśli w config.js jest opcja bonusy.wymusTyp, użyj jej do testów. Wykonuj dopiero po krokach A1–A4 (system typów musi istnieć).
 
 OPIS
-- id "sojusznik", kolor zastępczy #d93a3a, waga 1 (rzadki). Ikona: czerwona czapka.
+- id "sojusznik", waga 1 (rzadki). Ikona jest już w assets/bonusy/czapka.png (patrz docs/README_BONUSY.md): ustaw ją w polu `grafika` typu w config.js; kolor zastępczy #d93a3a zostaje na wypadek braku obrazka.
 - Zbiera go ten, kto go trafi śnieżką. Obok zbierającego pojawia się nowy zawodnik jego drużyny, sterowany przez AI (ten sam kod co przeciwnik, tylko po stronie zbierającego), z 3 życiami, do końca poziomu.
 - Wygląd i parametry: sojusznik gracza ma czerwoną kurtkę (czerwony oznacza naszą drużynę) i parametry losowego typu z config.typy. Sojusznik przeciwników to po prostu kolejny przeciwnik losowego typu (z własnym kolorem kurtki).
 - AI sojusznika: tak jak przeciwnik, ale celuje w najbliższego żywego przeciwnika; porusza się w swojej części pola (po swojej stronie przekątnej w Arenie). Zbiera bonusy i używa stanowisk według parametrów typu.
@@ -279,6 +284,9 @@ OPIS
 - Wygrana: wszyscy przeciwnicy wyeliminowani. Przegrana: tylko wyeliminowany zawodnik gracza (sojusznik nie wpływa na przegraną).
 - Najwyżej jeden sojusznik naraz na drużynę; bonus nie losuje się, gdy drużyna go ma. Nowy poziom usuwa sojusznika.
 - Działa w Arenie i Wielkiej arenie.
+
+UWAGA NA KOD
+- Wiele miejsc iteruje po [stan.gracz, ...stan.przeciwnicy] (animacje.js, bonusy.js, draw.js, game.js, tryby.js, razem ok. 11). Wprowadź jedną funkcję zwracającą wszystkie postacie (np. wszystkiePostacie(stan)) i użyj jej zamiast kopiować logikę. sprawdzKoniec w game.js sprawdza stan.przeciwnicy.every(...), więc sojusznik gracza nie może trafić do tej listy. Sojusznik przeciwników (gdy zbierze go przeciwnik) to zwykły dodatkowy przeciwnik i też musi zostać wyeliminowany do wygranej.
 
 PO ZMIANIE
 - Zaktualizuj CLAUDE.md (zasada "gramy jednym zawodnikiem" dostaje wyjątek: Sojusznik jest sterowany przez komputer) i docs/snowcraft-plan.md: przenieś Sojusznika z "Planowanych" do obecnych.

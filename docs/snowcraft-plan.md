@@ -86,6 +86,7 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 - **Wielka arena:** świat 2 × 2 pola, kamera jedzie za graczem, bez przekątnej, 18 dekoracji w całym świecie. Przeciwnicy podchodzą na odległość rzutu i rzucają tylko, gdy są na ekranie gracza. Kroki: W1 (zrobione: menu, świat, kamera, ruch, AI), W2 (zrobione: strzałki do przeciwników poza ekranem, zasięg śnieżki do szerokości widoku, neutralne stanowiska ze wspólną amunicją, bonusy w całym świecie, do 4 naraz, co 4–7 s), W3 (zrobione: zamieć, po 90 s świat przez 30 s zwęża się do jednego pola, ostrzeżenie 10 s wcześniej, szaroniebieska mgła poza granicą, rzeczy poza granicą znikają, wiatr spycha postacie do środka przez przeszkody).
 
 ### Przeciwnicy według poziomów
+(Stare założenia z początku projektu. Aktualny plan: sekcja „Typy przeciwników" niżej. Dziś w kodzie trudność ustawia tabela `poziomy` w `config.js`, po wprowadzeniu typów zastąpi ją skład poziomu.)
 - Poziomy 1–3: chodzą losowo, reagują wolno albo wcale.
 - Środek: widzą start śnieżki i po krótkiej reakcji robią krok w bok.
 - Wyższe: przewidują tor i uciekają, ale zwinność jest ograniczona.
