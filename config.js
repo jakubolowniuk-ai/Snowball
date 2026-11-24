@@ -97,6 +97,7 @@ const CONFIG = {
     zapasPrzeszkody: 0.02, // nie bliżej podstawy przeszkody niż tyle
     przeciwnicyZbierajaBonusy: true, // false: śnieżki przeciwników przelatują przez bonusy
     czasSerduszka: 1, // ile sekund widać serduszko po zjedzeniu Pierniczka
+    wymusTyp: null, // do testów: id bonusu (np. "kakao"), wtedy każdy nowy bonus jest tego typu; null = losowo
     typy: [
       // grafika: ścieżka do obrazka (np. "assets/bonusy/bombka.png") albo null = kula zastępcza
       // Bombka: tarcza, pochłania jedno trafienie
@@ -107,6 +108,8 @@ const CONFIG = {
       { id: "laska", nazwa: "Laska cukrowa", kolor: "#e03a3a", czasTrwania: 6, waga: 3, grafika: null, mnoznikPredkosci: 1.4 },
       // Pierniczek: od razu zdejmuje jedno trafienie (czasTrwania 0 = działa natychmiast)
       { id: "pierniczek", nazwa: "Pierniczek", kolor: "#b5733a", czasTrwania: 0, waga: 1, grafika: null },
+      // Kakao: krótsze przeładowanie (ze stosem/armatką liczy się najmniejszy mnożnik, nie iloczyn)
+      { id: "kakao", nazwa: "Kakao", kolor: "#6b3f26", czasTrwania: 10, waga: 3, grafika: null, mnoznikPrzeladowania: 0.3 },
     ],
   },
 

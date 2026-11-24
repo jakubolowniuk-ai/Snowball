@@ -94,14 +94,20 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 ### Osłony i przeszkody (nasze rozszerzenie)
 Choinki, bałwany, mury ze śniegu, skrzynki z prezentami, laski cukrowe jako płotek, igloo, sanie, zamarznięty staw (ślizganie), zaspy (spowolnienie).
 
-### Bonusy (pomysły)
-Aktywowane trafieniem śnieżką (rzut w miejsce bonusu).
+### Bonusy (obecne)
+Aktywowane trafieniem śnieżką (rzut w miejsce bonusu). Szczegóły w `CLAUDE.md`.
 - Bombka: tarcza na jedno trafienie.
 - Laska cukrowa: szybszy bieg na kilka sekund.
-- Gwiazdka: podwójny rzut.
-- Pierniczek: przywraca jedno trafienie (zdejmuje ogłuszenie lub trafienie).
-- Gorące kakao: zamrożenie przeciwników na 2–3 s.
-- Mocny rzut: następne 3 śnieżki mocniejsze.
+- Gwiazdka: wachlarz 3 śnieżek przez 3 rzuty.
+- Pierniczek: zdejmuje jedno trafienie.
+- Kakao: przeładowanie ×0,3 przez 10 s (ze stosem/armatką najmniejszy mnożnik).
+
+### Planowane bonusy
+- Pełna siła: 10 s albo 10 rzutów z maksymalną prędkością, przeładowanie od faktycznego przytrzymania.
+- Spowolnienie przeciwników: drużyna przeciwna przez 8 s chodzi ×0,5 i przeładowuje ×2.
+- Spowolnienie śnieżek: śnieżki drużyny przeciwnej przez 8 s lecą ×0,5.
+- Bombka odbijająca: zamiast pochłaniać, odbija śnieżkę w rzucającego.
+- Upicie: wybuch w miejscu bonusu, wszyscy w kręgu przez 10 s idą krzywo.
 - Pomysł: bonusy negatywne.
 
 ### Odłożone na później
