@@ -86,6 +86,7 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 - **Wielka arena:** świat 2 × 2 pola, kamera jedzie za graczem, bez przekątnej, 18 dekoracji w całym świecie. Przeciwnicy podchodzą na odległość rzutu i rzucają tylko, gdy są na ekranie gracza. Kroki: W1 (zrobione: menu, świat, kamera, ruch, AI), W2 (zrobione: strzałki do przeciwników poza ekranem, zasięg śnieżki do szerokości widoku, neutralne stanowiska ze wspólną amunicją, bonusy w całym świecie, do 4 naraz, co 4–7 s), W3 (zrobione: zamieć, po 90 s świat przez 30 s zwęża się do jednego pola, ostrzeżenie 10 s wcześniej, szaroniebieska mgła poza granicą, rzeczy poza granicą znikają, wiatr spycha postacie do środka przez przeszkody).
 
 ### Przeciwnicy według poziomów
+(Stare założenia z początku projektu. Aktualny plan: sekcja „Typy przeciwników" niżej. Dziś w kodzie trudność ustawia tabela `poziomy` w `config.js`, po wprowadzeniu typów zastąpi ją skład poziomu.)
 - Poziomy 1–3: chodzą losowo, reagują wolno albo wcale.
 - Środek: widzą start śnieżki i po krótkiej reakcji robią krok w bok.
 - Wyższe: przewidują tor i uciekają, ale zwinność jest ograniczona.
@@ -106,8 +107,47 @@ Aktywowane trafieniem śnieżką (rzut w miejsce bonusu). Szczegóły w `CLAUDE.
 - Spowolnienie śnieżek: śnieżki drużyny przeciwnej przez 8 s lecą ×0,5.
 - Upicie: wybuch w miejscu bonusu, wszyscy w kręgu przez 10 s idą krzywo.
 
-### Planowane bonusy
+### Planowane bonusy (ustalone na czacie, jeszcze niezrobione)
+Zrobione już: Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śnieżek, Upicie i Bombka odbijająca (patrz „Bonusy (obecne)"). Zostają cztery. Każdy działa na tej samej zasadzie co obecne: zdobywa go, kto trafi go śnieżką. Ikony to propozycje. Mocne bonusy (Wieżyczka, Sojusznik, Niewidzialność) mają mieć mniejszą wagę losowania. Kolejność robienia: Niewidzialność, Miotacz, a na końcu Wieżyczka i Sojusznik (nowe obiekty w kodzie).
+- **Niewidzialność:** postać jest półprzezroczysta (dla siebie też). Rzut **nie** odsłania. Po upływie czasu postać znów jest widoczna. W trakcie komputer rzuca w losowy punkt w pewnym zakresie wokół miejsca, gdzie ostatnio widział postać. Czas trwania do ustalenia (propozycja 6 s). Ikona: lodowy płatek śniegu.
+- **Miotacz** (armatka ręczna): 20 gałek; przytrzymany palec strzela ciągle jak miotacz ognia (bez podnoszenia palca). Przerwa między strzałami: propozycja 0,3 s, do ustalenia. Ikona: pomarańczowa lufa ze śnieżką.
+- **Wieżyczka** (armatka automatyczna): po trafieniu bonusu pojawia się w jego miejscu. Ma 3 życia (przeciwnicy mogą ją zniszczyć) i 30 gałek. Strzela co ok. 3 s losowo, najczęściej w najbliższych przeciwników. Ikona: mała wieżyczka z lufą.
+- **Sojusznik:** zawodnik sterowany przez komputer, w czerwonej kurtce (czerwony oznacza naszą drużynę), 3 życia, do końca poziomu. Parametry i umiejętności bierze od jednego z kolorów przeciwników (patrz „Typy przeciwników"). Wymaga: przeciwnicy muszą umieć celować też w sojusznika, ustalenia warunku przegranej (czy przegrywamy tylko po wyeliminowaniu gracza). Ikona: czerwona czapka.
 - Pomysł: bonusy negatywne.
+
+**Nazwy:** stanowiska drużyn nadal nazywają się „armatka" i „stos". Bonusowe to „Miotacz" i „Wieżyczka", żeby się nie myliły.
+
+### Typy przeciwników (w planowaniu, nic nie ustalone poza zasadami)
+- Zamiast tabeli poziomów, w której zmienia się naraz 8 parametrów, każdy **typ przeciwnika ma stałe parametry**, a poziom to skład (ile i jakich typów). Wyższe poziomy: więcej przeciwników albo typy z wyższymi parametrami.
+- **Typów jest tyle, ile kolorów kurtek poza czerwonym** (czerwony to nasza drużyna). Każdy kolor = inne parametry **i** inna rola/umiejętność (np. Strzelec, Unikacz, Artylerzysta, Zbieracz, Twardziel; do rozpisania).
+- Sojusznik (bonus) bierze parametry któregoś z kolorów, ale ma czerwoną kurtkę.
+- Do rozpisania: lista typów i ich parametrów (życia, czas ogłuszenia, prędkość chodzenia, przeładowanie, czas reakcji, szansa uniku, rozrzut, siła rzutu, szansa na bonus/stanowisko), sposób oznaczenia typu na ekranie (przy tylu kolorach sam kolor może nie wystarczyć), układanie poziomów (ręcznie albo punkty budżetu), limit przeciwników naraz, poziom 6+. Życia, czas ogłuszenia i prędkość chodzenia są teraz wspólne dla gracza i przeciwników, trzeba je rozdzielić.
+- Powód zmiany: poziom 5 jest za ciężki, bo tam wszystkie parametry osiągają maksimum naraz (5 przeciwników × 3 trafienia przeciw 3 trafieniom gracza).
+
+#### Ustalenia o typach
+- 15 kolorów kurtek poza czerwonym = 15 oddzielnych typów (bez „rodzin"). Żadnej roli na razie nie wyrzucamy. Czerwony to nasza drużyna.
+- Umiejętności z bonusów działają **stale** (nie okresowo). Każda stała umiejętność ma mieć cenę w innych liczbach typu (np. rzadsze rzuty, słabsza celność).
+- Typ ma stałe parametry. Wyjątek: życia mogą zależeć od poziomu (patrz Zielony).
+- Parametry typu wpływające na trudność: życia, czas ogłuszenia, rozmiar postaci, prędkość chodzenia, wędrówka i postój, odskok, szansa uniku, czas reakcji, przerwa między rzutami (min/max), siła rzutu (min/max), czas zamachu (osobno, nie z siły), rozrzut, wyprzedzanie (0–1, nowe), mnożnik przeładowania, odległość rzutu, szansa na bonus, szansa na stanowisko, mnożnik amunicji stanowisk, mnożnik czasu bonusów, stałe umiejętności, tarcza na start. Dziś część z nich jest wspólna dla wszystkich i dla gracza (życia, ogłuszenie, rozmiar, chodzenie, wędrówka/postój, odskok, przeładowanie); trzeba je rozdzielić. Nie istnieją jeszcze: wyprzedzanie, osobny zamach, mnożniki czasu bonusów i amunicji, stałe umiejętności, tarcza na start, podchodzenie w zwykłej Arenie.
+- Wskazówka do strojenia rozrzutu: błąd celowania jest losowy w kole o promieniu rozrzut; trafienie w stojącego, gdy błąd jest mniejszy niż ok. 0,038 (promień postaci plus śnieżki). Szansa trafienia P ≈ (0,038 / rozrzut)², więc rozrzut ≈ 0,038 / √P. Rozrzut poniżej 0,038 = zawsze trafia stojącego. Przeciw poruszającemu się graczowi prawie nigdy nie trafia, bo nie ma wyprzedzania.
+
+#### Poziomy Areny (plan, jeszcze niezrobione)
+- Poziom N = N przeciwników, **wszyscy wchodzą od razu** (bez limitu naraz i bez kolejki). Do poziomu 12 (ew. dalej).
+- **Zawieszona zasada trafiania swoich:** śnieżka nie trafia członków własnej drużyny (dotyczy wszystkich trybów, także Sojusznika). Nadal trafia przeciwników, postacie drużyny przeciwnej i bonusy. Skutki: przeciwnik nie osłania innego własnym ciałem, a pijany (bonus Upicie) nie trafi swoich.
+- Skład (Z = Zielony, L = Limonkowy): 1: 1Z · 2: 2Z · 3: 3Z · 4: 3Z+1L · 5: 3Z+2L · 6: 3Z+3L · 7: 3Z+4L · 8: 4Z+4L · 9: 4Z+5L · 10: 5Z+5L · 11: 5Z+6L · 12: 6Z+6L. Kolejne typy mają wchodzić od ok. poziomu 6–7 w miejsce części Zielonych i Limonkowych.
+- Do rozwiązania: ustawienie 12 przeciwników na starcie (jedna linia nie wystarczy, potrzebne 2–3 rzędy równoległe do przekątnej), sprawdzić, czy postacie się blokują, opcjonalny limit `maxNaraz` w config (domyślnie bez limitu), więcej bonusów naraz na wysokich poziomach, rozłożenie pierwszych rzutów w czasie.
+- Kolejność robienia: (1) system typów + Zielony na poziomach 1–3, (2) Limonkowy, (3) poziomy 4–12 i rozmieszczenie.
+
+#### Karty typów
+**Zielony (najsłabszy, Rekrut)**
+- Życia zależne od poziomu: 1–2: 2 życia, 3–4: 3, od 5: 4.
+- Ogłuszenie 1,5 s. Rozmiar postaci ×1,15 (do potwierdzenia).
+- Chodzenie ×0,7, krótkie kroki w stronę gracza, postój 1–1,5 s po kroku.
+- Rzuca z odległości 5–6 ludzików (0,31–0,375 szerokości pola). Zasada awaryjna: po ok. 5 s bez możliwości podejścia rzuca z największej możliwej odległości. Wymaga nowego zachowania w zwykłej Arenie (podchodzenie jest teraz tylko w Wielkiej arenie), bo nie przekracza przekątnej.
+- Przerwa między rzutami 3–4,5 s. Siła rzutu 0,05–0,15 (śnieżka ok. 0,65–0,75 szerokości pola na sekundę). Zamach min. 0,5 s niezależnie od siły.
+- Celuje tylko w punkt, w którym stoi gracz, bez wyprzedzania; rozrzut ok. 0,045 (ok. 70% trafień w stojącego gracza).
+- Unik 15%, czas reakcji 0,5 s (w praktyce kilka procent, bo rzuca z bliska).
+- Bonusy: szansa 10%. Stanowiska: 0%. Umiejętności: brak.
 
 ### Odłożone na później
 - Drużyna 3 zawodników: zaznaczanie zawodnika, zaznaczanie celów, automatyczne uniki i rzuty niezaznaczonych.
