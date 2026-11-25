@@ -51,7 +51,7 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 6. **Trafienia:** śnieżka **trafia każdego, kto stoi na jej drodze** (przeciwnika, nie samego rzucającego). Dwa trafienia ogłuszają na 1 s, trzecie eliminuje. Liczba trafień liczy się przez cały poziom.
 7. **Ruch w trakcie ładowania** jest dozwolony (dwa kciuki: jeden na padzie, drugi na planszy).
 8. **Przeładowanie:** po rzucie 0,5 s plus czas, który przytrzymaliśmy siłę. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pierścień pod stopami pokazuje odliczanie.
-9. **Przeciwnicy:** te same reguły co gracz. Przed rzutem robią **zamach z ręką za głową** (ostrzeżenie): im silniejszy rzut, tym dłużej trwa zamach. Poziom 1: 1 przeciwnik, poziom 2: 2, poziom 3: 3 itd. Wyższe poziomy: lepsze uniki i celność.
+9. **Przeciwnicy:** te same reguły co gracz. Przed rzutem robią **zamach z ręką za głową** (ostrzeżenie): im silniejszy rzut, tym dłużej trwa zamach. Poziom 1: 1 przeciwnik, poziom 2: 2, poziom 3: 3 itd. Przeciwnicy mają **typy** ze stałymi parametrami (`typy` i `skladPoziomow` w `config.js`): poziomy 1–3 to Zielony (patrz „Karty typów”). Poziomy 4+ są jeszcze na starej tabeli `poziomy` (wyższe poziomy: lepsze uniki i celność); to rozwiązanie tymczasowe do kroków A3/A4.
 10. **Bonusy:** ozdoby choinkowe pojawiają się w pasie wokół przekątnej (co 12–18 s, żyją 10 s, ostatnie 2 s migają; 1 naraz na poziomach 1–2, 2 od poziomu 3). Zdobywa je ten, kto trafi je śnieżką (kosztuje rzut). Nie mogą leżeć w strefie pada, w przeszkodzie, przy postaci ani za przeszkodą widzianą od gracza. Bonusy: **Bombka** (tarcza na jedno trafienie, max 12 s, bańka wokół postaci), **Gwiazdka** (3 rzuty albo 8 s: wachlarz 3 śnieżek), **Laska cukrowa** (bieg ×1,4 przez 6 s), **Pierniczek** (rzadki, od razu zdejmuje jedno trafienie). Przeciwnicy też je zbierają: z szansą zależną od poziomu (0,2–0,6) rzucają dokładnie w bonus bliższy im niż graczowi, jeśli mają czystą linię. Aktywne bonusy każdej postaci widać jako ikony nad głową.
 11. **Stanowiska:** każda drużyna ma stos gałek (7–9 gałek; przeładowanie ×0,3 w jego promieniu, stos maleje i znika) i armatkę (20 gałek; w miejscu stania tuż za nią rzut bez przeładowania, najczęściej co 0,2 s; licznik nad armatką; pusta zostaje jako dekoracja). Nie blokują ruchu ani śnieżek. Przeciwnicy z szansą zależną od poziomu (0,25–0,7) idą do swojego stanowiska i stoją tam do wyczerpania amunicji albo ogłuszenia (bez uników). Bonusy nie pojawiają się na stanowiskach.
 12. **Wygrana:** wyeliminowanie wszystkich przeciwników. **Przegrana:** wyeliminowanie zawodnika.
@@ -86,7 +86,7 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 - **Wielka arena:** świat 2 × 2 pola, kamera jedzie za graczem, bez przekątnej, 18 dekoracji w całym świecie. Przeciwnicy podchodzą na odległość rzutu i rzucają tylko, gdy są na ekranie gracza. Kroki: W1 (zrobione: menu, świat, kamera, ruch, AI), W2 (zrobione: strzałki do przeciwników poza ekranem, zasięg śnieżki do szerokości widoku, neutralne stanowiska ze wspólną amunicją, bonusy w całym świecie, do 4 naraz, co 4–7 s), W3 (zrobione: zamieć, po 90 s świat przez 30 s zwęża się do jednego pola, ostrzeżenie 10 s wcześniej, szaroniebieska mgła poza granicą, rzeczy poza granicą znikają, wiatr spycha postacie do środka przez przeszkody).
 
 ### Przeciwnicy według poziomów
-(Stare założenia z początku projektu. Aktualny plan: sekcja „Typy przeciwników" niżej. Dziś w kodzie trudność ustawia tabela `poziomy` w `config.js`, po wprowadzeniu typów zastąpi ją skład poziomu.)
+(Stare założenia z początku projektu. Aktualny plan: sekcja „Typy przeciwników" niżej. Poziomy 1–3 mają już skład z typów (`skladPoziomow`: 1, 2, 3 Zielonych); poziomy 4+ dalej używają tabeli `poziomy` w `config.js`, aż zastąpi ją skład.)
 - Poziomy 1–3: chodzą losowo, reagują wolno albo wcale.
 - Środek: widzą start śnieżki i po krótkiej reakcji robią krok w bok.
 - Wyższe: przewidują tor i uciekają, ale zwinność jest ograniczona.
@@ -139,7 +139,7 @@ Zrobione już: Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śn
 - Kolejność robienia: (1) system typów + Zielony na poziomach 1–3, (2) Limonkowy, (3) poziomy 4–12 i rozmieszczenie.
 
 #### Karty typów
-**Zielony (najsłabszy, Rekrut)**
+**Zielony (najsłabszy, Rekrut): ZROBIONY (krok A1), poziomy 1–3 w obu arenach.** Uwagi z wdrożenia: rozmiar ×1,15 pominięty (promień postaci jest wspólny i używany w wielu plikach). Rozrzut 0,045 daje w grze ok. 83% trafień w stojącego, nie 70%: pudło „za” graczem i tak przez niego przelatuje, bo śnieżka leci do punktu celu; ok. 70% daje rozrzut ok. 0,053. W Wielkiej arenie Zielony podchodzi po staremu (`odlegloscAI` 0,5), nie na 5–6 ludzików. Zamach przy sile 0,05–0,15 to zawsze 0,5 s (zamachMin).
 - Życia zależne od poziomu: 1–2: 2 życia, 3–4: 3, od 5: 4.
 - Ogłuszenie 1,5 s. Rozmiar postaci ×1,15 (do potwierdzenia).
 - Chodzenie ×0,7, krótkie kroki w stronę gracza, postój 1–1,5 s po kroku.

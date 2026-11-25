@@ -11,13 +11,17 @@ function losuj(a, b) {
 function nowyStanAI(param) {
   return {
     cel: null, // punkt, do którego idzie (null = stoi)
-    postoj: losuj(CONFIG.postojMin, CONFIG.postojMax), // ile jeszcze postoi
+    postoj: losuj(param.postojMin, param.postojMax), // ile jeszcze postoi
     // Pierwszy rzut dopiero po napisie "Level N"
     przerwa: CONFIG.czasNapisuLevel + losuj(param.przerwaMin, param.przerwaMax),
     unoszenie: null, // { czas, calosc } gdy unosi śnieżkę nad głowę (ładuje siłę)
     unik: null, // { za, sn } zaplanowany unik przed śnieżką sn za "za" sekund
     widziane: new Set(), // śnieżki, które już ocenił (każdą ocenia tylko raz)
     stanowisko: null, // stanowisko, do którego idzie albo przy którym stoi
+    // Przeciwnik z typem w Arenie (podchodzenie do gracza):
+    odlRzutu: null, // z jakiej odległości rzuci (losowana przy każdej decyzji o rzucie)
+    najblizej: Infinity, // najmniejsza odległość od gracza od ostatniego postępu
+    bezPostepu: 0, // ile sekund nie podszedł bliżej (zasada awaryjna)
   };
 }
 
@@ -30,7 +34,7 @@ function zwolnijStanowisko(z) {
 function aktualizujPrzeciwnika(stan, z, dt) {
   if (z.wyeliminowany) return;
   const ai = z.ai;
-  const param = parametryPoziomu(stan);
+  const param = parametryPrzeciwnika(stan, z); // z typu albo ze starej tabeli poziomy
 
   // Ogłuszony: stoi i nic nie robi (i odchodzi od stanowiska)
   if (z.ogluszenie > 0) {
@@ -59,11 +63,13 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     if (ai.unoszenie.czas >= ai.unoszenie.calosc) {
       const b = ai.unoszenie.bonus;
       if (b && stan.bonusy.includes(b)) {
-        wykonajRzut(stan, z, b.x, b.y, ai.unoszenie.czas); // w bonus: dokładnie, bez rozrzutu
+        // w bonus: dokładnie, bez rozrzutu
+        wykonajRzut(stan, z, b.x, b.y, ai.unoszenie.czas, ai.unoszenie.sila);
       } else {
         rzucWGracza(stan, z, param); // bonus zniknął albo celuje w gracza
       }
       ai.unoszenie = null;
+      ai.odlRzutu = null; // przy następnej decyzji nowa odległość rzutu
       ai.przerwa = przerwaPoRzucie(stan, z, param);
     }
     return;
@@ -84,25 +90,18 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     return;
   }
 
+  // Przeciwnik z typem w zwykłej Arenie: podchodzi krótkimi krokami i rzuca z odległości typu
+  if (z.typ && !jestWielka(stan)) {
+    podchodzenieWArenie(stan, z, param, dt);
+    return;
+  }
+
   // Czy pora zacząć rzut?
   const g = stan.gracz;
   // W Wielkiej arenie rzuca tylko, gdy jest na ekranie gracza, w zasięgu i z czystą linią
   const wolnoRzucic = !jestWielka(stan) || mozeRzucicWielka(stan, z);
   if (ai.przerwa <= 0 && z.przeladowanie <= 0 && !g.wyeliminowany && !ai.cel && wolnoRzucic) {
-    // Dobór siły. Unoszenie trwa tyle, ile ładowanie siły (silniejszy = dłużej).
-    let calosc;
-    if (CONFIG.zasiegZalezyOdSily) {
-      // Siła tak dobrana, żeby dorzucić do gracza (plus mały zapas)
-      const d = odleglosc(z.x, z.y, g.x, g.y) / SZEROKOSC_POLA;
-      const potrzebna = (d - CONFIG.zasiegMin) / (CONFIG.zasiegMax - CONFIG.zasiegMin);
-      calosc = Math.min(Math.max(potrzebna, 0) * CONFIG.MAX_CHARGE + CONFIG.zapasSily, CONFIG.MAX_CHARGE);
-    } else {
-      // Śnieżka i tak doleci, więc siła (czyli prędkość) jest losowa z zakresu poziomu
-      calosc = losuj(param.silaMin, param.silaMax) * CONFIG.MAX_CHARGE;
-    }
-    // Z szansą szansaBonusu celuje w bonus zamiast w gracza
-    const bonus = Math.random() < param.szansaBonusu ? wybierzBonusDlaPrzeciwnika(stan, z) : null;
-    ai.unoszenie = { czas: 0, calosc, bonus };
+    zacznijZamach(stan, z, param);
     return;
   }
 
@@ -118,7 +117,7 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     const ruszyl = Math.hypot(z.x - przedX, z.y - przedY) > predkoscPostaci(z) * dt * 0.2;
     if (doszedl || !ruszyl) {
       ai.cel = null;
-      ai.postoj = losuj(CONFIG.postojMin, CONFIG.postojMax);
+      ai.postoj = losuj(param.postojMin, param.postojMax);
     }
   } else {
     ai.postoj -= dt;
@@ -135,6 +134,79 @@ function aktualizujPrzeciwnika(stan, z, dt) {
       if (!stopyWPrzeszkodzie(cel.x, cel.y + PROMIEN_POSTACI * 0.85)) ai.cel = { x: cel.x, y: cel.y };
     }
   }
+}
+
+// Początek zamachu (ostrzeżenie przed rzutem). Przeciwnik z typem losuje siłę z typu,
+// a zamach trwa max(zamachMin, siła × MAX_CHARGE). Bez typu zamach = czas ładowania siły.
+function zacznijZamach(stan, z, param) {
+  const g = stan.gracz;
+  let calosc;
+  let silaTypu; // undefined = siła z czasu zamachu (stara tabela)
+  if (z.typ) {
+    silaTypu = losuj(param.silaMin, param.silaMax);
+    calosc = Math.max(param.zamachMin, silaTypu * CONFIG.MAX_CHARGE);
+  } else if (CONFIG.zasiegZalezyOdSily) {
+    // Siła tak dobrana, żeby dorzucić do gracza (plus mały zapas)
+    const d = odleglosc(z.x, z.y, g.x, g.y) / SZEROKOSC_POLA;
+    const potrzebna = (d - CONFIG.zasiegMin) / (CONFIG.zasiegMax - CONFIG.zasiegMin);
+    calosc = Math.min(Math.max(potrzebna, 0) * CONFIG.MAX_CHARGE + CONFIG.zapasSily, CONFIG.MAX_CHARGE);
+  } else {
+    // Śnieżka i tak doleci, więc siła (czyli prędkość) jest losowa z zakresu poziomu
+    calosc = losuj(param.silaMin, param.silaMax) * CONFIG.MAX_CHARGE;
+  }
+  // Z szansą szansaBonusu celuje w bonus zamiast w gracza
+  const bonus = Math.random() < param.szansaBonusu ? wybierzBonusDlaPrzeciwnika(stan, z) : null;
+  z.ai.unoszenie = { czas: 0, calosc, bonus, sila: silaTypu };
+}
+
+// Przeciwnik z typem w zwykłej Arenie: krótkie kroki w stronę gracza (z losowym odchyleniem),
+// po kroku postój. W odległości rzutu (lub bliżej) stoi i rzuca. Zasada awaryjna: gdy przez
+// czasAwaryjny nie podszedł bliżej (np. przekątna nie pozwala), rzuca z miejsca, gdzie stoi.
+function podchodzenieWArenie(stan, z, param, dt) {
+  const ai = z.ai;
+  const g = stan.gracz;
+  if (g.wyeliminowany) return;
+  if (ai.odlRzutu === null) ai.odlRzutu = j(losuj(param.odlegloscRzutuMin, param.odlegloscRzutuMax));
+  const d = odleglosc(z.x, z.y, g.x, g.y);
+
+  // Postęp: podszedł bliżej niż dotąd (o więcej niż 1 jednostkę, drobne drgania się nie liczą).
+  // Gdy gracz odszedł o więcej niż długość kroku, liczymy od nowa.
+  if (d < ai.najblizej - 1 || d > ai.najblizej + j(param.krokMax)) {
+    ai.najblizej = d;
+    ai.bezPostepu = 0;
+  } else {
+    ai.bezPostepu += dt;
+  }
+  const wZasiegu = d <= ai.odlRzutu;
+  const awaryjnie = ai.bezPostepu >= param.czasAwaryjny;
+
+  // Rzut: w zasięgu albo awaryjnie, po przerwie i przeładowaniu, nie w trakcie kroku
+  if ((wZasiegu || awaryjnie) && ai.przerwa <= 0 && z.przeladowanie <= 0 && !ai.cel) {
+    zacznijZamach(stan, z, param);
+    return;
+  }
+
+  // Krok (albo odskok po uniku) w toku
+  if (ai.cel) {
+    const przedX = z.x;
+    const przedY = z.y;
+    const doszedl = idzDo(z, ai.cel.x, ai.cel.y, dt);
+    const ruszyl = Math.hypot(z.x - przedX, z.y - przedY) > predkoscPostaci(z) * dt * 0.2;
+    if (doszedl || !ruszyl) {
+      ai.cel = null;
+      ai.postoj = losuj(param.postojMin, param.postojMax);
+    }
+    return;
+  }
+  // W zasięgu stoi w miejscu; poza zasięgiem po postoju robi następny krok
+  ai.postoj -= dt;
+  if (wZasiegu || ai.postoj > 0) return;
+  const kat = Math.atan2(g.y - z.y, g.x - z.x) + (losuj(-1, 1) * param.odchylenieKroku * Math.PI) / 180;
+  const dl = j(losuj(param.krokMin, param.krokMax));
+  const cel = { druzyna: z.druzyna, x: z.x + Math.cos(kat) * dl, y: z.y + Math.sin(kat) * dl };
+  ograniczDoSwojejStrony(cel); // przekątnej nie przekracza
+  // Punktu w przeszkodzie nie wybiera; spróbuje znowu w następnej klatce
+  if (!stopyWPrzeszkodzie(cel.x, cel.y + PROMIEN_POSTACI * 0.85)) ai.cel = { x: cel.x, y: cel.y };
 }
 
 // Ocenia nowe śnieżki lecące w jego stronę: z pewną szansą planuje unik
@@ -228,5 +300,6 @@ function rzucWGracza(stan, z, param) {
   if (g.wyeliminowany) return;
   const kat = Math.random() * Math.PI * 2;
   const blad = j(param.rozrzut) * Math.sqrt(Math.random()); // losowy punkt w kole
-  wykonajRzut(stan, z, g.x + Math.cos(kat) * blad, g.y + Math.sin(kat) * blad, z.ai.unoszenie.czas);
+  const u = z.ai.unoszenie;
+  wykonajRzut(stan, z, g.x + Math.cos(kat) * blad, g.y + Math.sin(kat) * blad, u.czas, u.sila);
 }

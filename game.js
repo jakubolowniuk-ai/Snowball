@@ -25,7 +25,44 @@ function nowaPostac(druzyna, start) {
     przeladowanieCalosc: 0, // ile trwało całe obecne przeładowanie (do rysowania postępu)
     bonusy: [], // aktywne bonusy postaci: { typ, pozostalo }
     wyeliminowany: false,
+    // Wspólne ustawienia (gracz i przeciwnicy ze starej tabeli); typ przeciwnika je zmienia
+    kolor: druzyna === "czerwoni" ? CONFIG.kolorGracza : CONFIG.kolorPrzeciwnika, // kolor atlasu
+    maxTrafien: CONFIG.trafieniaDoEliminacji, // tyle trafień eliminuje (liczba żyć)
+    czasOgluszenia: CONFIG.czasOgluszenia,
+    mnoznikPredkosci: 1,
+    mnoznikPrzeladowania: 1,
   };
+}
+
+// Przeciwnik dostaje typ: kolor, życia (zależne od poziomu), ogłuszenie, prędkość, przeładowanie
+function ustawTyp(z, typId, poziom) {
+  const t = CONFIG.typy[typId];
+  z.typ = typId;
+  z.kolor = t.kolor;
+  z.maxTrafien = Math.min(t.zycia.max, t.zycia.poczatkowe + Math.floor((poziom - 1) / t.zycia.coIlePoziomow));
+  z.czasOgluszenia = t.czasOgluszenia;
+  z.mnoznikPredkosci = t.mnoznikPredkosci;
+  z.mnoznikPrzeladowania = t.mnoznikPrzeladowania;
+}
+
+// Parametry zachowania przeciwnika (AI): z typu albo, bez typu, ze starej tabeli poziomy.
+// Zwraca jeden obiekt z tymi samymi nazwami, żeby ai.js czytał wszystko z jednego miejsca.
+function parametryPrzeciwnika(stan, z) {
+  if (z.typ) return CONFIG.typy[z.typ];
+  return {
+    ...parametryPoziomu(stan),
+    postojMin: CONFIG.postojMin,
+    postojMax: CONFIG.postojMax,
+  };
+}
+
+// Lista typów przeciwników na poziomie (np. ["zielony", "zielony"]) albo null = stara tabela
+function typyPoziomu(poziom) {
+  const sklad = CONFIG.skladPoziomow[poziom];
+  if (!sklad) return null;
+  const lista = [];
+  for (const { typ, ile } of sklad) for (let i = 0; i < ile; i++) lista.push(typ);
+  return lista;
 }
 
 // Stan gry (wypełnia go zacznijPoziom). tryb: "arena" albo "wielkaArena"; wMenu: widać menu
@@ -58,16 +95,17 @@ function zacznijPoziom(stan, poziom) {
   resetPrzeszkod(); // wszystkie dekoracje z powrotem (zamieć mogła je usunąć)
   const wielka = jestWielka(stan);
   stan.gracz = nowaPostac("czerwoni", wielka ? CONFIG.tryby.wielkaArena.startGracz : CONFIG.startGracz);
-  const ilu = wielka
-    ? Math.max(1, Math.round(param.przeciwnicy * CONFIG.tryby.wielkaArena.mnoznikPrzeciwnikow))
-    : param.przeciwnicy;
+  const typy = typyPoziomu(poziom); // null = poziom na starej tabeli
+  const bazowo = typy ? typy.length : param.przeciwnicy;
+  const ilu = wielka ? Math.max(1, Math.round(bazowo * CONFIG.tryby.wielkaArena.mnoznikPrzeciwnikow)) : bazowo;
   const pozycje = wielka ? pozycjePrzeciwnikowWielka(ilu) : pozycjePrzeciwnikow(ilu);
   stan.przeciwnicy = pozycje.map((p) => nowaPostac("zieloni", p));
+  if (typy) stan.przeciwnicy.forEach((p, i) => ustawTyp(p, typy[i % typy.length], poziom));
   for (const p of stan.przeciwnicy) {
     ograniczDoSwojejStrony(p); // nie za blisko brzegu
     wypchnijZPrzeszkod(p); // nie w środku dekoracji
   }
-  for (const p of stan.przeciwnicy) p.ai = nowyStanAI(param);
+  for (const p of stan.przeciwnicy) p.ai = nowyStanAI(parametryPrzeciwnika(stan, p));
   stan.czasPoziomu = 0; // ile sekund trwa obecny poziom
   stan.celowanie = null; // { x, y, czas } gdy palec celuje; czas = ile sekund ładuje się siła
   stan.sniezki = []; // śnieżki w locie
@@ -91,12 +129,12 @@ function trafienie(stan, z, sn) {
   // Bombka (tarcza) zatrzymuje trafienie (odbija albo pochłania): bez zliczenia i ogłuszenia
   if (tarczaPochlania(stan, z, sn)) return;
   z.trafienia += 1;
-  if (z.trafienia >= CONFIG.trafieniaDoEliminacji) {
+  if (z.trafienia >= z.maxTrafien) {
     z.wyeliminowany = true;
     z.ogluszenie = 0;
     z.bonusy = []; // wyeliminowanych efekty bonusów nie obejmują
   } else {
-    z.ogluszenie = CONFIG.czasOgluszenia;
+    z.ogluszenie = z.czasOgluszenia;
   }
   zacznijAnimacjeTrafienia(z, z.wyeliminowany); // ogłuszenie albo upadek
   // Obłoczek i rozbryzg na wysokości tułowia, losowo wybrane grafiki
@@ -251,13 +289,15 @@ function rzuc(stan, pOkno) {
 }
 
 // Rzut postaci z w punkt (celX, celY) po ładowaniu siły przez czasLadowania sekund.
-// Te same reguły dla gracza i przeciwników.
-function wykonajRzut(stan, z, celX, celY, czasLadowania) {
+// Te same reguły dla gracza i przeciwników. silaTypu: siła wylosowana przez przeciwnika
+// z typem (wtedy zamach i siła to osobne liczby); bez niej siła wynika z czasu ładowania.
+function wykonajRzut(stan, z, celX, celY, czasLadowania, silaTypu) {
   const d = odleglosc(z.x, z.y, celX, celY);
   if (d === 0) return;
-  // Pełna siła: każdy rzut z maksymalną prędkością (przeładowanie i tak od czasu ładowania)
+  // Pełna siła: każdy rzut z maksymalną prędkością (przeładowanie i tak bez zmian)
   const pelna = maEfekt(z, "pelnaSila");
-  const s = pelna ? 1 : sila(czasLadowania);
+  const zTypu = silaTypu !== undefined;
+  const s = pelna ? 1 : zTypu ? silaTypu : sila(czasLadowania);
   const kx = (celX - z.x) / d;
   const ky = (celY - z.y) / d;
 
@@ -290,7 +330,9 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania) {
 
   // Przeładowanie: stały czas plus faktyczny czas ładowania siły (także z Pełną siłą);
   // stos, armatka i Kakao je skracają, Spowolnienie przeciwników wydłuża
-  const normalne = CONFIG.czasPrzeladowania + Math.min(czasLadowania, CONFIG.MAX_CHARGE);
+  // (przeciwnik z typem: mnożnik typu i czas równoważny sile, nie długość zamachu)
+  const ladowanie = zTypu ? silaTypu * CONFIG.MAX_CHARGE : Math.min(czasLadowania, CONFIG.MAX_CHARGE);
+  const normalne = CONFIG.czasPrzeladowania * z.mnoznikPrzeladowania + ladowanie;
   z.przeladowanie = przeladowanieZeStanowiskiem(stan, z, normalne);
   z.przeladowanieCalosc = z.przeladowanie;
 }
@@ -340,7 +382,7 @@ function ograniczDoSwojejStrony(z) {
 function predkoscPostaci(z) {
   const laska = maEfekt(z, "laska") ? typBonusu("laska").mnoznikPredkosci : 1;
   const wolno = maEfekt(z, "spowolnieniePrzeciwnikow") ? typBonusu("spowolnieniePrzeciwnikow").mnoznikPredkosci : 1;
-  return j(CONFIG.predkoscZawodnika) * laska * wolno;
+  return j(CONFIG.predkoscZawodnika) * z.mnoznikPredkosci * laska * wolno; // z.mnoznikPredkosci: z typu
 }
 
 // Krok postaci w stronę punktu, z limitem prędkości. Zwraca true, gdy doszła.

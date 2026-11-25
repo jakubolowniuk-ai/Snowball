@@ -115,7 +115,10 @@ function wczytajObrazy(gotowe) {
   // Grafiki z sprites.json, atlasy kolorów zawodników w grze, grafiki bonusów i stanowisk
   const sciezki = [
     ...Object.keys(SPRITY),
-    ...[CONFIG.kolorGracza, CONFIG.kolorPrzeciwnika].map(ZAWODNIK.atlas),
+    // Set (zbiór) usuwa powtórzone kolory, żeby nie wczytywać atlasu dwa razy
+    ...[...new Set([CONFIG.kolorGracza, CONFIG.kolorPrzeciwnika, ...Object.values(CONFIG.typy).map((t) => t.kolor)])].map(
+      ZAWODNIK.atlas
+    ),
     ...CONFIG.bonusy.typy.filter((t) => t.grafika).map((t) => t.grafika),
     ...[CONFIG.stanowiska.stos, CONFIG.stanowiska.armatka].filter((t) => t.grafika).map((t) => t.grafika),
   ];

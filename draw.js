@@ -89,7 +89,7 @@ function kolorDruzyny(z) {
 
 // Atlas (obrazek z klatkami) w kolorze drużyny
 function atlasPostaci(z) {
-  return ZAWODNIK.atlas(z.druzyna === "czerwoni" ? CONFIG.kolorGracza : CONFIG.kolorPrzeciwnika);
+  return ZAWODNIK.atlas(z.kolor); // kolor postaci (gracz: kolorGracza, przeciwnik: z typu)
 }
 
 // Widok postaci ("przod" albo "tyl"), ustawia go animacje.js wg kierunku ruchu i celowania
@@ -483,7 +483,7 @@ function rysujIkonyBonusow(ctx, z, yKropek) {
 
 // Trzy małe kropki nad głową: pełne = trafienia, które zostały
 function rysujZycia(ctx, z) {
-  const ile = CONFIG.trafieniaDoEliminacji;
+  const ile = z.maxTrafien; // liczba żyć tej postaci
   const zostalo = ile - z.trafienia;
   const rk = j(CONFIG.promienKropekZycia);
   const odstep = rk * 3;
