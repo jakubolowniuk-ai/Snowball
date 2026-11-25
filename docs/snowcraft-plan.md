@@ -109,10 +109,10 @@ Aktywowane trafieniem śnieżką (rzut w miejsce bonusu). Szczegóły w `CLAUDE.
 - Niewidzialność: 6 s półprzezroczystości; przeciwnicy rzucają na oślep w koło 0,12 wokół miejsca, gdzie gracz był w chwili zebrania.
 - Miotacz: 20 gałek, przytrzymany palec strzela co 0,3 s z siłą 0,7, bez przeładowania; bezpiecznik 20 s; przeciwnik strzela seriami po 5.
 - Wieżyczka: staje w miejscu trafionego bonusu, 3 życia, 30 gałek, strzela co 3 s w drużynę przeciwną (60% w najbliższego; w Wielkiej arenie tylko na szerokość ekranu); przeciwnicy celowo w nią strzelają (najbliższy cel); nie blokuje ruchu.
+- Sojusznik: zawodnik drużyny zbierającego sterowany przez komputer (parametry losowego typu, 3 życia, do końca poziomu; u gracza czerwona kurtka); przeciwnicy celują w najbliższego z drużyny gracza; przegrana tylko po wyeliminowaniu gracza.
 
 ### Planowane bonusy (ustalone na czacie, jeszcze niezrobione)
-Zrobione już: Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śnieżek, Upicie i Bombka odbijająca (patrz „Bonusy (obecne)"). Został Sojusznik (Niewidzialność, Miotacz i Wieżyczka już zrobione). Każdy działa na tej samej zasadzie co obecne: zdobywa go, kto trafi go śnieżką. Ikony to propozycje. Mocne bonusy (Wieżyczka, Sojusznik, Niewidzialność) mają mieć mniejszą wagę losowania. Kolejność robienia: Niewidzialność, Miotacz, a na końcu Wieżyczka i Sojusznik (nowe obiekty w kodzie).
-- **Sojusznik:** zawodnik sterowany przez komputer, w czerwonej kurtce (czerwony oznacza naszą drużynę), 3 życia, do końca poziomu. Parametry i umiejętności bierze od jednego z kolorów przeciwników (patrz „Typy przeciwników"). Wymaga: przeciwnicy muszą umieć celować też w sojusznika, ustalenia warunku przegranej (czy przegrywamy tylko po wyeliminowaniu gracza). Ikona: czerwona czapka.
+Zrobione już: Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śnieżek, Upicie i Bombka odbijająca (patrz „Bonusy (obecne)"). Wszystkie są już zrobione (kroki B2–B5). Każdy działa na tej samej zasadzie co obecne: zdobywa go, kto trafi go śnieżką. Ikony to propozycje. Mocne bonusy (Wieżyczka, Sojusznik, Niewidzialność) mają mieć mniejszą wagę losowania. Kolejność robienia: Niewidzialność, Miotacz, a na końcu Wieżyczka i Sojusznik (nowe obiekty w kodzie).
 - Pomysł: bonusy negatywne.
 
 **Nazwy:** stanowiska drużyn nadal nazywają się „armatka" i „stos". Bonusowe to „Miotacz" i „Wieżyczka", żeby się nie myliły.

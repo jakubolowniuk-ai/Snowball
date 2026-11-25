@@ -327,9 +327,13 @@ function celPrzeciwnika(stan, z) {
   return cele.reduce((a, b) => (odleglosc(z.x, z.y, a.x, a.y) <= odleglosc(z.x, z.y, b.x, b.y) ? a : b));
 }
 
-// Czy z może obrać c za cel? Przeciwnicy na razie celują tylko w gracza, nie w jego sojusznika.
+// Czy z może obrać c za cel? W Wielkiej arenie przeciwnicy rzucają w sojusznika gracza tylko
+// wtedy, gdy jest na ekranie (tak jak w gracza: rzucają tylko, gdy gracz to widzi).
 function celWidoczny(stan, z, c) {
-  return !(c.sojusznik && c.druzyna === "czerwoni");
+  if (jestWielka(stan) && c.sojusznik && c.druzyna === "czerwoni") {
+    return naEkranie(c.x, c.y, j(CONFIG.tryby.wielkaArena.marginesWidoku));
+  }
+  return true;
 }
 
 // Punkt, w który przeciwnik rzuca w gracza: jego miejsce z losowym błędem (rozrzut).
