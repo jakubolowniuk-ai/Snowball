@@ -180,6 +180,8 @@ function lotSniezki(stan, sn, dt) {
   let najblizej = Infinity;
   for (const z of [stan.gracz, ...stan.przeciwnicy]) {
     if (z === sn.rzucajacy || z.wyeliminowany) continue;
+    // Swoich (drużyna rzucającego) nie trafia, chyba że rzucał upity albo trafianieSwoich: true
+    if (z.druzyna === sn.rzucajacy.druzyna && !CONFIG.trafianieSwoich && !sn.upita) continue;
     if (odlegloscOdOdcinka(z.x, z.y, przed.x, przed.y, po.x, po.y) > zasiegTrafienia) continue;
     // Gdy na odcinku jest kilka postaci, trafia ta bliżej początku
     const d = Math.hypot(z.x - przed.x, z.y - przed.y);
@@ -188,7 +190,7 @@ function lotSniezki(stan, sn, dt) {
       pierwszy = z;
     }
   }
-  // Bonus na drodze? (traktowany jak postać; w kroku B1 zbiera go tylko gracz)
+  // Bonus na drodze? (traktowany jak postać; zbiera go każda śnieżka, gdy przeciwnicyZbierajaBonusy)
   let bonus = null;
   if (sniezkaZbieraBonusy(stan, sn)) {
     const zasiegBonusu = j(CONFIG.bonusy.promienTrafienia) + j(CONFIG.promienSniezki);
@@ -322,6 +324,7 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania, silaTypu) {
       ),
       predkosc: j(pomiedzy(CONFIG.predkoscSniezkiMin, CONFIG.predkoscSniezkiMax, s)),
       przebyte: 0,
+      upita: maEfekt(z, "upicie"), // rzucona przez upitego: może trafić swoich
     });
   }
   // Wachlarz to jeden rzut, także dla Pełnej siły

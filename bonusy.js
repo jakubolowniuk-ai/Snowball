@@ -271,6 +271,7 @@ function tarczaPochlania(stan, z, sn) {
         predkosc: sn.predkosc,
         przebyte: 0,
         odbita: true,
+        upita: maEfekt(z, "upicie"), // odbił upity: może trafić swoich
       });
     }
   }

@@ -38,6 +38,9 @@ const CONFIG = {
   kolorPrzeladowania: "#b8c4d0", // szary pierścień pod stopami w trakcie przeładowania
 
   // Trafienia
+  // Śnieżka nie trafia drużyny rzucającego (wyjątek: rzucił upity). true = stare zachowanie,
+  // w którym trafia każdego na drodze oprócz rzucającego.
+  trafianieSwoich: false,
   trafieniaDoEliminacji: 3, // wcześniejsze trafienia tylko ogłuszają
   czasOgluszenia: 1, // sekundy bez ruchu i bez rzutu
   wibracjaTrafienia: 60, // milisekundy wibracji telefonu przy trafieniu (Android)
