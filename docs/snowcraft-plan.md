@@ -51,7 +51,7 @@ Ostatnia aktualizacja: 21.11.2026 (wersja z jednym zawodnikiem i rzutem w dowoln
 6. **Trafienia:** śnieżka **trafia każdego z drużyny przeciwnej, kto stoi na jej drodze** (swoich nie trafia, wyjątek: upity) (przeciwnika, nie samego rzucającego). Dwa trafienia ogłuszają na 1 s, trzecie eliminuje. Liczba trafień liczy się przez cały poziom.
 7. **Ruch w trakcie ładowania** jest dozwolony (dwa kciuki: jeden na padzie, drugi na planszy).
 8. **Przeładowanie:** po rzucie 0,5 s plus czas, który przytrzymaliśmy siłę. W tym czasie można się ruszać, ale nowe dotknięcie planszy nic nie rzuca. Pierścień pod stopami pokazuje odliczanie.
-9. **Przeciwnicy:** te same reguły co gracz. Przed rzutem robią **zamach z ręką za głową** (ostrzeżenie): im silniejszy rzut, tym dłużej trwa zamach. Poziom 1: 1 przeciwnik, poziom 2: 2, poziom 3: 3 itd. Przeciwnicy mają **typy** ze stałymi parametrami (`typy` i `skladPoziomow` w `config.js`): poziomy 1–3 to Zielony (patrz „Karty typów”). Poziomy 4+ są jeszcze na starej tabeli `poziomy` (wyższe poziomy: lepsze uniki i celność); to rozwiązanie tymczasowe do kroków A3/A4.
+9. **Przeciwnicy:** te same reguły co gracz. Przed rzutem robią **zamach z ręką za głową** (ostrzeżenie): im silniejszy rzut, tym dłużej trwa zamach. Poziom 1: 1 przeciwnik, poziom 2: 2, poziom 3: 3 itd. Przeciwnicy mają **typy** ze stałymi parametrami (`typy` i `skladPoziomow` w `config.js`): poziomy 1–3 to Zielony (patrz „Karty typów”). Poziomy 4–6 to Zielony i Limonkowy. Poziomy 7+ są jeszcze na starej tabeli `poziomy`; to rozwiązanie tymczasowe do kroku A4.
 10. **Bonusy:** ozdoby choinkowe pojawiają się w pasie wokół przekątnej (co 12–18 s, żyją 10 s, ostatnie 2 s migają; 1 naraz na poziomach 1–2, 2 od poziomu 3). Zdobywa je ten, kto trafi je śnieżką (kosztuje rzut). Nie mogą leżeć w strefie pada, w przeszkodzie, przy postaci ani za przeszkodą widzianą od gracza. Bonusy: **Bombka** (tarcza na jedno trafienie, max 12 s, bańka wokół postaci), **Gwiazdka** (3 rzuty albo 8 s: wachlarz 3 śnieżek), **Laska cukrowa** (bieg ×1,4 przez 6 s), **Pierniczek** (rzadki, od razu zdejmuje jedno trafienie). Przeciwnicy też je zbierają: z szansą zależną od poziomu (0,2–0,6) rzucają dokładnie w bonus bliższy im niż graczowi, jeśli mają czystą linię. Aktywne bonusy każdej postaci widać jako ikony nad głową.
 11. **Stanowiska:** każda drużyna ma stos gałek (7–9 gałek; przeładowanie ×0,3 w jego promieniu, stos maleje i znika) i armatkę (20 gałek; w miejscu stania tuż za nią rzut bez przeładowania, najczęściej co 0,2 s; licznik nad armatką; pusta zostaje jako dekoracja). Nie blokują ruchu ani śnieżek. Przeciwnicy z szansą zależną od poziomu (0,25–0,7) idą do swojego stanowiska i stoją tam do wyczerpania amunicji albo ogłuszenia (bez uników). Bonusy nie pojawiają się na stanowiskach.
 12. **Wygrana:** wyeliminowanie wszystkich przeciwników. **Przegrana:** wyeliminowanie zawodnika.
@@ -139,15 +139,22 @@ Zrobione już: Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śn
 - Kolejność robienia: (1) system typów + Zielony na poziomach 1–3, (2) Limonkowy, (3) poziomy 4–12 i rozmieszczenie.
 
 #### Karty typów
-**Zielony (najsłabszy, Rekrut): ZROBIONY (krok A1), poziomy 1–3 w obu arenach.** Uwagi z wdrożenia: rozmiar ×1,15 pominięty (promień postaci jest wspólny i używany w wielu plikach). Rozrzut 0,045 daje w grze ok. 83% trafień w stojącego, nie 70%: pudło „za” graczem i tak przez niego przelatuje, bo śnieżka leci do punktu celu; ok. 70% daje rozrzut ok. 0,053. W Wielkiej arenie Zielony podchodzi po staremu (`odlegloscAI` 0,5), nie na 5–6 ludzików. Zamach przy sile 0,05–0,15 to zawsze 0,5 s (zamachMin).
+**Zielony (najsłabszy, Rekrut): ZROBIONY (krok A1), poziomy 1–3 w obu arenach.** Uwagi z wdrożenia: rozmiar ×1,15 pominięty (promień postaci jest wspólny i używany w wielu plikach). Rozrzut z karty (0,045) dawał w grze ok. 83% trafień, nie 70% (pudło „za” graczem i tak przez niego przelatuje), więc w krokach A3 poprawiony na 0,053 (ok. 70%). W Wielkiej arenie Zielony podchodzi po staremu (`odlegloscAI` 0,5), nie na 5–6 ludzików. Zamach przy sile 0,05–0,15 to zawsze 0,5 s (zamachMin).
 - Życia zależne od poziomu: 1–2: 2 życia, 3–4: 3, od 5: 4.
 - Ogłuszenie 1,5 s. Rozmiar postaci ×1,15 (do potwierdzenia).
 - Chodzenie ×0,7, krótkie kroki w stronę gracza, postój 1–1,5 s po kroku.
 - Rzuca z odległości 5–6 ludzików (0,31–0,375 szerokości pola). Zasada awaryjna: po ok. 5 s bez możliwości podejścia rzuca z największej możliwej odległości. Wymaga nowego zachowania w zwykłej Arenie (podchodzenie jest teraz tylko w Wielkiej arenie), bo nie przekracza przekątnej.
 - Przerwa między rzutami 3–4,5 s. Siła rzutu 0,05–0,15 (śnieżka ok. 0,65–0,75 szerokości pola na sekundę). Zamach min. 0,5 s niezależnie od siły.
-- Celuje tylko w punkt, w którym stoi gracz, bez wyprzedzania; rozrzut ok. 0,045 (ok. 70% trafień w stojącego gracza).
+- Celuje tylko w punkt, w którym stoi gracz, bez wyprzedzania; rozrzut 0,053 (ok. 70% trafień w stojącego gracza).
 - Unik 15%, czas reakcji 0,5 s (w praktyce kilka procent, bo rzuca z bliska).
 - Bonusy: szansa 10%. Stanowiska: 0%. Umiejętności: brak.
+
+**Limonkowy (Zwiadowca): ZROBIONY (krok A3), poziomy 4–6 (3Z+1L, 3Z+2L, 3Z+3L).**
+- Życia 3 stałe, ogłuszenie 1,2 s, rozmiar 1,0.
+- Stała umiejętność „Laska cukrowa”: chód ×1,4 (0,42 szerokości pola na sekundę, szybszy od gracza bez bonusu).
+- Kroki 0,08–0,12 w stronę gracza (±25°), postój 0,5–1 s, rzuca z 0,375–0,4375 (6–7 ludzików), zasada awaryjna jak u Zielonego.
+- Przerwa 3–4,5 s, siła 0,1–0,3, zamach min. 0,4 s, rozrzut 0,047 (ok. 80% trafień w stojącego).
+- Unik 30%, reakcja 0,6 s, bonusy 20%, stanowiska 10%. Cena umiejętności: słabe śnieżki i rzadkie rzuty.
 
 ### Odłożone na później
 - Drużyna 3 zawodników: zaznaczanie zawodnika, zaznaczanie celów, automatyczne uniki i rzuty niezaznaczonych.

@@ -92,12 +92,42 @@ const CONFIG = {
       silaMin: 0.05, // siła rzutu = prędkość śnieżki (0-1)
       silaMax: 0.15,
       zamachMin: 0.5, // zamach (ostrzeżenie) trwa max(zamachMin, sila × MAX_CHARGE)
-      rozrzut: 0.045, // celuje w miejsce gracza z tym błędem (ok. 70% trafień w stojącego)
+      // Celuje w miejsce gracza z tym błędem: 0,053 = ok. 70% trafień w stojącego (sprawdzone
+      // symulacją; pudło "za" graczem i tak przez niego przelatuje, więc wzór z planu zaniżał)
+      rozrzut: 0.053,
       szansaUniku: 0.15,
       czasReakcji: 0.5,
       mnoznikPrzeladowania: 1, // razy czasPrzeladowania
       szansaBonusu: 0.1,
       szansaStanowiska: 0,
+    },
+    // Limonkowy: Zwiadowca. Stała umiejętność "Laska cukrowa" (szybszy niż gracz bez bonusu);
+    // cena: słabe śnieżki i rzadkie rzuty.
+    limonkowy: {
+      nazwa: "Limonkowy (Zwiadowca)",
+      kolor: "limonkowy",
+      zycia: 3, // liczba = stałe życia (nie zależą od poziomu)
+      czasOgluszenia: 1.2,
+      mnoznikPredkosci: 1.4,
+      krokMin: 0.08,
+      krokMax: 0.12,
+      odchylenieKroku: 25,
+      postojMin: 0.5,
+      postojMax: 1.0,
+      odlegloscRzutuMin: 0.375, // 6-7 ludzików
+      odlegloscRzutuMax: 0.4375,
+      czasAwaryjny: 5,
+      przerwaMin: 3,
+      przerwaMax: 4.5,
+      silaMin: 0.1,
+      silaMax: 0.3,
+      zamachMin: 0.4,
+      rozrzut: 0.047, // ok. 80% trafień w stojącego
+      szansaUniku: 0.3,
+      czasReakcji: 0.6,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.2,
+      szansaStanowiska: 0.1,
     },
   },
   // Skład poziomu: lista { typ, ile }. Poziom bez wpisu działa po staremu (tabela poziomy).
@@ -105,6 +135,9 @@ const CONFIG = {
     1: [{ typ: "zielony", ile: 1 }],
     2: [{ typ: "zielony", ile: 2 }],
     3: [{ typ: "zielony", ile: 3 }],
+    4: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 1 }],
+    5: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 2 }],
+    6: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 3 }],
   },
 
   // Zachowanie przeciwnika na starej tabeli poziomy (poziomy bez składu)

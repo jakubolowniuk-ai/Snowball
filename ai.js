@@ -90,8 +90,9 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     return;
   }
 
-  // Przeciwnik z typem w zwykłej Arenie: podchodzi krótkimi krokami i rzuca z odległości typu
-  if (z.typ && !jestWielka(stan)) {
+  // Przeciwnik z typem w zwykłej Arenie: podchodzi krótkimi krokami i rzuca z odległości typu.
+  // Przy stanowisku stoi i rzuca niezależnie od odległości (jak dawniej, kod niżej).
+  if (z.typ && !jestWielka(stan) && !ai.stanowisko) {
     podchodzenieWArenie(stan, z, param, dt);
     return;
   }

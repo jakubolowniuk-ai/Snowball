@@ -39,7 +39,11 @@ function ustawTyp(z, typId, poziom) {
   const t = CONFIG.typy[typId];
   z.typ = typId;
   z.kolor = t.kolor;
-  z.maxTrafien = Math.min(t.zycia.max, t.zycia.poczatkowe + Math.floor((poziom - 1) / t.zycia.coIlePoziomow));
+  // Życia: stała liczba albo { poczatkowe, coIlePoziomow, max } (rosną z poziomem)
+  z.maxTrafien =
+    typeof t.zycia === "number"
+      ? t.zycia
+      : Math.min(t.zycia.max, t.zycia.poczatkowe + Math.floor((poziom - 1) / t.zycia.coIlePoziomow));
   z.czasOgluszenia = t.czasOgluszenia;
   z.mnoznikPredkosci = t.mnoznikPredkosci;
   z.mnoznikPrzeladowania = t.mnoznikPrzeladowania;
