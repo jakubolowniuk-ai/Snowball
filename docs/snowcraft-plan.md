@@ -126,12 +126,12 @@ Zrobione już: Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śn
 
 #### Ustalenia o typach
 - 15 kolorów kurtek poza czerwonym = 15 oddzielnych typów (bez „rodzin"). Żadnej roli na razie nie wyrzucamy. Czerwony to nasza drużyna.
-- Umiejętności z bonusów działają **stale** (nie okresowo). Każda stała umiejętność ma mieć cenę w innych liczbach typu (np. rzadsze rzuty, słabsza celność).
-- Typ ma stałe parametry. Wyjątek: życia mogą zależeć od poziomu (patrz Zielony).
+- **Umiejętności z bonusów są ODŁOŻONE** (decyzja Jakuba 25.11): dostaną je dopiero typy elitarne, poza poziomami 1–20 (patrz „Koncepcja typów A"). Każda umiejętność ma mieć cenę w innych liczbach typu.
+- Typ ma stałe parametry. **Życia NIE są parametrem typu**: są w składzie poziomu (`{ typ, ile, zycia }`), więc ten sam kolor może mieć na różnych poziomach różne życia (decyzja Jakuba 25.11).
 - Parametry typu wpływające na trudność: życia, czas ogłuszenia, rozmiar postaci, prędkość chodzenia, wędrówka i postój, odskok, szansa uniku, czas reakcji, przerwa między rzutami (min/max), siła rzutu (min/max), czas zamachu (osobno, nie z siły), rozrzut, wyprzedzanie (0–1, nowe), mnożnik przeładowania, odległość rzutu, szansa na bonus, szansa na stanowisko, mnożnik amunicji stanowisk, mnożnik czasu bonusów, stałe umiejętności, tarcza na start. Dziś część z nich jest wspólna dla wszystkich i dla gracza (życia, ogłuszenie, rozmiar, chodzenie, wędrówka/postój, odskok, przeładowanie); trzeba je rozdzielić. Nie istnieją jeszcze: wyprzedzanie, osobny zamach, mnożniki czasu bonusów i amunicji, stałe umiejętności, tarcza na start, podchodzenie w zwykłej Arenie.
 - Wskazówka do strojenia rozrzutu: błąd celowania jest losowy w kole o promieniu rozrzut; trafienie w stojącego, gdy błąd jest mniejszy niż ok. 0,038 (promień postaci plus śnieżki). Szansa trafienia P ≈ (0,038 / rozrzut)², więc rozrzut ≈ 0,038 / √P. Rozrzut poniżej 0,038 = zawsze trafia stojącego. Przeciw poruszającemu się graczowi prawie nigdy nie trafia, bo nie ma wyprzedzania.
 
-#### Poziomy Areny: ZROBIONE (krok A4)
+#### Poziomy Areny: ZROBIONE (krok A4), ZASTĄPIONE planem 1–20 (niżej)
 - Wprowadzone: skład 1–12 jak niżej (13+ jak 12), typy przeplatane; `maxNaraz: 6` (decyzja Jakuba: bez limitu poziom 12 to ok. 42 życia przeciwników na 3 gracza) z kolejką (wejście 2 s po zwolnieniu miejsca); start w rzędach równoległych do przekątnej (odstęp rzędów 0,14, naprzemiennie; przy 12 naraz najbliżsi stoją ok. 0,063 od siebie, trochę mniej niż 1,2 × rozmiar postaci, bo trójkąt jest za mały); pierwsze rzuty rozłożone o 0–3 s; miękkie odpychanie przeciwników; bonusy w Arenie `maxNaraz` [1, 1, 2, 2, 3]; stara tabela `poziomy` usunięta. Poniżej pierwotny plan.
 - Poziom N = N przeciwników, **wszyscy wchodzą od razu** (bez limitu naraz i bez kolejki). Do poziomu 12 (ew. dalej).
 - **Trafianie swoich: WPROWADZONE (krok A2).** Śnieżka nie trafia członków własnej drużyny (wszystkie tryby, także przyszły Sojusznik; przełącznik `trafianieSwoich` w `config.js`). Nadal trafia drużynę przeciwną, rozbija się o przeszkody i zbiera bonusy. Skutek: przeciwnik nie osłania innego własnym ciałem. **Wyjątek (decyzja Jakuba): upity (bonus Upicie) trafia też swoich.**
@@ -139,7 +139,69 @@ Zrobione już: Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śn
 - Do rozwiązania: ustawienie 12 przeciwników na starcie (jedna linia nie wystarczy, potrzebne 2–3 rzędy równoległe do przekątnej), sprawdzić, czy postacie się blokują, opcjonalny limit `maxNaraz` w config (domyślnie bez limitu), więcej bonusów naraz na wysokich poziomach, rozłożenie pierwszych rzutów w czasie.
 - Kolejność robienia: (1) system typów + Zielony na poziomach 1–3, (2) Limonkowy, (3) poziomy 4–12 i rozmieszczenie.
 
+#### Koncepcja typów A (OBOWIĄZUJĄCA, ustalona z Jakubem 25.11)
+- **Każdy kolor to profil kompromisów** (szybki, ale niecelny; celny, ale z długim zamachem itd.) zbudowany z parametrów mechaniki. Gracz realnie czuje pięć osi: **chód, celność, zamach (ostrzeżenie), siłę rzutu (prędkość gałki), unik**. Reszta (przerwa, ogłuszenie, odległość, szansa na bonus i stanowisko) jest dodatkiem.
+- **Życia** są w składzie poziomu, nie w typie. Odrzucona została „drabinka B" (każdy kolor lepszy od poprzedniego o równy krok): sąsiednie kolory różniłyby się za mało, żeby to było czuć.
+- **Odległość od gracza to oś typu** (`odlegloscRzutuMin/Max`): jedni muszą podejść blisko, inni stoją daleko, Błękitny ucieka, gdy gracz się zbliża (`ucieka`). W Wielkiej arenie przeciwnik trzyma dystans z typu (nie globalne `odlegloscAI`).
+- **Umiejętności z bonusów tylko dla elity** (kolory 11–15, poza poziomami 1–20): Różowy wachlarz kilku śnieżek, Granatowy niewidzialność (10–15 s od startu i po każdym trafieniu), Bordowy serie jak z armatki, Niebieski i Złoty po dwie umiejętności. Bossowie później, z osobną grafiką.
+- Skala: „chód" 1,0 = prędkość gracza bez bonusu; „trafia" = szansa trafienia stojącego gracza; „siła" = środek zakresu 0–1. Rozrzut dobierany symulacją jak w A1 (punkty odniesienia z gry: 0,053 = ok. 70%, 0,047 = ok. 80%).
+
+| # | Kolor, rola | chód | trafia | zamach | siła | unik |
+|---|---|---|---|---|---|---|
+| 1 | Zielony, Rekrut | 0,7 | 70% | 0,50 | 0,10 | 15% |
+| 2 | Limonkowy, Standard | 1,0 | 80% | 0,40 | 0,20 | 30% |
+| 3 | Żółty, Biegacz | 1,4 | 30% | 0,40 | 0,20 | 35% |
+| 4 | Pomarańczowy, Snajper | 0,8 | 100% | 0,90 | 0,45 | 10% |
+| 5 | Turkusowy, Szybkostrzelec | 0,9 | 40% | 0,30 | 0,15 | 25% |
+| 6 | Błękitny, Unikacz | 1,0 | 45% | 0,45 | 0,20 | 60% |
+| 7 | Szary, Wytrwały | 0,5 | 60% | 0,50 | 0,25 | 20% |
+| 8 | Fioletowy, Siłacz | 0,6 | 70% | 0,80 | 0,90 | 10% |
+| 9 | Brązowy, od stanowisk | 0,9 | 75% | 0,40 | 0,30 | 25% |
+| 10 | Magenta, od bonusów | 1,1 | 70% | 0,40 | 0,30 | 30% |
+| 11 | Różowy (elita) | 1,3 | 90% | 0,70 | 0,15 | 20% |
+| 12 | Granatowy (elita) | 0,7 | 95% | 0,50 | 0,30 | 55% |
+| 13 | Bordowy (elita) | 1,3 | 40% | 0,50 | 0,80 | 25% |
+| 14 | Niebieski (elita) | 0,6 | 95% | 0,70 | 0,75 | 10% |
+| 15 | Złoty (elita) | 1,2 | 90% | 0,30 | 0,70 | 50% |
+
+Dodatki typów 1–10 (pełne wartości są w promptach C3–C10 w `docs/PROMPTY_DLA_AGENTA.md`): Szary ma krótkie ogłuszenie (0,4 s) i rzadkie rzuty, Pomarańczowy i Fioletowy długie przerwy (5–6 s), Turkusowy krótkie (1,5–2,5 s), Brązowy 90% szansy na stanowisko, Magenta 80% na bonus. Uwaga: zamach = max(zamachMin, siła × 1,5 s), więc u Fioletowego (siła ok. 0,9) wychodzi ok. 1,3–1,5 s.
+
+#### Poziomy Areny 1–20 (OBOWIĄZUJĄCE, do testu na Wielkiej arenie; robocze, do strojenia po graniu)
+- Jakub chce przetestować te 20 poziomów **najpierw na Wielkiej arenie** (potem ewentualnie na Arenie). Skład jest wspólny dla obu aren (`skladPoziomow`, `mnoznikPrzeciwnikow` 1).
+- Zasady: poziomy 1–5 ustalone przez Jakuba, od 6: co poziom +1 przeciwnik (poziom N = N osób). Co drugi poziom wchodzi **nowy kolor** (Żółty 6, Pomarańczowy 8, Turkusowy 10, Błękitny 12, Szary 14, Fioletowy 16, Brązowy 18, Magenta 20), w pozostałych dochodzi **nowy Zielony z 2 życiami** („dopełniaj zawsze od zielonych"). Nowe kolory też mają 2 życia (założenie robocze). Starsze grupy zostają przy swoich życiach (3 Zielone po 3, 2 Limonkowe po 2).
+- Przy 20 przeciwnikach naraz plansza byłaby nieczytelna, więc działa `maxNaraz` (robocze 8, reszta czeka w kolejce, wchodzi 2 s po zwolnieniu miejsca). Do strojenia.
+- Poziom 21 i dalej: skład poziomu 20.
+
+| Poz. | Skład (Z = Zielony, L = Limonkowy, nowe kolory z 2ż) | Wrogów | Trafień |
+|---|---|---|---|
+| 1 | 2 Z po 1ż | 2 | 2 |
+| 2 | 4 Z po 1ż | 4 | 4 |
+| 3 | 2 Z po 1ż, 1 L po 1ż | 3 | 3 |
+| 4 | 3 Z po 1ż, 2 L po 1ż | 5 | 5 |
+| 5 | 3 Z po 2ż, 2 L po 1ż | 5 | 8 |
+| 6 | 3 Z po 3ż, 2 L po 2ż, 1 Żółty | 6 | 15 |
+| 7 | + 1 Z po 2ż | 7 | 17 |
+| 8 | + Pomarańczowy | 8 | 19 |
+| 9 | + Z (razem 2 nowe) | 9 | 21 |
+| 10 | + Turkusowy | 10 | 23 |
+| 11 | + Z (3 nowe) | 11 | 25 |
+| 12 | + Błękitny | 12 | 27 |
+| 13 | + Z (4 nowe) | 13 | 29 |
+| 14 | + Szary | 14 | 31 |
+| 15 | + Z (5 nowych) | 15 | 33 |
+| 16 | + Fioletowy | 16 | 35 |
+| 17 | + Z (6 nowych) | 17 | 37 |
+| 18 | + Brązowy | 18 | 39 |
+| 19 | + Z (7 nowych) | 19 | 41 |
+| 20 | + Magenta | 20 | 43 |
+
+- Poziomy 3 i 4 mają po 1 życiu (założenie, Jakub nie podał). Poziom 20: 10 Zielonych (3 po 3ż, 7 po 2ż), 2 Limonkowe, po jednym z ośmiu kolorów.
+- Trafień przybywa równo o 2 na poziom. Dla porównania stara wersja (życia Zielonego rosnące do 4, Limonkowy 3 życia) miała 18 trafień na poziomie 5 i 38 na poziomie 11, czego Jakub nie mógł przejść.
+- Słabe punkty do sprawdzenia w grze: poziomy 15–20 mogą być za długie (ok. 2 min i więcej, w Wielkiej arenie zamieć zwęża świat po 90 s: do testów można ustawić `czasDoZwezania` bardzo duże); połowa wrogów na wysokich poziomach to Zielone; Żółty (chód 1,4, trafia 30%) może być nie do trafienia; Snajper (100% trafień, zamach 0,9 s) wymaga, żeby punkt celu był ustalony na początku zamachu, inaczej ostrzeżenie nic nie daje.
+- Kolejność robienia (prompty C0–C10 w `docs/PROMPTY_DLA_AGENTA.md`): C0 poziom startowy do testów (opcjonalnie), C1 życia w składzie + Limonkowy bez Laski + poziomy 1–5, C2 dystans z typu w Wielkiej arenie, C3 Żółty (6–7), C4 Pomarańczowy (8–9), C5 Turkusowy (10–11), C6 Błękitny (12–13), C7 Szary (14–15), C8 Fioletowy (16–17), C9 Brązowy (18–19), C10 Magenta (20).
+
 #### Karty typów
+(Uwaga: życia i „Laska cukrowa" Limonkowego z poniższych kart są nieaktualne od decyzji z 25.11: życia są w składzie poziomu, Limonkowy ma chód ×1,0. Tabela życi Zielonego 2/3/4 też nieaktualna.)
 **Zielony (najsłabszy, Rekrut): ZROBIONY (krok A1), poziomy 1–3 w obu arenach.** Uwagi z wdrożenia: rozmiar ×1,15 pominięty (promień postaci jest wspólny i używany w wielu plikach). Rozrzut z karty (0,045) dawał w grze ok. 83% trafień, nie 70% (pudło „za” graczem i tak przez niego przelatuje), więc w krokach A3 poprawiony na 0,053 (ok. 70%). W Wielkiej arenie Zielony podchodzi po staremu (`odlegloscAI` 0,5), nie na 5–6 ludzików. Zamach przy sile 0,05–0,15 to zawsze 0,5 s (zamachMin).
 - Życia zależne od poziomu: 1–2: 2 życia, 3–4: 3, od 5: 4.
 - Ogłuszenie 1,5 s. Rozmiar postaci ×1,15 (do potwierdzenia).
