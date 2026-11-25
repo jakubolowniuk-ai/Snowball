@@ -51,7 +51,8 @@ const CONFIG = {
   czasChmurki: 0.5, // jak długo widać obłoczek i rozbryzg po trafieniu
   czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem
 
-  // Typy przeciwników: każdy typ ma stałe parametry, a poziom to skład (ile i jakich typów).
+  // Typy przeciwników: każdy typ ma stałe parametry, a poziom to skład (ile i jakich typów
+  // oraz ile żyć). Życia nie są parametrem typu, tylko wpisu w składzie poziomu.
   // Gracz ich nie używa, ma wspólne ustawienia (trafieniaDoEliminacji, czasOgluszenia, ...).
   // Odległości i kroki to ułamki szerokości pola, czasy w sekundach, siła 0-1.
   typy: {
@@ -60,8 +61,6 @@ const CONFIG = {
     zielony: {
       nazwa: "Zielony (Rekrut)",
       kolor: "zielony", // atlas assets/gracze/atlasy/<kolor>.webp
-      // Życia: na starcie poczatkowe, +1 co coIlePoziomow poziomów, najwyżej max
-      zycia: { poczatkowe: 2, coIlePoziomow: 2, max: 4 },
       czasOgluszenia: 1.5,
       mnoznikPredkosci: 0.7, // chodzi wolniej niż gracz
       // Ruch w Arenie: krótkie kroki w stronę gracza, kierunek z losowym odchyleniem
@@ -88,14 +87,12 @@ const CONFIG = {
       szansaBonusu: 0.1,
       szansaStanowiska: 0,
     },
-    // Limonkowy: Zwiadowca. Stała umiejętność "Laska cukrowa" (szybszy niż gracz bez bonusu);
-    // cena: słabe śnieżki i rzadkie rzuty.
+    // Limonkowy: Standard. Chodzi tak szybko jak gracz, celniejszy niż Zielony.
     limonkowy: {
-      nazwa: "Limonkowy (Zwiadowca)",
+      nazwa: "Limonkowy (Standard)",
       kolor: "limonkowy",
-      zycia: 3, // liczba = stałe życia (nie zależą od poziomu)
       czasOgluszenia: 1.2,
-      mnoznikPredkosci: 1.4,
+      mnoznikPredkosci: 1.0,
       krokMin: 0.08,
       krokMax: 0.12,
       odchylenieKroku: 25,
@@ -117,25 +114,20 @@ const CONFIG = {
       szansaStanowiska: 0.1,
     },
   },
-  // Skład poziomu: lista { typ, ile }. Poziom bez wpisu bierze skład najbliższego niższego.
+  // Skład poziomu: lista { typ, ile, zycia } (zycia = ile trafień eliminuje; 1 = od razu,
+  // bez ogłuszenia). Ten sam typ może mieć kilka wpisów z różnymi życiami.
+  // Poziom bez wpisu bierze skład najbliższego niższego.
   skladPoziomow: {
-    1: [{ typ: "zielony", ile: 1 }],
-    2: [{ typ: "zielony", ile: 2 }],
-    3: [{ typ: "zielony", ile: 3 }],
-    4: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 1 }],
-    5: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 2 }],
-    6: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 3 }],
-    7: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 4 }],
-    8: [{ typ: "zielony", ile: 4 }, { typ: "limonkowy", ile: 4 }],
-    9: [{ typ: "zielony", ile: 4 }, { typ: "limonkowy", ile: 5 }],
-    10: [{ typ: "zielony", ile: 5 }, { typ: "limonkowy", ile: 5 }],
-    11: [{ typ: "zielony", ile: 5 }, { typ: "limonkowy", ile: 6 }],
-    12: [{ typ: "zielony", ile: 6 }, { typ: "limonkowy", ile: 6 }],
-    // poziom 13 i dalej: skład ostatniego wpisu (12)
+    1: [{ typ: "zielony", ile: 2, zycia: 1 }],
+    2: [{ typ: "zielony", ile: 4, zycia: 1 }],
+    3: [{ typ: "zielony", ile: 2, zycia: 1 }, { typ: "limonkowy", ile: 1, zycia: 1 }],
+    4: [{ typ: "zielony", ile: 3, zycia: 1 }, { typ: "limonkowy", ile: 2, zycia: 1 }],
+    5: [{ typ: "zielony", ile: 3, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 1 }],
+    // poziom 6 i dalej: skład ostatniego wpisu
   },
   // Ilu przeciwników naraz na planszy (null = wszyscy od razu). Reszta czeka w kolejce
   // i wchodzi opoznienieWejscia s po tym, jak zwolni się miejsce (ktoś odpadnie).
-  maxNaraz: 6,
+  maxNaraz: 8,
   opoznienieWejscia: 2,
   // Pierwszy rzut każdego przeciwnika: po napisie "Level N" + zwykła przerwa + losowo 0-tyle s
   opoznienieStartuMax: 3,

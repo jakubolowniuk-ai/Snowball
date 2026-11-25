@@ -256,7 +256,7 @@ function dodajSojusznika(stan, z) {
   const ustawienia = typBonusu("sojusznik");
   const typy = Object.keys(CONFIG.typy);
   const s = nowaPostac(z.druzyna, { x: 0, y: 0 });
-  ustawTyp(s, typy[Math.floor(Math.random() * typy.length)], stan.poziom);
+  ustawTyp(s, typy[Math.floor(Math.random() * typy.length)]);
   s.sojusznik = true;
   s.maxTrafien = ustawienia.zycia;
   if (z.druzyna === "czerwoni") s.kolor = CONFIG.kolorGracza;
