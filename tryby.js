@@ -298,7 +298,7 @@ function zacznijTryb(stan, tryb) {
   stan.tryb = tryb;
   stan.wMenu = false;
   menu.style.display = "none";
-  zacznijPoziom(stan, 1);
+  zacznijPoziom(stan, CONFIG.poziomStartowy); // normalnie 1, do testów można zacząć wyżej
 }
 
 document.getElementById("przyciskArena").addEventListener("click", () => zacznijTryb(stan, "arena"));

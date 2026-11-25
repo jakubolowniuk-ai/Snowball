@@ -6,6 +6,10 @@ const CONFIG = {
   // Pole gry: szerokość do wysokości (2 = pole dwa razy szersze niż wyższe)
   ASPECT: 2,
 
+  // Do testów: od którego poziomu zaczyna się gra z menu (np. 15 = start od poziomu 15,
+  // po wygranej idzie 16 itd.). Normalnie 1.
+  poziomStartowy: 1,
+
   // Zawodnik
   rozmiarPostaci: 1 / 16, // średnica okręgu trafień (hitbox) zawodnika
   predkoscZawodnika: 0.3, // limit prędkości: szerokości pola na sekundę
