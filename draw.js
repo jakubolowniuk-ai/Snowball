@@ -825,6 +825,7 @@ function rysujSwiat(ctx, stan) {
     ...przeszkody().map((p) => ({ x: p.x, y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
     ...widoczneStanowiska(stan).map((st) => ({ x: st.x, y: st.y, rysuj: () => rysujStanowisko(ctx, st) })),
     ...stan.bonusy.map((b) => ({ x: b.x, y: b.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujBonusNaPlanszy(ctx, stan, b) })),
+    ...stan.wiezyczki.map((w) => ({ x: w.x, y: w.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujWiezyczke(ctx, w) })),
   ]
     .filter((o) => widac(o.x, o.y))
     .sort((a, b) => a.y - b.y);

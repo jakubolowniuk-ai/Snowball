@@ -261,6 +261,20 @@ function lotSniezki(stan, sn, dt) {
       pierwszy = z;
     }
   }
+  // Wieżyczka drużyny przeciwnej na drodze? (jak postać; swojej nie trafia, chyba że rzucał upity)
+  let wiez = null;
+  const zasiegWiezyczki = j(typBonusu("wiezyczka").promienTrafienia) + j(CONFIG.promienSniezki);
+  for (const w of stan.wiezyczki) {
+    if (w === sn.rzucajacy) continue;
+    if (w.druzyna === sn.rzucajacy.druzyna && !CONFIG.trafianieSwoich && !sn.upita) continue;
+    if (odlegloscOdOdcinka(w.x, w.y, przed.x, przed.y, po.x, po.y) > zasiegWiezyczki) continue;
+    const d = Math.hypot(w.x - przed.x, w.y - przed.y);
+    if (d < najblizej) {
+      najblizej = d;
+      wiez = w;
+      pierwszy = null; // wieżyczka jest bliżej startu niż postać
+    }
+  }
   // Bonus na drodze? (traktowany jak postać; zbiera go każda śnieżka, gdy przeciwnicyZbierajaBonusy)
   let bonus = null;
   if (sniezkaZbieraBonusy(stan, sn)) {
@@ -272,6 +286,7 @@ function lotSniezki(stan, sn, dt) {
         najblizej = d;
         bonus = b;
         pierwszy = null; // bonus jest bliżej startu niż postać
+        wiez = null;
       }
     }
   }
@@ -279,7 +294,7 @@ function lotSniezki(stan, sn, dt) {
   // Przeszkoda na drodze? Sprawdzamy tor cienia (na wysokości stóp).
   const stopy = PROMIEN_POSTACI * 0.85;
   const p = przeszkodaNaOdcinku(przed.x, przed.y + stopy, po.x, po.y + stopy);
-  if (p && ((!pierwszy && !bonus) || Math.hypot(p.x - przed.x, p.y - stopy - przed.y) < najblizej)) {
+  if (p && ((!pierwszy && !bonus && !wiez) || Math.hypot(p.x - przed.x, p.y - stopy - przed.y) < najblizej)) {
     // Śnieżka rozbija się o przeszkodę: sam rozbryzg, bez trafienia.
     // Rozbryzg nie wyżej niż czubek grafiki przeszkody.
     const czubek = p.y - rozmiarGrafiki(p.sciezka).wys * SPRITY[p.sciezka].kotwicaY;
@@ -294,6 +309,10 @@ function lotSniezki(stan, sn, dt) {
   }
   if (bonus) {
     zdobadzBonus(stan, sn.rzucajacy, bonus);
+    return true;
+  }
+  if (wiez) {
+    trafienieWiezyczki(stan, wiez);
     return true;
   }
   if (pierwszy) {
@@ -669,6 +688,9 @@ function aktualizuj(dt) {
 
   // Przeciwnicy (ruch, uniki, rzuty) - logika w ai.js
   for (const p of stan.przeciwnicy) aktualizujPrzeciwnika(stan, p, dt);
+
+  // Wieżyczki z bonusu strzelają same
+  aktualizujWiezyczki(stan, dt);
 
   // Przeciwnicy nie stoją jeden na drugim
   odepchnijPrzeciwnikow(stan, dt);

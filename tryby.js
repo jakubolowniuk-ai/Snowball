@@ -68,6 +68,7 @@ function aktualizujZamiec(stan, dt) {
   stan.stanowiska = stan.stanowiska.filter((st) => !st.zniknelo);
   for (const b of stan.bonusy) if (pozaGranica(stan, b.x, b.y, 0)) chmurkaZamieci(stan, b.x, b.y);
   stan.bonusy = stan.bonusy.filter((b) => !pozaGranica(stan, b.x, b.y, 0));
+  usunWiezyczkiPoza(stan);
 
   // Wiatr: postać poza granicą jest spychana do środka (przez przeszkody, bez obrażeń)
   const v = j(WA().predkoscWiatru) * dt;

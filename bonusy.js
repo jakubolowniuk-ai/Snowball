@@ -18,6 +18,7 @@ function maxBonusowNaraz(stan) {
 // Na początku poziomu: pusta plansza, licznik do pierwszego bonusu
 function zacznijBonusy(stan) {
   stan.bonusy = [];
+  stan.wiezyczki = []; // wieżyczki z bonusu (nowy poziom je usuwa)
   stan.doBonusu = B().pierwszyPoSekundach;
 }
 
@@ -136,6 +137,7 @@ function aktualizujBonusy(stan, dt) {
 
 // Czy śnieżka może zebrać bonus? (w kroku B1 tylko śnieżki gracza)
 function sniezkaZbieraBonusy(stan, sn) {
+  if (sn.rzucajacy.wiezyczka) return false; // strzały wieżyczki przelatują przez bonusy
   return sn.rzucajacy === stan.gracz || B().przeciwnicyZbierajaBonusy;
 }
 
@@ -200,6 +202,13 @@ function zdobadzBonus(stan, z, b) {
         ab.doZmiany = 0; // za ile sekund nowy losowy skręt
       }
     }
+    return;
+  }
+
+  // Wieżyczka: nikt jej nie "nosi", staje w miejscu bonusu dla drużyny trafiającego
+  if (typ.id === "wiezyczka") {
+    chmurkaSniegu(stan, b.x, b.y);
+    postawWiezyczke(stan, z.druzyna, b.x, b.y);
     return;
   }
 

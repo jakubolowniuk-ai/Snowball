@@ -216,6 +216,10 @@ const CONFIG = {
       // z siłą silaStrzalu, bez przeładowania; czasTrwania = bezpiecznik czasu (decyzja: 20 s).
       // Przeciwnik strzela seriami po seriaAI strzałów, potem zwykła przerwa.
       { id: "miotacz", nazwa: "Miotacz", kolor: "#ff9a2e", czasTrwania: 20, waga: 2, grafika: "assets/bonusy/miotacz.png", rzuty: 20, odstepStrzalow: 0.3, silaStrzalu: 0.7, seriaAI: 5 },
+      // Wieżyczka: po trafieniu staje w miejscu bonusu (drużyna trafiającego). zycia, amunicja (gałki),
+      // strzał co odstepStrzalow s z siłą silaStrzalu i rozrzutem; z szansą szansaNajblizszego
+      // w najbliższego z drużyny przeciwnej, inaczej w losowego; promien trafienia wieżyczki.
+      { id: "wiezyczka", nazwa: "Wieżyczka", kolor: "#6e6e7a", czasTrwania: 0, waga: 1, grafika: "assets/bonusy/wiezyczka.png", zycia: 3, amunicja: 30, odstepStrzalow: 3, silaStrzalu: 0.5, rozrzut: 0.05, szansaNajblizszego: 0.6, promienTrafienia: 0.025 },
       // Upicie: bonus wybucha, wszyscy żywi w kręgu idą krzywo (czas i reszta w sekcji upicie wyżej)
       { id: "upicie", nazwa: "Upicie", kolor: "#a64ad6", waga: 2, grafika: "assets/bonusy/upicie.png" },
     ],
