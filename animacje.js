@@ -113,7 +113,7 @@ function wektorCelowania(stan, z) {
   if (z === stan.gracz && stan.celowanie) return { dx: stan.celowanie.x - z.x, dy: stan.celowanie.y - z.y };
   if (z.ai && z.ai.unoszenie) {
     const b = z.ai.unoszenie.bonus;
-    const cel = b && stan.bonusy.includes(b) ? b : widocznyCel(stan);
+    const cel = b && stan.bonusy.includes(b) ? b : celPrzeciwnika(stan, z);
     return { dx: cel.x - z.x, dy: cel.y - z.y };
   }
   return null;

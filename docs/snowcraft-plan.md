@@ -108,10 +108,10 @@ Aktywowane trafieniem śnieżką (rzut w miejsce bonusu). Szczegóły w `CLAUDE.
 - Upicie: wybuch w miejscu bonusu, wszyscy w kręgu przez 10 s idą krzywo.
 - Niewidzialność: 6 s półprzezroczystości; przeciwnicy rzucają na oślep w koło 0,12 wokół miejsca, gdzie gracz był w chwili zebrania.
 - Miotacz: 20 gałek, przytrzymany palec strzela co 0,3 s z siłą 0,7, bez przeładowania; bezpiecznik 20 s; przeciwnik strzela seriami po 5.
+- Wieżyczka: staje w miejscu trafionego bonusu, 3 życia, 30 gałek, strzela co 3 s w drużynę przeciwną (60% w najbliższego; w Wielkiej arenie tylko na szerokość ekranu); przeciwnicy celowo w nią strzelają (najbliższy cel); nie blokuje ruchu.
 
 ### Planowane bonusy (ustalone na czacie, jeszcze niezrobione)
-Zrobione już: Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śnieżek, Upicie i Bombka odbijająca (patrz „Bonusy (obecne)"). Zostają dwa (Niewidzialność i Miotacz już zrobione). Każdy działa na tej samej zasadzie co obecne: zdobywa go, kto trafi go śnieżką. Ikony to propozycje. Mocne bonusy (Wieżyczka, Sojusznik, Niewidzialność) mają mieć mniejszą wagę losowania. Kolejność robienia: Niewidzialność, Miotacz, a na końcu Wieżyczka i Sojusznik (nowe obiekty w kodzie).
-- **Wieżyczka** (armatka automatyczna): po trafieniu bonusu pojawia się w jego miejscu. Ma 3 życia (przeciwnicy mogą ją zniszczyć) i 30 gałek. Strzela co ok. 3 s losowo, najczęściej w najbliższych przeciwników. Ikona: mała wieżyczka z lufą.
+Zrobione już: Kakao, Pełna siła, Spowolnienie przeciwników, Spowolnienie śnieżek, Upicie i Bombka odbijająca (patrz „Bonusy (obecne)"). Został Sojusznik (Niewidzialność, Miotacz i Wieżyczka już zrobione). Każdy działa na tej samej zasadzie co obecne: zdobywa go, kto trafi go śnieżką. Ikony to propozycje. Mocne bonusy (Wieżyczka, Sojusznik, Niewidzialność) mają mieć mniejszą wagę losowania. Kolejność robienia: Niewidzialność, Miotacz, a na końcu Wieżyczka i Sojusznik (nowe obiekty w kodzie).
 - **Sojusznik:** zawodnik sterowany przez komputer, w czerwonej kurtce (czerwony oznacza naszą drużynę), 3 życia, do końca poziomu. Parametry i umiejętności bierze od jednego z kolorów przeciwników (patrz „Typy przeciwników"). Wymaga: przeciwnicy muszą umieć celować też w sojusznika, ustalenia warunku przegranej (czy przegrywamy tylko po wyeliminowaniu gracza). Ikona: czerwona czapka.
 - Pomysł: bonusy negatywne.
 

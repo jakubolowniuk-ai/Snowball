@@ -67,7 +67,7 @@ function aktualizujPrzeciwnika(stan, z, dt) {
       ai.seria.doStrzalu = typ.odstepStrzalow;
       ai.seria.zostalo -= 1;
       if (maEfekt(z, "miotacz") && !stan.gracz.wyeliminowany) {
-        const p = punktRzutuWGracza(stan, param);
+        const p = punktRzutuWGracza(stan, z, param);
         wykonajRzut(stan, z, p.x, p.y, 0, typ.silaStrzalu, true);
       }
       if (ai.seria.zostalo <= 0 || !maEfekt(z, "miotacz")) {
@@ -166,7 +166,7 @@ function zacznijZamach(stan, z, param) {
     z.ai.seria = { zostalo: typBonusu("miotacz").seriaAI, doStrzalu: 0 };
     return;
   }
-  const g = widocznyCel(stan);
+  const g = celPrzeciwnika(stan, z);
   let silaTypu = losuj(param.silaMin, param.silaMax);
   if (CONFIG.zasiegZalezyOdSily) {
     // Gdy zasięg zależy od siły: co najmniej tyle siły, żeby dorzucić do gracza
@@ -186,7 +186,7 @@ function zacznijZamach(stan, z, param) {
 function podchodzenieWArenie(stan, z, param, dt) {
   const ai = z.ai;
   if (stan.gracz.wyeliminowany) return;
-  const g = widocznyCel(stan); // niewidzialnego gracza widzi tylko w zapamiętanym miejscu
+  const g = celPrzeciwnika(stan, z); // gracz (niewidzialny: zapamiętane miejsce) albo jego wieżyczka
   if (ai.odlRzutu === null) ai.odlRzutu = j(losuj(param.odlegloscRzutuMin, param.odlegloscRzutuMax));
   const d = odleglosc(z.x, z.y, g.x, g.y);
 
@@ -269,7 +269,7 @@ function odskocz(z, sn) {
 // Bonus, w który przeciwnik może rzucić: z czystą linią (bez przeszkody)
 // i bliższy jemu niż graczowi; z takich najbliższy jemu. Brak takiego = null.
 function wybierzBonusDlaPrzeciwnika(stan, z) {
-  const g = widocznyCel(stan);
+  const g = celPrzeciwnika(stan, z);
   const stopy = PROMIEN_POSTACI * 0.85;
   let najlepszy = null;
   let najblizej = Infinity;
@@ -315,10 +315,18 @@ function przerwaBezSpowolnienia(stan, z, param) {
   return zwykla * bonus;
 }
 
+// Cel przeciwnika z: najbliższy z drużyny gracza, czyli sam gracz (niewidzialnego widzi tylko
+// w zapamiętanym miejscu) albo wieżyczka drużyny gracza (przeciwnicy strzelają też w nią).
+function celPrzeciwnika(stan, z) {
+  const cele = [widocznyCel(stan)];
+  for (const w of stan.wiezyczki) if (w.druzyna !== z.druzyna) cele.push({ x: w.x, y: w.y, niewidzialny: false });
+  return cele.reduce((a, b) => (odleglosc(z.x, z.y, a.x, a.y) <= odleglosc(z.x, z.y, b.x, b.y) ? a : b));
+}
+
 // Punkt, w który przeciwnik rzuca w gracza: jego miejsce z losowym błędem (rozrzut).
 // Niewidzialnego gracza nie widzi: losowy punkt koła promienPoszukiwania wokół zapamiętanego miejsca.
-function punktRzutuWGracza(stan, param) {
-  const g = widocznyCel(stan);
+function punktRzutuWGracza(stan, z, param) {
+  const g = celPrzeciwnika(stan, z);
   const promien = g.niewidzialny ? j(typBonusu("niewidzialnosc").promienPoszukiwania) : j(param.rozrzut);
   const kat = Math.random() * Math.PI * 2;
   const blad = promien * Math.sqrt(Math.random()); // losowy punkt w kole
@@ -328,7 +336,7 @@ function punktRzutuWGracza(stan, param) {
 // Rzut w gracza po zamachu
 function rzucWGracza(stan, z, param) {
   if (stan.gracz.wyeliminowany) return;
-  const p = punktRzutuWGracza(stan, param);
+  const p = punktRzutuWGracza(stan, z, param);
   const u = z.ai.unoszenie;
   wykonajRzut(stan, z, p.x, p.y, u.czas, u.sila);
 }
