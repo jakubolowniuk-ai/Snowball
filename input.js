@@ -23,8 +23,14 @@ function podepnijSterowanie(canvas, stan, ekranNaPlansze) {
       palecPada = e.pointerId;
       pad.dotykany = true;
       ustawWychylenie(p);
-    } else if (!naPadzie(p) && palecCelu === null && graczMozeSterowac(stan) && stan.gracz.przeladowanie <= 0) {
+    } else if (
+      !naPadzie(p) &&
+      palecCelu === null &&
+      graczMozeSterowac(stan) &&
+      (stan.gracz.przeladowanie <= 0 || maEfekt(stan.gracz, "miotacz"))
+    ) {
       // Celowanie: nie przy ogłuszeniu, nie po końcu poziomu i nie w trakcie przeładowania
+      // (z Miotaczem przeładowania nie ma)
       palecCelu = e.pointerId;
       zacznijCelowanie(stan, p);
     } else {

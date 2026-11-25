@@ -40,6 +40,7 @@ function aktualizujPrzeciwnika(stan, z, dt) {
   // Ogłuszony: stoi i nic nie robi (i odchodzi od stanowiska)
   if (z.ogluszenie > 0) {
     ai.unoszenie = null;
+    ai.seria = null; // ogłuszenie przerywa serię z Miotacza
     ai.cel = null;
     zwolnijStanowisko(z);
     return;
@@ -56,6 +57,25 @@ function aktualizujPrzeciwnika(stan, z, dt) {
       odskocz(z, ai.unik.sn);
       ai.unik = null;
     }
+  }
+
+  // Seria z Miotacza: stoi i strzela co odstepStrzalow, potem zwykła przerwa
+  if (ai.seria) {
+    ai.seria.doStrzalu -= dt;
+    if (ai.seria.doStrzalu <= 0) {
+      const typ = typBonusu("miotacz");
+      ai.seria.doStrzalu = typ.odstepStrzalow;
+      ai.seria.zostalo -= 1;
+      if (maEfekt(z, "miotacz") && !stan.gracz.wyeliminowany) {
+        const p = punktRzutuWGracza(stan, param);
+        wykonajRzut(stan, z, p.x, p.y, 0, typ.silaStrzalu, true);
+      }
+      if (ai.seria.zostalo <= 0 || !maEfekt(z, "miotacz")) {
+        ai.seria = null;
+        ai.przerwa = przerwaPoRzucie(stan, z, param);
+      }
+    }
+    return;
   }
 
   // Unoszenie śnieżki nad głowę (ładowanie siły). Wtedy stoi.
@@ -140,7 +160,12 @@ function aktualizujPrzeciwnika(stan, z, dt) {
 
 // Początek zamachu (ostrzeżenie przed rzutem). Przeciwnik losuje siłę z typu,
 // a zamach trwa max(zamachMin, siła × MAX_CHARGE).
+// Z Miotaczem zamiast zamachu zaczyna serię strzałów.
 function zacznijZamach(stan, z, param) {
+  if (maEfekt(z, "miotacz")) {
+    z.ai.seria = { zostalo: typBonusu("miotacz").seriaAI, doStrzalu: 0 };
+    return;
+  }
   const g = widocznyCel(stan);
   let silaTypu = losuj(param.silaMin, param.silaMax);
   if (CONFIG.zasiegZalezyOdSily) {
@@ -290,14 +315,20 @@ function przerwaBezSpowolnienia(stan, z, param) {
   return zwykla * bonus;
 }
 
-// Rzut w gracza z losowym błędem (rozrzut). Niewidzialnego gracza nie widzi:
-// rzuca w losowy punkt koła promienPoszukiwania wokół zapamiętanego miejsca.
-function rzucWGracza(stan, z, param) {
-  if (stan.gracz.wyeliminowany) return;
+// Punkt, w który przeciwnik rzuca w gracza: jego miejsce z losowym błędem (rozrzut).
+// Niewidzialnego gracza nie widzi: losowy punkt koła promienPoszukiwania wokół zapamiętanego miejsca.
+function punktRzutuWGracza(stan, param) {
   const g = widocznyCel(stan);
   const promien = g.niewidzialny ? j(typBonusu("niewidzialnosc").promienPoszukiwania) : j(param.rozrzut);
   const kat = Math.random() * Math.PI * 2;
   const blad = promien * Math.sqrt(Math.random()); // losowy punkt w kole
+  return { x: g.x + Math.cos(kat) * blad, y: g.y + Math.sin(kat) * blad };
+}
+
+// Rzut w gracza po zamachu
+function rzucWGracza(stan, z, param) {
+  if (stan.gracz.wyeliminowany) return;
+  const p = punktRzutuWGracza(stan, param);
   const u = z.ai.unoszenie;
-  wykonajRzut(stan, z, g.x + Math.cos(kat) * blad, g.y + Math.sin(kat) * blad, u.czas, u.sila);
+  wykonajRzut(stan, z, p.x, p.y, u.czas, u.sila);
 }

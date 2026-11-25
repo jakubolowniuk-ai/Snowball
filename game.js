@@ -336,7 +336,26 @@ function zasieg(s) {
 // a cel ma zostać pod palcem (x, y w świecie liczymy co klatkę).
 function zacznijCelowanie(stan, p) {
   const s = oknoNaSwiat(p);
-  stan.celowanie = { oknoX: p.x, oknoY: p.y, x: s.x, y: s.y, czas: 0 };
+  // Z Miotaczem: przytrzymany palec strzela seriami (pierwszy strzał od razu)
+  const miotacz = maEfekt(stan.gracz, "miotacz");
+  stan.celowanie = { oknoX: p.x, oknoY: p.y, x: s.x, y: s.y, czas: 0, miotacz, doStrzalu: 0 };
+}
+
+// Miotacz gracza: dopóki palec trzyma, strzał co odstepStrzalow w punkt pod palcem
+function strzelajZMiotacza(stan, dt) {
+  const c = stan.celowanie;
+  const g = stan.gracz;
+  if (!c || !c.miotacz) return;
+  if (!maEfekt(g, "miotacz")) {
+    stan.celowanie = null; // skończyły się gałki albo czas: koniec strzelania
+    return;
+  }
+  c.doStrzalu -= dt;
+  if (c.doStrzalu > 0) return;
+  const typ = typBonusu("miotacz");
+  c.doStrzalu = typ.odstepStrzalow;
+  if (odleglosc(g.x, g.y, c.x, c.y) < j(CONFIG.promienAnulowania)) return; // za blisko: nie strzela
+  wykonajRzut(stan, g, c.x, c.y, 0, typ.silaStrzalu, true);
 }
 
 function przesunCelowanie(stan, p) {
@@ -348,11 +367,12 @@ function przesunCelowanie(stan, p) {
   c.y = s.y;
 }
 
-// Puszczenie palca celującego (p: punkt w oknie ekranu): rzut w miejsce palca albo anulowanie
+// Puszczenie palca celującego (p: punkt w oknie ekranu): rzut w miejsce palca albo anulowanie.
+// Przy Miotaczu puszczenie tylko kończy strzelanie (amunicja zostaje).
 function rzuc(stan, pOkno) {
   const c = stan.celowanie;
   stan.celowanie = null;
-  if (!c) return;
+  if (!c || c.miotacz) return;
   const p = oknoNaSwiat(pOkno);
 
   const g = stan.gracz;
@@ -364,7 +384,8 @@ function rzuc(stan, pOkno) {
 // Rzut postaci z w punkt (celX, celY) po ładowaniu siły przez czasLadowania sekund.
 // Te same reguły dla gracza i przeciwników. silaTypu: siła wylosowana przez przeciwnika
 // z typem (wtedy zamach i siła to osobne liczby); bez niej siła wynika z czasu ładowania.
-function wykonajRzut(stan, z, celX, celY, czasLadowania, silaTypu) {
+// miotacz: strzał z Miotacza (siła podana, bez przeładowania, zużywa gałkę Miotacza).
+function wykonajRzut(stan, z, celX, celY, czasLadowania, silaTypu, miotacz = false) {
   const d = odleglosc(z.x, z.y, celX, celY);
   if (d === 0) return;
   // Pełna siła: każdy rzut z maksymalną prędkością (przeładowanie i tak bez zmian)
@@ -401,6 +422,12 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania, silaTypu) {
   // Wachlarz to jeden rzut, także dla Pełnej siły
   if (gwiazdka) zuzyjRzutEfektu(z, "gwiazdka");
   if (pelna) zuzyjRzutEfektu(z, "pelnaSila");
+
+  // Miotacz: bez przeładowania między strzałami, każdy strzał to jedna gałka
+  if (miotacz) {
+    zuzyjRzutEfektu(z, "miotacz");
+    return;
+  }
 
   // Przeładowanie: stały czas plus faktyczny czas ładowania siły (także z Pełną siłą);
   // stos, armatka i Kakao je skracają, Spowolnienie przeciwników wydłuża
@@ -597,6 +624,7 @@ function aktualizuj(dt) {
     stan.celowanie.czas += dt;
     przesunCelowanie(stan, { x: stan.celowanie.oknoX, y: stan.celowanie.oknoY });
   }
+  if (graczMozeSterowac(stan)) strzelajZMiotacza(stan, dt);
 
   // Lot śnieżek: znikają po trafieniu albo na końcu lotu.
   // Śnieżki odbite przez Bombkę w tej klatce trafiają do nowej listy i też zostają.

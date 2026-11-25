@@ -212,6 +212,10 @@ const CONFIG = {
       // Niewidzialność: postać półprzezroczysta (alfa), przeciwnicy rzucają na oślep w koło
       // o promieniu promienPoszukiwania wokół miejsca, gdzie gracz był w chwili zebrania
       { id: "niewidzialnosc", nazwa: "Niewidzialność", kolor: "#bfe9ff", czasTrwania: 6, waga: 1, grafika: "assets/bonusy/niewidzialnosc.png", alfa: 0.35, promienPoszukiwania: 0.12 },
+      // Miotacz (armatka ręczna): "rzuty" = gałki; przytrzymany palec strzela co odstepStrzalow
+      // z siłą silaStrzalu, bez przeładowania; czasTrwania = bezpiecznik czasu (decyzja: 20 s).
+      // Przeciwnik strzela seriami po seriaAI strzałów, potem zwykła przerwa.
+      { id: "miotacz", nazwa: "Miotacz", kolor: "#ff9a2e", czasTrwania: 20, waga: 2, grafika: "assets/bonusy/miotacz.png", rzuty: 20, odstepStrzalow: 0.3, silaStrzalu: 0.7, seriaAI: 5 },
       // Upicie: bonus wybucha, wszyscy żywi w kręgu idą krzywo (czas i reszta w sekcji upicie wyżej)
       { id: "upicie", nazwa: "Upicie", kolor: "#a64ad6", waga: 2, grafika: "assets/bonusy/upicie.png" },
     ],
