@@ -61,7 +61,50 @@ const CONFIG = {
     { przeciwnicy: 5, czasReakcji: 0.4, szansaUniku: 0.7, rozrzut: 0.02, przerwaMin: 3.5, przerwaMax: 5, silaMin: 0.5, silaMax: 1, szansaBonusu: 0.6, szansaStanowiska: 0.7 },
   ],
 
-  // Zachowanie przeciwnika (na każdym poziomie takie samo)
+  // Typy przeciwników: każdy typ ma stałe parametry (zamiast tabeli poziomy).
+  // Gracz ich nie używa, ma wspólne ustawienia (trafieniaDoEliminacji, czasOgluszenia, ...).
+  // Odległości i kroki to ułamki szerokości pola, czasy w sekundach, siła 0-1.
+  typy: {
+    // Zielony: najsłabszy (Rekrut). Rozmiar ×1,15 z karty typu pominięty (promień postaci
+    // jest wspólny i używany w wielu miejscach kodu).
+    zielony: {
+      nazwa: "Zielony (Rekrut)",
+      kolor: "zielony", // atlas assets/gracze/atlasy/<kolor>.webp
+      // Życia: na starcie poczatkowe, +1 co coIlePoziomow poziomów, najwyżej max
+      zycia: { poczatkowe: 2, coIlePoziomow: 2, max: 4 },
+      czasOgluszenia: 1.5,
+      mnoznikPredkosci: 0.7, // chodzi wolniej niż gracz
+      // Ruch w Arenie: krótkie kroki w stronę gracza, kierunek z losowym odchyleniem
+      krokMin: 0.05,
+      krokMax: 0.09,
+      odchylenieKroku: 25, // stopnie
+      postojMin: 1.0, // postój po kroku
+      postojMax: 1.5,
+      // Rzuca z tej odległości albo bliżej (losowana przy każdej decyzji o rzucie)
+      odlegloscRzutuMin: 0.3125,
+      odlegloscRzutuMax: 0.375,
+      czasAwaryjny: 5, // gdy przez tyle sekund nie podejdzie bliżej, rzuca z miejsca
+      przerwaMin: 3, // przerwa między rzutami
+      przerwaMax: 4.5,
+      silaMin: 0.05, // siła rzutu = prędkość śnieżki (0-1)
+      silaMax: 0.15,
+      zamachMin: 0.5, // zamach (ostrzeżenie) trwa max(zamachMin, sila × MAX_CHARGE)
+      rozrzut: 0.045, // celuje w miejsce gracza z tym błędem (ok. 70% trafień w stojącego)
+      szansaUniku: 0.15,
+      czasReakcji: 0.5,
+      mnoznikPrzeladowania: 1, // razy czasPrzeladowania
+      szansaBonusu: 0.1,
+      szansaStanowiska: 0,
+    },
+  },
+  // Skład poziomu: lista { typ, ile }. Poziom bez wpisu działa po staremu (tabela poziomy).
+  skladPoziomow: {
+    1: [{ typ: "zielony", ile: 1 }],
+    2: [{ typ: "zielony", ile: 2 }],
+    3: [{ typ: "zielony", ile: 3 }],
+  },
+
+  // Zachowanie przeciwnika na starej tabeli poziomy (poziomy bez składu)
   wedrowka: 0.12, // jak daleko odchodzi przy losowym chodzeniu
   postojMin: 0.4, // ile stoi między krokami (sekundy, losowo od min do max)
   postojMax: 1.2,
