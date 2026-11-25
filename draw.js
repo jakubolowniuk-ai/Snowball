@@ -550,6 +550,9 @@ function rysujZawodnika(ctx, z, toGracz) {
   // Postać z grafiki (podeszwy w punkcie stóp); gdy grafiki brak, kółko jak dawniej
   // Niesiony wiatrem zamieci podskakuje (cień zostaje na ziemi)
   const podskok = z.wiatr ? Math.abs(Math.sin(stan.czasPoziomu * 12)) * j(CONFIG.tryby.wielkaArena.wysokoscPodskoku) : 0;
+  // Niewidzialny: półprzezroczysty (widać go, także samego siebie, ale słabo)
+  const alfa = z.bonusy.some((ab) => ab.typ === "niewidzialnosc") ? typBonusu("niewidzialnosc").alfa : 1;
+  ctx.globalAlpha *= alfa;
   if (!rysujPostac(ctx, z, z.x, y - podskok)) {
     ctx.fillStyle = kolorDruzyny(z);
     ctx.beginPath();
@@ -558,7 +561,10 @@ function rysujZawodnika(ctx, z, toGracz) {
   }
   ctx.restore();
 
+  ctx.save();
+  ctx.globalAlpha *= alfa;
   rysujBanke(ctx, z);
+  ctx.restore();
 }
 
 

@@ -206,7 +206,7 @@ function pozycjePrzeciwnikowWielka(n) {
 // Rzuca tylko, gdy sam jest w widoku kamery (gracz go widzi), gracz jest w zasięgu
 // i między nimi nie ma przeszkody
 function mozeRzucicWielka(stan, z) {
-  const g = stan.gracz;
+  const g = widocznyCel(stan); // niewidzialnego gracza widzi tylko w zapamiętanym miejscu
   if (!naEkranie(z.x, z.y, j(WA().marginesWidoku))) return false;
   if (odleglosc(z.x, z.y, g.x, g.y) > j(WA().maxOdlegloscRzutuAI)) return false;
   const stopy = PROMIEN_POSTACI * 0.85;
@@ -215,7 +215,7 @@ function mozeRzucicWielka(stan, z) {
 
 // Dokąd iść: daleko od gracza - podchodzi, za blisko - cofa się, w sam raz - kręci się w pobliżu
 function celWielkiejAreny(stan, z) {
-  const g = stan.gracz;
+  const g = widocznyCel(stan);
   const d = odleglosc(z.x, z.y, g.x, g.y) || 1;
   const idealna = j(WA().odlegloscAI);
   const kx = (z.x - g.x) / d; // kierunek od gracza do przeciwnika

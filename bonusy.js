@@ -221,7 +221,19 @@ function zdobadzBonus(stan, z, b) {
     return;
   }
 
-  dodajEfekt(z, typ.id);
+  const ab = dodajEfekt(z, typ.id);
+  // Niewidzialność: przeciwnicy pamiętają tylko miejsce, gdzie postać była w chwili zebrania
+  if (typ.id === "niewidzialnosc") {
+    ab.widzianyX = z.x;
+    ab.widzianyY = z.y;
+  }
+}
+
+// Gdzie przeciwnicy "widzą" gracza: zwykle tam, gdzie stoi; niewidzialnego tylko
+// w zapamiętanym miejscu (z chwili zebrania Niewidzialności)
+function widocznyCel(stan, g = stan.gracz) {
+  const ab = g.bonusy.find((x) => x.typ === "niewidzialnosc");
+  return ab ? { x: ab.widzianyX, y: ab.widzianyY, niewidzialny: true } : { x: g.x, y: g.y, niewidzialny: false };
 }
 
 // Upicie: skręt ruchu płynnie dochodzi do losowego kąta, nowy kąt co zmianaCo s

@@ -209,6 +209,9 @@ const CONFIG = {
       { id: "spowolnieniePrzeciwnikow", nazwa: "Spowolnienie przeciwników", kolor: "#7fd6ff", czasTrwania: 8, waga: 2, grafika: "assets/bonusy/spowolnienie_przeciwnikow.png", mnoznikPredkosci: 0.5, mnoznikPrzeladowania: 2 },
       // Spowolnienie śnieżek: śnieżki drużyny przeciwnej lecą wolniej (także te już w locie)
       { id: "spowolnienieSniezek", nazwa: "Spowolnienie śnieżek", kolor: "#3acfb0", czasTrwania: 8, waga: 2, grafika: "assets/bonusy/spowolnienie_sniezek.png", mnoznikPredkosci: 0.5 },
+      // Niewidzialność: postać półprzezroczysta (alfa), przeciwnicy rzucają na oślep w koło
+      // o promieniu promienPoszukiwania wokół miejsca, gdzie gracz był w chwili zebrania
+      { id: "niewidzialnosc", nazwa: "Niewidzialność", kolor: "#bfe9ff", czasTrwania: 6, waga: 1, grafika: "assets/bonusy/niewidzialnosc.png", alfa: 0.35, promienPoszukiwania: 0.12 },
       // Upicie: bonus wybucha, wszyscy żywi w kręgu idą krzywo (czas i reszta w sekcji upicie wyżej)
       { id: "upicie", nazwa: "Upicie", kolor: "#a64ad6", waga: 2, grafika: "assets/bonusy/upicie.png" },
     ],

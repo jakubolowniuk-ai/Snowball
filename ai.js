@@ -141,7 +141,7 @@ function aktualizujPrzeciwnika(stan, z, dt) {
 // Początek zamachu (ostrzeżenie przed rzutem). Przeciwnik losuje siłę z typu,
 // a zamach trwa max(zamachMin, siła × MAX_CHARGE).
 function zacznijZamach(stan, z, param) {
-  const g = stan.gracz;
+  const g = widocznyCel(stan);
   let silaTypu = losuj(param.silaMin, param.silaMax);
   if (CONFIG.zasiegZalezyOdSily) {
     // Gdy zasięg zależy od siły: co najmniej tyle siły, żeby dorzucić do gracza
@@ -160,8 +160,8 @@ function zacznijZamach(stan, z, param) {
 // czasAwaryjny nie podszedł bliżej (np. przekątna nie pozwala), rzuca z miejsca, gdzie stoi.
 function podchodzenieWArenie(stan, z, param, dt) {
   const ai = z.ai;
-  const g = stan.gracz;
-  if (g.wyeliminowany) return;
+  if (stan.gracz.wyeliminowany) return;
+  const g = widocznyCel(stan); // niewidzialnego gracza widzi tylko w zapamiętanym miejscu
   if (ai.odlRzutu === null) ai.odlRzutu = j(losuj(param.odlegloscRzutuMin, param.odlegloscRzutuMax));
   const d = odleglosc(z.x, z.y, g.x, g.y);
 
@@ -244,7 +244,7 @@ function odskocz(z, sn) {
 // Bonus, w który przeciwnik może rzucić: z czystą linią (bez przeszkody)
 // i bliższy jemu niż graczowi; z takich najbliższy jemu. Brak takiego = null.
 function wybierzBonusDlaPrzeciwnika(stan, z) {
-  const g = stan.gracz;
+  const g = widocznyCel(stan);
   const stopy = PROMIEN_POSTACI * 0.85;
   let najlepszy = null;
   let najblizej = Infinity;
@@ -290,12 +290,14 @@ function przerwaBezSpowolnienia(stan, z, param) {
   return zwykla * bonus;
 }
 
-// Rzut w gracza z losowym błędem (rozrzut)
+// Rzut w gracza z losowym błędem (rozrzut). Niewidzialnego gracza nie widzi:
+// rzuca w losowy punkt koła promienPoszukiwania wokół zapamiętanego miejsca.
 function rzucWGracza(stan, z, param) {
-  const g = stan.gracz;
-  if (g.wyeliminowany) return;
+  if (stan.gracz.wyeliminowany) return;
+  const g = widocznyCel(stan);
+  const promien = g.niewidzialny ? j(typBonusu("niewidzialnosc").promienPoszukiwania) : j(param.rozrzut);
   const kat = Math.random() * Math.PI * 2;
-  const blad = j(param.rozrzut) * Math.sqrt(Math.random()); // losowy punkt w kole
+  const blad = promien * Math.sqrt(Math.random()); // losowy punkt w kole
   const u = z.ai.unoszenie;
   wykonajRzut(stan, z, g.x + Math.cos(kat) * blad, g.y + Math.sin(kat) * blad, u.czas, u.sila);
 }
