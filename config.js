@@ -47,24 +47,7 @@ const CONFIG = {
   czasChmurki: 0.5, // jak długo widać obłoczek i rozbryzg po trafieniu
   czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem
 
-  // Poziomy: ilu przeciwników i jak dobrze grają.
-  // Po ostatnim poziomie gra idzie dalej (Level 6, 7...) z ustawieniami ostatniego.
-  //  czasReakcji: ile sekund mija, zanim zauważy lecącą śnieżkę i zacznie unik
-  //  szansaUniku: szansa (0-1), że w ogóle spróbuje uniknąć śnieżki
-  //  rozrzut: jak bardzo chybia (promień losowego błędu celowania)
-  //  przerwaMin/Max: przerwa między rzutami jednego przeciwnika (sekundy, losowo)
-  //  silaMin/Max: siła rzutu (0-1) losowana z tego zakresu (gdy zasięg nie zależy od siły)
-  //  szansaBonusu: szansa (0-1), że zamiast w gracza rzuci w bonus (bliższy jemu niż graczowi)
-  //  szansaStanowiska: szansa (0-1), że po rzucie pójdzie do wolnego stanowiska swojej drużyny
-  poziomy: [
-    { przeciwnicy: 1, czasReakcji: 0.8, szansaUniku: 0.3, rozrzut: 0.04, przerwaMin: 1.5, przerwaMax: 3, silaMin: 0.1, silaMax: 0.5, szansaBonusu: 0.2, szansaStanowiska: 0.25 },
-    { przeciwnicy: 2, czasReakcji: 0.7, szansaUniku: 0.4, rozrzut: 0.035, przerwaMin: 2, przerwaMax: 3.5, silaMin: 0.2, silaMax: 0.6, szansaBonusu: 0.3, szansaStanowiska: 0.35 },
-    { przeciwnicy: 3, czasReakcji: 0.6, szansaUniku: 0.5, rozrzut: 0.03, przerwaMin: 2.5, przerwaMax: 4, silaMin: 0.3, silaMax: 0.75, szansaBonusu: 0.4, szansaStanowiska: 0.45 },
-    { przeciwnicy: 4, czasReakcji: 0.5, szansaUniku: 0.6, rozrzut: 0.025, przerwaMin: 3, przerwaMax: 4.5, silaMin: 0.4, silaMax: 0.9, szansaBonusu: 0.5, szansaStanowiska: 0.6 },
-    { przeciwnicy: 5, czasReakcji: 0.4, szansaUniku: 0.7, rozrzut: 0.02, przerwaMin: 3.5, przerwaMax: 5, silaMin: 0.5, silaMax: 1, szansaBonusu: 0.6, szansaStanowiska: 0.7 },
-  ],
-
-  // Typy przeciwników: każdy typ ma stałe parametry (zamiast tabeli poziomy).
+  // Typy przeciwników: każdy typ ma stałe parametry, a poziom to skład (ile i jakich typów).
   // Gracz ich nie używa, ma wspólne ustawienia (trafieniaDoEliminacji, czasOgluszenia, ...).
   // Odległości i kroki to ułamki szerokości pola, czasy w sekundach, siła 0-1.
   typy: {
@@ -92,27 +75,79 @@ const CONFIG = {
       silaMin: 0.05, // siła rzutu = prędkość śnieżki (0-1)
       silaMax: 0.15,
       zamachMin: 0.5, // zamach (ostrzeżenie) trwa max(zamachMin, sila × MAX_CHARGE)
-      rozrzut: 0.045, // celuje w miejsce gracza z tym błędem (ok. 70% trafień w stojącego)
+      // Celuje w miejsce gracza z tym błędem: 0,053 = ok. 70% trafień w stojącego (sprawdzone
+      // symulacją; pudło "za" graczem i tak przez niego przelatuje, więc wzór z planu zaniżał)
+      rozrzut: 0.053,
       szansaUniku: 0.15,
       czasReakcji: 0.5,
       mnoznikPrzeladowania: 1, // razy czasPrzeladowania
       szansaBonusu: 0.1,
       szansaStanowiska: 0,
     },
+    // Limonkowy: Zwiadowca. Stała umiejętność "Laska cukrowa" (szybszy niż gracz bez bonusu);
+    // cena: słabe śnieżki i rzadkie rzuty.
+    limonkowy: {
+      nazwa: "Limonkowy (Zwiadowca)",
+      kolor: "limonkowy",
+      zycia: 3, // liczba = stałe życia (nie zależą od poziomu)
+      czasOgluszenia: 1.2,
+      mnoznikPredkosci: 1.4,
+      krokMin: 0.08,
+      krokMax: 0.12,
+      odchylenieKroku: 25,
+      postojMin: 0.5,
+      postojMax: 1.0,
+      odlegloscRzutuMin: 0.375, // 6-7 ludzików
+      odlegloscRzutuMax: 0.4375,
+      czasAwaryjny: 5,
+      przerwaMin: 3,
+      przerwaMax: 4.5,
+      silaMin: 0.1,
+      silaMax: 0.3,
+      zamachMin: 0.4,
+      rozrzut: 0.047, // ok. 80% trafień w stojącego
+      szansaUniku: 0.3,
+      czasReakcji: 0.6,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.2,
+      szansaStanowiska: 0.1,
+    },
   },
-  // Skład poziomu: lista { typ, ile }. Poziom bez wpisu działa po staremu (tabela poziomy).
+  // Skład poziomu: lista { typ, ile }. Poziom bez wpisu bierze skład najbliższego niższego.
   skladPoziomow: {
     1: [{ typ: "zielony", ile: 1 }],
     2: [{ typ: "zielony", ile: 2 }],
     3: [{ typ: "zielony", ile: 3 }],
+    4: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 1 }],
+    5: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 2 }],
+    6: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 3 }],
+    7: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 4 }],
+    8: [{ typ: "zielony", ile: 4 }, { typ: "limonkowy", ile: 4 }],
+    9: [{ typ: "zielony", ile: 4 }, { typ: "limonkowy", ile: 5 }],
+    10: [{ typ: "zielony", ile: 5 }, { typ: "limonkowy", ile: 5 }],
+    11: [{ typ: "zielony", ile: 5 }, { typ: "limonkowy", ile: 6 }],
+    12: [{ typ: "zielony", ile: 6 }, { typ: "limonkowy", ile: 6 }],
+    // poziom 13 i dalej: skład ostatniego wpisu (12)
   },
+  // Ilu przeciwników naraz na planszy (null = wszyscy od razu). Reszta czeka w kolejce
+  // i wchodzi opoznienieWejscia s po tym, jak zwolni się miejsce (ktoś odpadnie).
+  maxNaraz: 6,
+  opoznienieWejscia: 2,
+  // Pierwszy rzut każdego przeciwnika: po napisie "Level N" + zwykła przerwa + losowo 0-tyle s
+  opoznienieStartuMax: 3,
+  // Ustawienie na starcie w Arenie: rzędy równoległe do przekątnej (pierwszy: liniaPrzeciwnikow),
+  // kolejne bliżej lewego górnego rogu co odstepRzedow, najwyżej maxWRzedzie w rzędzie,
+  // postacie nie bliżej siebie niż minOdstep × rozmiarPostaci
+  odstepRzedow: 0.14, // z przesunięciem rzędów daje odstęp co najmniej minOdstep × rozmiarPostaci
+  maxWRzedzie: 6,
+  minOdstep: 1.2,
+  // Miękkie odpychanie przeciwników od siebie (żeby nie stali jeden na drugim):
+  // postacie bliżej niż rozmiarPostaci rozsuwają się, im większe, tym szybciej (na sekundę)
+  odpychaniePrzeciwnikow: 4,
 
-  // Zachowanie przeciwnika na starej tabeli poziomy (poziomy bez składu)
-  wedrowka: 0.12, // jak daleko odchodzi przy losowym chodzeniu
-  postojMin: 0.4, // ile stoi między krokami (sekundy, losowo od min do max)
-  postojMax: 1.2,
+  // Zachowanie przeciwników wspólne dla wszystkich typów
+  wedrowka: 0.12, // Wielka arena: jak daleko odchodzi przy losowym chodzeniu
   odskok: 0.08, // jak daleko odskakuje w bok przy uniku
-  zapasSily: 0.15, // ile sekund dłużej ładuje siłę, żeby na pewno dorzucić
 
   // Pozycje startowe (y też jako ułamek szerokości; wysokość pola to 1 / ASPECT)
   startGracz: { x: 0.62, y: 0.42 }, // prawa dolna część pola, poza padem
@@ -135,7 +170,7 @@ const CONFIG = {
     odstepMax: 18,
     czasZycia: 10, // ile sekund bonus leży na planszy
     miganieOstatnie: 2, // ostatnie sekundy życia bonus miga
-    maxNaraz: [1, 1, 2], // ile naraz na poziomie 1, 2, 3 (dalej jak ostatni)
+    maxNaraz: [1, 1, 2, 2, 3], // ile naraz na poziomie 1, 2, 3, ... (dalej jak ostatni)
     promienTrafienia: 0.02, // okrąg trafienia bonusu (i jego wielkość na ekranie)
     pasPrzekatnej: 0.08, // szerokość pasa wokół przekątnej, w którym się pojawia
     marginesKrawedzi: 0.05, // odstęp od krawędzi pola
@@ -174,6 +209,21 @@ const CONFIG = {
       { id: "spowolnieniePrzeciwnikow", nazwa: "Spowolnienie przeciwników", kolor: "#7fd6ff", czasTrwania: 8, waga: 2, grafika: "assets/bonusy/spowolnienie_przeciwnikow.png", mnoznikPredkosci: 0.5, mnoznikPrzeladowania: 2 },
       // Spowolnienie śnieżek: śnieżki drużyny przeciwnej lecą wolniej (także te już w locie)
       { id: "spowolnienieSniezek", nazwa: "Spowolnienie śnieżek", kolor: "#3acfb0", czasTrwania: 8, waga: 2, grafika: "assets/bonusy/spowolnienie_sniezek.png", mnoznikPredkosci: 0.5 },
+      // Niewidzialność: postać półprzezroczysta (alfa), przeciwnicy rzucają na oślep w koło
+      // o promieniu promienPoszukiwania wokół miejsca, gdzie gracz był w chwili zebrania
+      { id: "niewidzialnosc", nazwa: "Niewidzialność", kolor: "#bfe9ff", czasTrwania: 6, waga: 1, grafika: "assets/bonusy/niewidzialnosc.png", alfa: 0.35, promienPoszukiwania: 0.12 },
+      // Miotacz (armatka ręczna): "rzuty" = gałki; przytrzymany palec strzela co odstepStrzalow
+      // z siłą silaStrzalu, bez przeładowania; czasTrwania = bezpiecznik czasu (decyzja: 20 s).
+      // Przeciwnik strzela seriami po seriaAI strzałów, potem zwykła przerwa.
+      { id: "miotacz", nazwa: "Miotacz", kolor: "#ff9a2e", czasTrwania: 20, waga: 2, grafika: "assets/bonusy/miotacz.png", rzuty: 20, odstepStrzalow: 0.3, silaStrzalu: 0.7, seriaAI: 5 },
+      // Wieżyczka: po trafieniu staje w miejscu bonusu (drużyna trafiającego). zycia, amunicja (gałki),
+      // strzał co odstepStrzalow s z siłą silaStrzalu i rozrzutem; z szansą szansaNajblizszego
+      // w najbliższego z drużyny przeciwnej, inaczej w losowego; promien trafienia wieżyczki.
+      { id: "wiezyczka", nazwa: "Wieżyczka", kolor: "#6e6e7a", czasTrwania: 0, waga: 1, grafika: "assets/bonusy/wiezyczka.png", zycia: 3, amunicja: 30, odstepStrzalow: 3, silaStrzalu: 0.5, rozrzut: 0.05, szansaNajblizszego: 0.6, promienTrafienia: 0.025 },
+      // Sojusznik: obok zbierającego pojawia się zawodnik jego drużyny sterowany przez komputer,
+      // z parametrami losowego typu i zycia życiami, do końca poziomu (sojusznik gracza w kurtce
+      // w kolorze gracza). Najwyżej jeden naraz na drużynę. odleglosc: jak daleko od zbierającego.
+      { id: "sojusznik", nazwa: "Sojusznik", kolor: "#d93a3a", czasTrwania: 0, waga: 1, grafika: "assets/bonusy/czapka.png", zycia: 3, odleglosc: 0.1 },
       // Upicie: bonus wybucha, wszyscy żywi w kręgu idą krzywo (czas i reszta w sekcji upicie wyżej)
       { id: "upicie", nazwa: "Upicie", kolor: "#a64ad6", waga: 2, grafika: "assets/bonusy/upicie.png" },
     ],
@@ -208,7 +258,7 @@ const CONFIG = {
       wygladzanieKamery: 4, // jak szybko kamera dogania gracza (większe = szybciej)
       startGracz: { x: 1.6, y: 0.82 }, // prawa dolna część świata
       liniaPrzeciwnikow: 0.55, // przeciwnicy na linii w lewej górnej części (0 = róg)
-      mnoznikPrzeciwnikow: 1, // liczba przeciwników = poziomy[N].przeciwnicy razy to
+      mnoznikPrzeciwnikow: 1, // liczba przeciwników = suma ze składu poziomu razy to
       odlegloscAI: 0.5, // z jakiej odległości od gracza przeciwnik chce rzucać
       maxOdlegloscRzutuAI: 0.9, // dalej nie rzuca
       marginesWidoku: 0.05, // przeciwnik rzuca tylko na ekranie gracza (z tym zapasem)

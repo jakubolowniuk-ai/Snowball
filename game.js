@@ -39,50 +39,72 @@ function ustawTyp(z, typId, poziom) {
   const t = CONFIG.typy[typId];
   z.typ = typId;
   z.kolor = t.kolor;
-  z.maxTrafien = Math.min(t.zycia.max, t.zycia.poczatkowe + Math.floor((poziom - 1) / t.zycia.coIlePoziomow));
+  // Życia: stała liczba albo { poczatkowe, coIlePoziomow, max } (rosną z poziomem)
+  z.maxTrafien =
+    typeof t.zycia === "number"
+      ? t.zycia
+      : Math.min(t.zycia.max, t.zycia.poczatkowe + Math.floor((poziom - 1) / t.zycia.coIlePoziomow));
   z.czasOgluszenia = t.czasOgluszenia;
   z.mnoznikPredkosci = t.mnoznikPredkosci;
   z.mnoznikPrzeladowania = t.mnoznikPrzeladowania;
 }
 
-// Parametry zachowania przeciwnika (AI): z typu albo, bez typu, ze starej tabeli poziomy.
-// Zwraca jeden obiekt z tymi samymi nazwami, żeby ai.js czytał wszystko z jednego miejsca.
+// Parametry zachowania przeciwnika (AI) z jego typu
 function parametryPrzeciwnika(stan, z) {
-  if (z.typ) return CONFIG.typy[z.typ];
-  return {
-    ...parametryPoziomu(stan),
-    postojMin: CONFIG.postojMin,
-    postojMax: CONFIG.postojMax,
-  };
+  return CONFIG.typy[z.typ];
 }
 
-// Lista typów przeciwników na poziomie (np. ["zielony", "zielony"]) albo null = stara tabela
+// Lista typów przeciwników na poziomie (np. ["zielony", "zielony"]).
+// Poziom bez wpisu w skladPoziomow bierze skład najbliższego niższego (13+ jak 12).
 function typyPoziomu(poziom) {
-  const sklad = CONFIG.skladPoziomow[poziom];
-  if (!sklad) return null;
+  const numery = Object.keys(CONFIG.skladPoziomow).map(Number).filter((n) => n <= poziom);
+  const sklad = CONFIG.skladPoziomow[Math.max(...numery)];
+  // Typy przeplatane (Z, L, Z, L, ...), żeby przy limicie maxNaraz na planszy były oba
   const lista = [];
-  for (const { typ, ile } of sklad) for (let i = 0; i < ile; i++) lista.push(typ);
+  const zostalo = sklad.map(({ typ, ile }) => ({ typ, ile }));
+  while (zostalo.some((s) => s.ile > 0)) {
+    for (const s of zostalo) {
+      if (s.ile > 0) {
+        lista.push(s.typ);
+        s.ile -= 1;
+      }
+    }
+  }
   return lista;
+}
+
+// Wszystkie postacie: gracz, jego sojusznicy (bonus Sojusznik) i przeciwnicy
+function wszystkiePostacie(stan) {
+  return [stan.gracz, ...stan.sojusznicy, ...stan.przeciwnicy];
 }
 
 // Stan gry (wypełnia go zacznijPoziom). tryb: "arena" albo "wielkaArena"; wMenu: widać menu
 const stan = { tryb: "arena", wMenu: true };
 
-// Parametry obecnego poziomu z config.js (po ostatnim zostają ustawienia ostatniego)
-function parametryPoziomu(stan) {
-  const ile = CONFIG.poziomy.length;
-  return CONFIG.poziomy[Math.min(stan.poziom, ile) - 1];
-}
-
-// Pozycje startowe n przeciwników: równo na linii równoległej do przekątnej,
-// w lewym górnym trójkącie (od lewego brzegu do górnego)
+// Pozycje startowe n przeciwników w Arenie: rzędy równoległe do przekątnej w lewym górnym
+// trójkącie. Pierwszy rząd na liniaPrzeciwnikow, kolejne bliżej rogu (co odstepRzedow),
+// najwyżej maxWRzedzie w rzędzie i tyle, ile się zmieści przy minOdstep; rzędy nieparzyste
+// przesunięte o pół odstępu (naprzemiennie).
 function pozycjePrzeciwnikow(n) {
   const wysokosc = 1 / CONFIG.ASPECT; // wysokość pola jako ułamek szerokości
-  const a = CONFIG.liniaPrzeciwnikow;
+  const r = CONFIG.rozmiarPostaci / 2; // promień postaci (ułamek szerokości): zapas od brzegu
+  const odstep = CONFIG.minOdstep * CONFIG.rozmiarPostaci;
   const pozycje = [];
-  for (let i = 0; i < n; i++) {
-    const t = (i + 0.5) / n; // od 0 (lewy brzeg) do 1 (górny brzeg)
-    pozycje.push({ x: t * a, y: (1 - t) * a * wysokosc });
+  let a = CONFIG.liniaPrzeciwnikow;
+  for (let rzad = 0; pozycje.length < n; rzad++, a -= CONFIG.odstepRzedow) {
+    // Brak miejsca w trójkącie (bardzo dużo przeciwników): kolejni znów od pierwszego rzędu
+    if (a < 4 * CONFIG.rozmiarPostaci) a = CONFIG.liniaPrzeciwnikow - CONFIG.odstepRzedow / 2;
+    // Punkt rzędu: (t × a, (1 - t) × a × wysokosc); t tylko tam, gdzie postać nie dotyka brzegu
+    const tMin = r / a;
+    const tMax = 1 - r / (a * wysokosc);
+    const dlugosc = Math.max(tMax - tMin, 0) * Math.hypot(a, a * wysokosc);
+    const miesci = Math.floor(dlugosc / odstep - 0.5);
+    const ile = Math.max(1, Math.min(n - pozycje.length, CONFIG.maxWRzedzie, miesci));
+    const przesuniecie = rzad % 2 ? 0.5 : 0; // rzędy nieparzyste o pół miejsca dalej
+    for (let i = 0; i < ile; i++) {
+      const t = tMin + (tMax - tMin) * ((i + 0.5 + przesuniecie) / (ile + 0.5));
+      pozycje.push({ x: t * a, y: (1 - t) * a * wysokosc });
+    }
   }
   return pozycje;
 }
@@ -90,22 +112,20 @@ function pozycjePrzeciwnikow(n) {
 // Ustawia wszystko od nowa na początek poziomu o numerze "poziom"
 function zacznijPoziom(stan, poziom) {
   stan.poziom = poziom;
-  const param = parametryPoziomu(stan);
   ustawSwiat(stan); // Arena: świat = pole; Wielka arena: większy świat
   resetPrzeszkod(); // wszystkie dekoracje z powrotem (zamieć mogła je usunąć)
   const wielka = jestWielka(stan);
   stan.gracz = nowaPostac("czerwoni", wielka ? CONFIG.tryby.wielkaArena.startGracz : CONFIG.startGracz);
-  const typy = typyPoziomu(poziom); // null = poziom na starej tabeli
-  const bazowo = typy ? typy.length : param.przeciwnicy;
-  const ilu = wielka ? Math.max(1, Math.round(bazowo * CONFIG.tryby.wielkaArena.mnoznikPrzeciwnikow)) : bazowo;
+  stan.sojusznicy = []; // sojusznicy gracza (bonus Sojusznik), nowy poziom ich usuwa
+  const typy = typyPoziomu(poziom);
+  const ilu = wielka ? Math.max(1, Math.round(typy.length * CONFIG.tryby.wielkaArena.mnoznikPrzeciwnikow)) : typy.length;
   const pozycje = wielka ? pozycjePrzeciwnikowWielka(ilu) : pozycjePrzeciwnikow(ilu);
-  stan.przeciwnicy = pozycje.map((p) => nowaPostac("zieloni", p));
-  if (typy) stan.przeciwnicy.forEach((p, i) => ustawTyp(p, typy[i % typy.length], poziom));
-  for (const p of stan.przeciwnicy) {
-    ograniczDoSwojejStrony(p); // nie za blisko brzegu
-    wypchnijZPrzeszkod(p); // nie w środku dekoracji
-  }
-  for (const p of stan.przeciwnicy) p.ai = nowyStanAI(parametryPrzeciwnika(stan, p));
+  // Wszyscy przeciwnicy poziomu; pierwszych maxNaraz wchodzi od razu, reszta czeka w kolejce
+  const wszyscy = pozycje.map((p, i) => nowyPrzeciwnik(stan, typy[i % typy.length], p));
+  const naraz = CONFIG.maxNaraz || wszyscy.length;
+  stan.przeciwnicy = wszyscy.slice(0, naraz);
+  stan.kolejka = wszyscy.slice(naraz);
+  stan.doWejscia = CONFIG.opoznienieWejscia;
   stan.czasPoziomu = 0; // ile sekund trwa obecny poziom
   stan.celowanie = null; // { x, y, czas } gdy palec celuje; czas = ile sekund ładuje się siła
   stan.sniezki = []; // śnieżki w locie
@@ -116,6 +136,77 @@ function zacznijPoziom(stan, poziom) {
   ustawKamere(stan);
 }
 zacznijPoziom(stan, 1);
+
+// Nowy przeciwnik typu typId w punkcie start (ułamki szerokości pola)
+function nowyPrzeciwnik(stan, typId, start) {
+  const p = nowaPostac("zieloni", start);
+  ustawTyp(p, typId, stan.poziom);
+  ograniczDoSwojejStrony(p); // nie za blisko brzegu
+  wypchnijZPrzeszkod(p); // nie w środku dekoracji
+  p.ai = nowyStanAI(parametryPrzeciwnika(stan, p));
+  return p;
+}
+
+// Miękkie odpychanie: dwaj żywi przeciwnicy bliżej niż rozmiarPostaci rozsuwają się powoli.
+// Sojusznik gracza odsuwa się od gracza (gracz się nie przesuwa).
+function odepchnijPrzeciwnikow(stan, dt) {
+  const g = stan.gracz;
+  for (const s of stan.sojusznicy) {
+    if (s.wyeliminowany || g.wyeliminowany) continue;
+    const dx = s.x - g.x || 1; // ten sam punkt: w poziomie
+    const dy = s.y - g.y;
+    const d = Math.hypot(dx, dy);
+    if (d >= j(CONFIG.rozmiarPostaci)) continue;
+    const przesun = (j(CONFIG.rozmiarPostaci) - d) * Math.min(1, CONFIG.odpychaniePrzeciwnikow * dt);
+    s.x += (dx / d) * przesun;
+    s.y += (dy / d) * przesun;
+    ograniczDoSwojejStrony(s);
+    wypchnijZPrzeszkod(s);
+  }
+  const zywi = stan.przeciwnicy.filter((p) => !p.wyeliminowany);
+  const min = j(CONFIG.rozmiarPostaci);
+  const k = Math.min(1, CONFIG.odpychaniePrzeciwnikow * dt);
+  for (let i = 0; i < zywi.length; i++) {
+    for (let n = i + 1; n < zywi.length; n++) {
+      const a = zywi[i];
+      const b = zywi[n];
+      let dx = b.x - a.x;
+      let dy = b.y - a.y;
+      let d = Math.hypot(dx, dy);
+      if (d >= min) continue;
+      if (d === 0) {
+        dx = 1; // ten sam punkt: rozsuwamy w poziomie
+        d = 1;
+      }
+      const przesun = ((min - d) / 2) * k;
+      a.x -= (dx / d) * przesun;
+      a.y -= (dy / d) * przesun;
+      b.x += (dx / d) * przesun;
+      b.y += (dy / d) * przesun;
+      for (const p of [a, b]) {
+        ograniczDoSwojejStrony(p);
+        wypchnijZPrzeszkod(p);
+      }
+    }
+  }
+}
+
+// Kolejka (gdy ustawiony maxNaraz): gdy na planszy jest mniej żywych niż maxNaraz,
+// po opoznienieWejscia s wchodzi następny z kolejki (na swoje miejsce startowe)
+function aktualizujKolejke(stan, dt) {
+  if (!stan.kolejka.length) return;
+  const zywych = stan.przeciwnicy.filter((p) => !p.wyeliminowany).length;
+  if (zywych >= CONFIG.maxNaraz) {
+    stan.doWejscia = CONFIG.opoznienieWejscia;
+    return;
+  }
+  stan.doWejscia -= dt;
+  if (stan.doWejscia > 0) return;
+  const p = stan.kolejka.shift();
+  p.ai.przerwa -= CONFIG.czasNapisuLevel; // napis "Level N" już minął
+  stan.przeciwnicy.push(p);
+  stan.doWejscia = CONFIG.opoznienieWejscia;
+}
 
 // Czy gracz może teraz sterować (ruch i rzut)
 function graczMozeSterowac(stan) {
@@ -178,7 +269,7 @@ function lotSniezki(stan, sn, dt) {
   const zasiegTrafienia = PROMIEN_POSTACI + j(CONFIG.promienSniezki);
   let pierwszy = null;
   let najblizej = Infinity;
-  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+  for (const z of wszystkiePostacie(stan)) {
     if (z === sn.rzucajacy || z.wyeliminowany) continue;
     // Swoich (drużyna rzucającego) nie trafia, chyba że rzucał upity albo trafianieSwoich: true
     if (z.druzyna === sn.rzucajacy.druzyna && !CONFIG.trafianieSwoich && !sn.upita) continue;
@@ -188,6 +279,20 @@ function lotSniezki(stan, sn, dt) {
     if (d < najblizej) {
       najblizej = d;
       pierwszy = z;
+    }
+  }
+  // Wieżyczka drużyny przeciwnej na drodze? (jak postać; swojej nie trafia, chyba że rzucał upity)
+  let wiez = null;
+  const zasiegWiezyczki = j(typBonusu("wiezyczka").promienTrafienia) + j(CONFIG.promienSniezki);
+  for (const w of stan.wiezyczki) {
+    if (w === sn.rzucajacy) continue;
+    if (w.druzyna === sn.rzucajacy.druzyna && !CONFIG.trafianieSwoich && !sn.upita) continue;
+    if (odlegloscOdOdcinka(w.x, w.y, przed.x, przed.y, po.x, po.y) > zasiegWiezyczki) continue;
+    const d = Math.hypot(w.x - przed.x, w.y - przed.y);
+    if (d < najblizej) {
+      najblizej = d;
+      wiez = w;
+      pierwszy = null; // wieżyczka jest bliżej startu niż postać
     }
   }
   // Bonus na drodze? (traktowany jak postać; zbiera go każda śnieżka, gdy przeciwnicyZbierajaBonusy)
@@ -201,6 +306,7 @@ function lotSniezki(stan, sn, dt) {
         najblizej = d;
         bonus = b;
         pierwszy = null; // bonus jest bliżej startu niż postać
+        wiez = null;
       }
     }
   }
@@ -208,7 +314,7 @@ function lotSniezki(stan, sn, dt) {
   // Przeszkoda na drodze? Sprawdzamy tor cienia (na wysokości stóp).
   const stopy = PROMIEN_POSTACI * 0.85;
   const p = przeszkodaNaOdcinku(przed.x, przed.y + stopy, po.x, po.y + stopy);
-  if (p && ((!pierwszy && !bonus) || Math.hypot(p.x - przed.x, p.y - stopy - przed.y) < najblizej)) {
+  if (p && ((!pierwszy && !bonus && !wiez) || Math.hypot(p.x - przed.x, p.y - stopy - przed.y) < najblizej)) {
     // Śnieżka rozbija się o przeszkodę: sam rozbryzg, bez trafienia.
     // Rozbryzg nie wyżej niż czubek grafiki przeszkody.
     const czubek = p.y - rozmiarGrafiki(p.sciezka).wys * SPRITY[p.sciezka].kotwicaY;
@@ -225,6 +331,10 @@ function lotSniezki(stan, sn, dt) {
     zdobadzBonus(stan, sn.rzucajacy, bonus);
     return true;
   }
+  if (wiez) {
+    trafienieWiezyczki(stan, wiez);
+    return true;
+  }
   if (pierwszy) {
     trafienie(stan, pierwszy, sn);
     return true;
@@ -237,7 +347,7 @@ function sprawdzKoniec(stan) {
   if (stan.koniec) return;
   if (stan.gracz.wyeliminowany) {
     stan.koniec = { wynik: "przegrana", czas: 0 };
-  } else if (stan.przeciwnicy.every((p) => p.wyeliminowany)) {
+  } else if (stan.przeciwnicy.every((p) => p.wyeliminowany) && !stan.kolejka.length) {
     stan.koniec = { wynik: "wygrana", czas: 0 };
   }
   if (stan.koniec) {
@@ -265,7 +375,26 @@ function zasieg(s) {
 // a cel ma zostać pod palcem (x, y w świecie liczymy co klatkę).
 function zacznijCelowanie(stan, p) {
   const s = oknoNaSwiat(p);
-  stan.celowanie = { oknoX: p.x, oknoY: p.y, x: s.x, y: s.y, czas: 0 };
+  // Z Miotaczem: przytrzymany palec strzela seriami (pierwszy strzał od razu)
+  const miotacz = maEfekt(stan.gracz, "miotacz");
+  stan.celowanie = { oknoX: p.x, oknoY: p.y, x: s.x, y: s.y, czas: 0, miotacz, doStrzalu: 0 };
+}
+
+// Miotacz gracza: dopóki palec trzyma, strzał co odstepStrzalow w punkt pod palcem
+function strzelajZMiotacza(stan, dt) {
+  const c = stan.celowanie;
+  const g = stan.gracz;
+  if (!c || !c.miotacz) return;
+  if (!maEfekt(g, "miotacz")) {
+    stan.celowanie = null; // skończyły się gałki albo czas: koniec strzelania
+    return;
+  }
+  c.doStrzalu -= dt;
+  if (c.doStrzalu > 0) return;
+  const typ = typBonusu("miotacz");
+  c.doStrzalu = typ.odstepStrzalow;
+  if (odleglosc(g.x, g.y, c.x, c.y) < j(CONFIG.promienAnulowania)) return; // za blisko: nie strzela
+  wykonajRzut(stan, g, c.x, c.y, 0, typ.silaStrzalu, true);
 }
 
 function przesunCelowanie(stan, p) {
@@ -277,11 +406,12 @@ function przesunCelowanie(stan, p) {
   c.y = s.y;
 }
 
-// Puszczenie palca celującego (p: punkt w oknie ekranu): rzut w miejsce palca albo anulowanie
+// Puszczenie palca celującego (p: punkt w oknie ekranu): rzut w miejsce palca albo anulowanie.
+// Przy Miotaczu puszczenie tylko kończy strzelanie (amunicja zostaje).
 function rzuc(stan, pOkno) {
   const c = stan.celowanie;
   stan.celowanie = null;
-  if (!c) return;
+  if (!c || c.miotacz) return;
   const p = oknoNaSwiat(pOkno);
 
   const g = stan.gracz;
@@ -293,7 +423,8 @@ function rzuc(stan, pOkno) {
 // Rzut postaci z w punkt (celX, celY) po ładowaniu siły przez czasLadowania sekund.
 // Te same reguły dla gracza i przeciwników. silaTypu: siła wylosowana przez przeciwnika
 // z typem (wtedy zamach i siła to osobne liczby); bez niej siła wynika z czasu ładowania.
-function wykonajRzut(stan, z, celX, celY, czasLadowania, silaTypu) {
+// miotacz: strzał z Miotacza (siła podana, bez przeładowania, zużywa gałkę Miotacza).
+function wykonajRzut(stan, z, celX, celY, czasLadowania, silaTypu, miotacz = false) {
   const d = odleglosc(z.x, z.y, celX, celY);
   if (d === 0) return;
   // Pełna siła: każdy rzut z maksymalną prędkością (przeładowanie i tak bez zmian)
@@ -330,6 +461,12 @@ function wykonajRzut(stan, z, celX, celY, czasLadowania, silaTypu) {
   // Wachlarz to jeden rzut, także dla Pełnej siły
   if (gwiazdka) zuzyjRzutEfektu(z, "gwiazdka");
   if (pelna) zuzyjRzutEfektu(z, "pelnaSila");
+
+  // Miotacz: bez przeładowania między strzałami, każdy strzał to jedna gałka
+  if (miotacz) {
+    zuzyjRzutEfektu(z, "miotacz");
+    return;
+  }
 
   // Przeładowanie: stały czas plus faktyczny czas ładowania siły (także z Pełną siłą);
   // stos, armatka i Kakao je skracają, Spowolnienie przeciwników wydłuża
@@ -526,6 +663,7 @@ function aktualizuj(dt) {
     stan.celowanie.czas += dt;
     przesunCelowanie(stan, { x: stan.celowanie.oknoX, y: stan.celowanie.oknoY });
   }
+  if (graczMozeSterowac(stan)) strzelajZMiotacza(stan, dt);
 
   // Lot śnieżek: znikają po trafieniu albo na końcu lotu.
   // Śnieżki odbite przez Bombkę w tej klatce trafiają do nowej listy i też zostają.
@@ -535,7 +673,7 @@ function aktualizuj(dt) {
   stan.sniezki = zostaja.concat(stan.sniezki);
 
   // Odliczanie ogłuszenia i przeładowania (niezależnie od siebie)
-  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+  for (const z of wszystkiePostacie(stan)) {
     if (z.ogluszenie > 0) z.ogluszenie = Math.max(z.ogluszenie - dt, 0);
     if (z.przeladowanie > 0) z.przeladowanie = Math.max(z.przeladowanie - dt, 0);
   }
@@ -565,8 +703,18 @@ function aktualizuj(dt) {
   // Bonusy: pojawianie, znikanie, odliczanie (stoją w trakcie napisu i po końcu poziomu)
   aktualizujBonusy(stan, dt);
 
+  // Kolejka przeciwników (gdy ustawiony maxNaraz)
+  aktualizujKolejke(stan, dt);
+
   // Przeciwnicy (ruch, uniki, rzuty) - logika w ai.js
   for (const p of stan.przeciwnicy) aktualizujPrzeciwnika(stan, p, dt);
+  for (const s of stan.sojusznicy) aktualizujPrzeciwnika(stan, s, dt); // ten sam kod AI, druga strona
+
+  // Wieżyczki z bonusu strzelają same
+  aktualizujWiezyczki(stan, dt);
+
+  // Przeciwnicy nie stoją jeden na drugim
+  odepchnijPrzeciwnikow(stan, dt);
 
   // Gracz: ruch z joysticka (ogłuszony stoi, ale kciuk może zostać na padzie)
   if (graczMozeSterowac(stan)) ruchZPada(stan.gracz, dt);

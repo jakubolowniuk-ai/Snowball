@@ -13,7 +13,8 @@ function nowyStanAI(param) {
     cel: null, // punkt, do którego idzie (null = stoi)
     postoj: losuj(param.postojMin, param.postojMax), // ile jeszcze postoi
     // Pierwszy rzut dopiero po napisie "Level N"
-    przerwa: CONFIG.czasNapisuLevel + losuj(param.przerwaMin, param.przerwaMax),
+    // (plus losowe opóźnienie, żeby przeciwnicy nie rzucali naraz)
+    przerwa: CONFIG.czasNapisuLevel + losuj(param.przerwaMin, param.przerwaMax) + losuj(0, CONFIG.opoznienieStartuMax),
     unoszenie: null, // { czas, calosc } gdy unosi śnieżkę nad głowę (ładuje siłę)
     unik: null, // { za, sn } zaplanowany unik przed śnieżką sn za "za" sekund
     widziane: new Set(), // śnieżki, które już ocenił (każdą ocenia tylko raz)
@@ -39,6 +40,7 @@ function aktualizujPrzeciwnika(stan, z, dt) {
   // Ogłuszony: stoi i nic nie robi (i odchodzi od stanowiska)
   if (z.ogluszenie > 0) {
     ai.unoszenie = null;
+    ai.seria = null; // ogłuszenie przerywa serię z Miotacza
     ai.cel = null;
     zwolnijStanowisko(z);
     return;
@@ -55,6 +57,23 @@ function aktualizujPrzeciwnika(stan, z, dt) {
       odskocz(z, ai.unik.sn);
       ai.unik = null;
     }
+  }
+
+  // Seria z Miotacza: stoi i strzela co odstepStrzalow, potem zwykła przerwa
+  if (ai.seria) {
+    ai.seria.doStrzalu -= dt;
+    if (ai.seria.doStrzalu <= 0) {
+      const typ = typBonusu("miotacz");
+      ai.seria.doStrzalu = typ.odstepStrzalow;
+      ai.seria.zostalo -= 1;
+      const p = maEfekt(z, "miotacz") ? punktRzutuWGracza(stan, z, param) : null;
+      if (p) wykonajRzut(stan, z, p.x, p.y, 0, typ.silaStrzalu, true);
+      if (ai.seria.zostalo <= 0 || !maEfekt(z, "miotacz")) {
+        ai.seria = null;
+        ai.przerwa = przerwaPoRzucie(stan, z, param);
+      }
+    }
+    return;
   }
 
   // Unoszenie śnieżki nad głowę (ładowanie siły). Wtedy stoi.
@@ -90,17 +109,17 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     return;
   }
 
-  // Przeciwnik z typem w zwykłej Arenie: podchodzi krótkimi krokami i rzuca z odległości typu
-  if (z.typ && !jestWielka(stan)) {
+  // Przeciwnik z typem w zwykłej Arenie: podchodzi krótkimi krokami i rzuca z odległości typu.
+  // Przy stanowisku stoi i rzuca niezależnie od odległości (jak dawniej, kod niżej).
+  if (z.typ && !jestWielka(stan) && !ai.stanowisko) {
     podchodzenieWArenie(stan, z, param, dt);
     return;
   }
 
-  // Czy pora zacząć rzut?
-  const g = stan.gracz;
+  // Czy pora zacząć rzut? (jest w kogo: celPrzeciwnika nie jest pusty)
   // W Wielkiej arenie rzuca tylko, gdy jest na ekranie gracza, w zasięgu i z czystą linią
   const wolnoRzucic = !jestWielka(stan) || mozeRzucicWielka(stan, z);
-  if (ai.przerwa <= 0 && z.przeladowanie <= 0 && !g.wyeliminowany && !ai.cel && wolnoRzucic) {
+  if (ai.przerwa <= 0 && z.przeladowanie <= 0 && celPrzeciwnika(stan, z) && !ai.cel && wolnoRzucic) {
     zacznijZamach(stan, z, param);
     return;
   }
@@ -136,24 +155,23 @@ function aktualizujPrzeciwnika(stan, z, dt) {
   }
 }
 
-// Początek zamachu (ostrzeżenie przed rzutem). Przeciwnik z typem losuje siłę z typu,
-// a zamach trwa max(zamachMin, siła × MAX_CHARGE). Bez typu zamach = czas ładowania siły.
+// Początek zamachu (ostrzeżenie przed rzutem). Przeciwnik losuje siłę z typu,
+// a zamach trwa max(zamachMin, siła × MAX_CHARGE).
+// Z Miotaczem zamiast zamachu zaczyna serię strzałów.
 function zacznijZamach(stan, z, param) {
-  const g = stan.gracz;
-  let calosc;
-  let silaTypu; // undefined = siła z czasu zamachu (stara tabela)
-  if (z.typ) {
-    silaTypu = losuj(param.silaMin, param.silaMax);
-    calosc = Math.max(param.zamachMin, silaTypu * CONFIG.MAX_CHARGE);
-  } else if (CONFIG.zasiegZalezyOdSily) {
-    // Siła tak dobrana, żeby dorzucić do gracza (plus mały zapas)
+  if (maEfekt(z, "miotacz")) {
+    z.ai.seria = { zostalo: typBonusu("miotacz").seriaAI, doStrzalu: 0 };
+    return;
+  }
+  const g = celPrzeciwnika(stan, z);
+  let silaTypu = losuj(param.silaMin, param.silaMax);
+  if (CONFIG.zasiegZalezyOdSily) {
+    // Gdy zasięg zależy od siły: co najmniej tyle siły, żeby dorzucić do gracza
     const d = odleglosc(z.x, z.y, g.x, g.y) / SZEROKOSC_POLA;
     const potrzebna = (d - CONFIG.zasiegMin) / (CONFIG.zasiegMax - CONFIG.zasiegMin);
-    calosc = Math.min(Math.max(potrzebna, 0) * CONFIG.MAX_CHARGE + CONFIG.zapasSily, CONFIG.MAX_CHARGE);
-  } else {
-    // Śnieżka i tak doleci, więc siła (czyli prędkość) jest losowa z zakresu poziomu
-    calosc = losuj(param.silaMin, param.silaMax) * CONFIG.MAX_CHARGE;
+    silaTypu = Math.min(Math.max(silaTypu, potrzebna), 1);
   }
+  const calosc = Math.max(param.zamachMin, silaTypu * CONFIG.MAX_CHARGE);
   // Z szansą szansaBonusu celuje w bonus zamiast w gracza
   const bonus = Math.random() < param.szansaBonusu ? wybierzBonusDlaPrzeciwnika(stan, z) : null;
   z.ai.unoszenie = { czas: 0, calosc, bonus, sila: silaTypu };
@@ -164,8 +182,8 @@ function zacznijZamach(stan, z, param) {
 // czasAwaryjny nie podszedł bliżej (np. przekątna nie pozwala), rzuca z miejsca, gdzie stoi.
 function podchodzenieWArenie(stan, z, param, dt) {
   const ai = z.ai;
-  const g = stan.gracz;
-  if (g.wyeliminowany) return;
+  const g = celPrzeciwnika(stan, z); // najbliższy z drużyny przeciwnej (albo jej wieżyczka)
+  if (!g) return;
   if (ai.odlRzutu === null) ai.odlRzutu = j(losuj(param.odlegloscRzutuMin, param.odlegloscRzutuMax));
   const d = odleglosc(z.x, z.y, g.x, g.y);
 
@@ -214,6 +232,8 @@ function zauwazSniezki(stan, z, param) {
   const ai = z.ai;
   for (const sn of stan.sniezki) {
     if (sn.rzucajacy === z || ai.widziane.has(sn)) continue;
+    // Śnieżek własnej drużyny nie unika (nie trafiają go, chyba że rzucił upity)
+    if (sn.rzucajacy.druzyna === z.druzyna && !CONFIG.trafianieSwoich && !sn.upita) continue;
     ai.widziane.add(sn);
     // Czy tor śnieżki w ogóle przechodzi blisko niego?
     const koniecX = sn.startX + sn.kierX * sn.dlugosc;
@@ -248,7 +268,8 @@ function odskocz(z, sn) {
 // Bonus, w który przeciwnik może rzucić: z czystą linią (bez przeszkody)
 // i bliższy jemu niż graczowi; z takich najbliższy jemu. Brak takiego = null.
 function wybierzBonusDlaPrzeciwnika(stan, z) {
-  const g = stan.gracz;
+  const g = celPrzeciwnika(stan, z);
+  if (!g) return null;
   const stopy = PROMIEN_POSTACI * 0.85;
   let najlepszy = null;
   let najblizej = Infinity;
@@ -294,12 +315,42 @@ function przerwaBezSpowolnienia(stan, z, param) {
   return zwykla * bonus;
 }
 
-// Rzut w gracza z losowym błędem (rozrzut)
-function rzucWGracza(stan, z, param) {
-  const g = stan.gracz;
-  if (g.wyeliminowany) return;
+// Cel postaci sterowanej przez komputer (przeciwnika albo sojusznika gracza): najbliższy żywy
+// z drużyny przeciwnej albo wieżyczka tej drużyny. Niewidzialnego widzi tylko w zapamiętanym
+// miejscu. Zwraca punkt { x, y, niewidzialny } albo null (nie ma w kogo rzucać).
+function celPrzeciwnika(stan, z) {
+  const cele = wszystkiePostacie(stan)
+    .filter((c) => !c.wyeliminowany && c.druzyna !== z.druzyna && celWidoczny(stan, z, c))
+    .map((c) => widocznyCel(stan, c));
+  for (const w of stan.wiezyczki) if (w.druzyna !== z.druzyna) cele.push({ x: w.x, y: w.y, niewidzialny: false });
+  if (!cele.length) return null;
+  return cele.reduce((a, b) => (odleglosc(z.x, z.y, a.x, a.y) <= odleglosc(z.x, z.y, b.x, b.y) ? a : b));
+}
+
+// Czy z może obrać c za cel? W Wielkiej arenie przeciwnicy rzucają w sojusznika gracza tylko
+// wtedy, gdy jest na ekranie (tak jak w gracza: rzucają tylko, gdy gracz to widzi).
+function celWidoczny(stan, z, c) {
+  if (jestWielka(stan) && c.sojusznik && c.druzyna === "czerwoni") {
+    return naEkranie(c.x, c.y, j(CONFIG.tryby.wielkaArena.marginesWidoku));
+  }
+  return true;
+}
+
+// Punkt, w który przeciwnik rzuca w gracza: jego miejsce z losowym błędem (rozrzut).
+// Niewidzialnego gracza nie widzi: losowy punkt koła promienPoszukiwania wokół zapamiętanego miejsca.
+function punktRzutuWGracza(stan, z, param) {
+  const g = celPrzeciwnika(stan, z);
+  if (!g) return null;
+  const promien = g.niewidzialny ? j(typBonusu("niewidzialnosc").promienPoszukiwania) : j(param.rozrzut);
   const kat = Math.random() * Math.PI * 2;
-  const blad = j(param.rozrzut) * Math.sqrt(Math.random()); // losowy punkt w kole
+  const blad = promien * Math.sqrt(Math.random()); // losowy punkt w kole
+  return { x: g.x + Math.cos(kat) * blad, y: g.y + Math.sin(kat) * blad };
+}
+
+// Rzut w gracza po zamachu
+function rzucWGracza(stan, z, param) {
+  const p = punktRzutuWGracza(stan, z, param);
+  if (!p) return;
   const u = z.ai.unoszenie;
-  wykonajRzut(stan, z, g.x + Math.cos(kat) * blad, g.y + Math.sin(kat) * blad, u.czas, u.sila);
+  wykonajRzut(stan, z, p.x, p.y, u.czas, u.sila);
 }

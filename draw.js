@@ -281,7 +281,7 @@ function rysujBlysk(ctx, z, k, x, y, odbicie, sila, kolor = "230, 40, 40") {
 // Delikatny okrąg strefy na ziemi, gdy w strefie stoi postać tej drużyny
 function rysujStrefeStanowiska(ctx, stan, st) {
   if (st.amunicja <= 0) return;
-  const ktos = [stan.gracz, ...stan.przeciwnicy].some(
+  const ktos = wszystkiePostacie(stan).some(
     (z) => stanowiskoDlaDruzyny(st, z) && !z.wyeliminowany && wStrefieStanowiska(z, st)
   );
   if (!ktos) return;
@@ -550,6 +550,9 @@ function rysujZawodnika(ctx, z, toGracz) {
   // Postać z grafiki (podeszwy w punkcie stóp); gdy grafiki brak, kółko jak dawniej
   // Niesiony wiatrem zamieci podskakuje (cień zostaje na ziemi)
   const podskok = z.wiatr ? Math.abs(Math.sin(stan.czasPoziomu * 12)) * j(CONFIG.tryby.wielkaArena.wysokoscPodskoku) : 0;
+  // Niewidzialny: półprzezroczysty (widać go, także samego siebie, ale słabo)
+  const alfa = z.bonusy.some((ab) => ab.typ === "niewidzialnosc") ? typBonusu("niewidzialnosc").alfa : 1;
+  ctx.globalAlpha *= alfa;
   if (!rysujPostac(ctx, z, z.x, y - podskok)) {
     ctx.fillStyle = kolorDruzyny(z);
     ctx.beginPath();
@@ -558,7 +561,10 @@ function rysujZawodnika(ctx, z, toGracz) {
   }
   ctx.restore();
 
+  ctx.save();
+  ctx.globalAlpha *= alfa;
   rysujBanke(ctx, z);
+  ctx.restore();
 }
 
 
@@ -806,7 +812,7 @@ function rysujSwiat(ctx, stan) {
 
   // Najpierw leżący (są na ziemi), potem stojący od góry do dołu,
   // żeby bliżsi (niżej) zasłaniali dalszych
-  const wszyscy = [stan.gracz, ...stan.przeciwnicy];
+  const wszyscy = wszystkiePostacie(stan);
   const lezacy = wszyscy.filter((z) => z.wyeliminowany);
   const stojacy = wszyscy.filter((z) => !z.wyeliminowany);
   for (const z of lezacy) rysujZawodnika(ctx, z, z === stan.gracz);
@@ -819,6 +825,7 @@ function rysujSwiat(ctx, stan) {
     ...przeszkody().map((p) => ({ x: p.x, y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
     ...widoczneStanowiska(stan).map((st) => ({ x: st.x, y: st.y, rysuj: () => rysujStanowisko(ctx, st) })),
     ...stan.bonusy.map((b) => ({ x: b.x, y: b.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujBonusNaPlanszy(ctx, stan, b) })),
+    ...stan.wiezyczki.map((w) => ({ x: w.x, y: w.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujWiezyczke(ctx, w) })),
   ]
     .filter((o) => widac(o.x, o.y))
     .sort((a, b) => a.y - b.y);

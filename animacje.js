@@ -113,7 +113,8 @@ function wektorCelowania(stan, z) {
   if (z === stan.gracz && stan.celowanie) return { dx: stan.celowanie.x - z.x, dy: stan.celowanie.y - z.y };
   if (z.ai && z.ai.unoszenie) {
     const b = z.ai.unoszenie.bonus;
-    const cel = b && stan.bonusy.includes(b) ? b : stan.gracz;
+    const cel = b && stan.bonusy.includes(b) ? b : celPrzeciwnika(stan, z);
+    if (!cel) return null;
     return { dx: cel.x - z.x, dy: cel.y - z.y };
   }
   return null;
@@ -121,7 +122,7 @@ function wektorCelowania(stan, z) {
 
 // Co klatkę: czy postać się rusza i o ile
 function aktualizujAnimacje(stan, dt) {
-  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+  for (const z of wszystkiePostacie(stan)) {
     if (!z.anim) z.anim = nowaAnimacja(z);
     const a = z.anim;
     const dx = z.x - a.poprzX;
