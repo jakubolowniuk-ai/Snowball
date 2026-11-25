@@ -2,7 +2,10 @@
 
 Każdy prompt wklejasz osobno, w osobnej rozmowie z agentem, i sprawdzasz grę na telefonie przed następnym. Agent czyta CLAUDE.md i docs/snowcraft-plan.md z `main`, więc **najpierw scal gałąź z dokumentacją** (pull request), inaczej nie zobaczy ustaleń. Po scaleniu zamiast wklejać cały prompt możesz napisać agentowi: „Wykonaj krok A1 z docs/PROMPTY_DLA_AGENTA.md".
 
-## Zalecana kolejność
+## Stan na 25.11
+Kroki A1–A4 i B2–B5 są zrobione i scalone w `main`. **Teraz obowiązuje część C na końcu pliku** (koncepcja typów A i 20 poziomów, test na Wielkiej arenie). Część C zastępuje ustalenia z A1/A3/A4 o życiach (życia są w składzie poziomu, nie w typie) i o Limonkowym (bez Laski cukrowej). Kroki wklejaj po kolei: C0 (opcjonalny), C1, C2, ..., C10.
+
+## Zalecana kolejność (stara, kroki A i B zrobione)
 1. **A1** typy + Zielony na poziomach 1–3
 2. **A2** śnieżka nie trafia swoich
 3. **A3** Limonkowy + poziomy 4–6
@@ -291,4 +294,280 @@ UWAGA NA KOD
 PO ZMIANIE
 - Zaktualizuj CLAUDE.md (zasada "gramy jednym zawodnikiem" dostaje wyjątek: Sojusznik jest sterowany przez komputer) i docs/snowcraft-plan.md: przenieś Sojusznika z "Planowanych" do obecnych.
 - Powiedz Jakubowi, jak sprawdzić: wymusTyp "sojusznik"; po trafieniu bonusu obok ciebie pojawia się czerwony zawodnik, który sam rzuca w przeciwników; przeciwnicy celują także w niego; przegrywasz tylko po wyeliminowaniu ciebie.
+```
+
+
+---
+
+# CZĘŚĆ C: koncepcja typów A i 20 poziomów (test na Wielkiej arenie)
+
+Wspólne zasady dla każdego kroku C (są też w CLAUDE.md): najpierw krótki plan i zgoda Jakuba, jeden commit po polsku, komentarze po polsku, nowe terminy techniczne wyjaśnione jednym zdaniem, wszystkie liczby w config.js, nic ponad prośbę, na końcu napisz Jakubowi, jak sprawdzić na telefonie. Wartości oznaczone „(start)" są wstępne: Jakub stroi je po graniu w config.js. Rozrzut podany niżej to wartość startowa: sprawdź symulacją jak w kroku A1, ile trafień w stojącego daje, i popraw tak, by wyszedł podany cel w procentach.
+
+## C0. Poziom startowy do testów (opcjonalny)
+
+```
+Zadanie: opcja testowa w config.js, dzięki której można zacząć grę od wybranego poziomu.
+
+Najpierw przeczytaj CLAUDE.md, potem game.js (start gry, przejście do następnego poziomu) i tryby.js (start z menu). Pokaż krótki plan i poczekaj na zgodę.
+
+CO ZROBIĆ
+1. W config.js: `poziomStartowy: 1` (komentarz: do testów, np. 15 zaczyna grę od poziomu 15, po wygranej idzie 16 itd.).
+2. Przy starcie gry z menu (Arena i Wielka arena) pierwszy poziom to poziomStartowy. Nic innego się nie zmienia (restart po przegranej jak dotąd).
+3. Zaktualizuj CLAUDE.md jednym zdaniem.
+
+Powiedz Jakubowi, jak sprawdzić: ustaw poziomStartowy: 8, wejdź w Arenę, na ekranie powinno być "Level 8".
+```
+
+## C1. Życia w składzie poziomu, Limonkowy bez Laski, poziomy 1–5
+
+```
+Zadanie: życia przeniesione do składu poziomu, Limonkowy bez Laski cukrowej, nowe poziomy 1–5 (obie areny).
+
+Najpierw przeczytaj CLAUDE.md i docs/snowcraft-plan.md (sekcje "Koncepcja typów A" i "Poziomy Areny 1–20"), potem config.js, game.js (typyPoziomu, tworzenie postaci, zacznijPoziom, trafienie), draw.js (kropki żyć) i bonusy.js (Sojusznik). Pracuj wg zasad z CLAUDE.md i wspólnych zasad części C.
+
+CO ZROBIĆ
+1. Życia nie są już parametrem typu. Wpis składu poziomu ma postać { typ, ile, zycia } (zycia = liczba trafień do eliminacji). Usuń `zycia` z typów `zielony` i `limonkowy` (także wzór { poczatkowe, coIlePoziomow, max }). Ten sam typ może wystąpić w jednym poziomie w kilku wpisach z różnymi życiami (np. Zielone po 3 i po 2 życia).
+2. typyPoziomu zwraca listę obiektów { typ, zycia } (dalej przeplatane między wpisami, żeby przy limicie maxNaraz weszły różne typy), a zacznijPoziom i kolejka przepisują zycia na postać. Sprawdź grepem `zycia` i `maxTrafien` w całym kodzie, w tym w bonusie Sojusznik (jego `zycia: 3` z config.bonusy zostaje, ale nie może czytać żyć z typu).
+3. Życie 1 oznacza, że pierwsze trafienie od razu eliminuje, bez fazy ogłuszenia. Sprawdź, że animacja eliminacji, kropki żyć w draw.js (jedna kropka) i ekran końca poziomu działają.
+4. Limonkowy: zdejmij "Laskę cukrową": mnoznikPredkosci 1.0 (było 1.4). Nazwa "Limonkowy (Standard)", popraw komentarze. Reszta parametrów bez zmian.
+5. skladPoziomow: usuń stare wpisy 1–12 i wpisz poziomy 1–5:
+   1: zielony 2 szt. po 1 życiu
+   2: zielony 4 po 1
+   3: zielony 2 po 1 + limonkowy 1 po 1
+   4: zielony 3 po 1 + limonkowy 2 po 1
+   5: zielony 3 po 2 + limonkowy 2 po 1
+   Poziom 6 i dalej na razie bez wpisów, czyli biorą skład poziomu 5 (tymczasowo; kolejne kroki dopisują poziomy do 20).
+6. maxNaraz w config.js: 8 (było 6).
+7. Wielka arena używa tego samego składu (mnoznikPrzeciwnikow 1). Nic więcej się w niej nie zmienia.
+
+PO ZMIANIE
+- Zaktualizuj CLAUDE.md (Zasady gry, Przeciwnicy: życia ze składu poziomu, Limonkowy bez Laski, skład poziomów 1–5) i docs/snowcraft-plan.md (karty Zielonego i Limonkowego: życia i Laska nieaktualne).
+- Powiedz Jakubowi, jak sprawdzić: Arena i Wielka arena, poziom 1: dwa Zielone, każdy ginie od jednego trafienia; poziom 5: Zielone mają po 2 życia (ogłuszenie po pierwszym trafieniu), Limonkowe po 1; Limonkowy chodzi tak szybko jak gracz, nie szybciej.
+```
+
+## C2. Wielka arena: dystans z typu
+
+```
+Zadanie: w Wielkiej arenie przeciwnik ma trzymać dystans zależny od swojego typu zamiast jednej wartości odlegloscAI.
+
+Najpierw przeczytaj CLAUDE.md, docs/snowcraft-plan.md ("Koncepcja typów A"), tryby.js (celWielkiejAreny i warunek rzucania, maxOdlegloscRzutuAI) i ai.js. Pracuj wg zasad CLAUDE.md i wspólnych zasad części C.
+
+CO ZROBIĆ
+1. W celWielkiejAreny idealna odległość od gracza (celu) = losowa z przedziału `odlegloscRzutuMin`–`odlegloscRzutuMax` typu przeciwnika (te same pola, które w Arenie decydują, z jakiej odległości rzuca). `tryby.wielkaArena.odlegloscAI` zostaje tylko jako wartość zapasowa dla postaci bez typu.
+2. Progi "za daleko" (×1,25) i "za blisko" (×0,6) liczone od tej idealnej odległości, jak dotąd.
+3. Warunek rzucania w Wielkiej arenie: nadal tylko na ekranie gracza, z czystą linią i w zasięgu. `maxOdlegloscRzutuAI` musi być co najmniej równy największej odlegloscRzutuMax ze wszystkich typów (jeśli któryś typ ma więcej, zgłoś Jakubowi zamiast cicho zmieniać).
+4. Stanowiska i bonusy zostają bez zmian.
+
+PO ZMIANIE
+- Zaktualizuj CLAUDE.md i docs/snowcraft-plan.md (Wielka arena: dystans z typu).
+- Powiedz Jakubowi, jak sprawdzić: Wielka arena, poziom 1: Zielone podchodzą na ok. 5–6 ludzików (a nie ok. 0,5 szerokości widoku jak wcześniej), poziom 4–5: Limonkowe stają nieco dalej niż Zielone.
+```
+
+## C3. Żółty (Biegacz) + poziomy 6–7
+
+```
+Zadanie: dodaj typ Żółty (Biegacz) i poziomy 6–7.
+
+Najpierw przeczytaj CLAUDE.md, docs/snowcraft-plan.md (sekcje "Koncepcja typów A", "Poziomy Areny 1–20"), config.js (typy, skladPoziomow) i ai.js. Pracuj wg zasad CLAUDE.md i wspólnych zasad części C.
+
+CO ZROBIĆ
+1. W config.typy dodaj `zolty` (kolor "zolty"; atlas assets/gracze/atlasy/zolty.webp ładuje mechanizm z A1, sprawdź tylko, że postać rysuje się i animuje).
+ŻÓŁTY, WARTOŚCI (Biegacz: szybki, ale niecelny)
+- czasOgluszenia 1.0, mnoznikPredkosci 1.4
+- ruch: krok 0.10–0.16, odchylenieKroku 45 (kręci się nerwowo), postój 0.3–0.7
+- odlegloscRzutu 0.30–0.40, czasAwaryjny 5
+- przerwa 2.5–3.5, sila 0.1–0.3, zamachMin 0.4
+- rozrzut: start 0.077, cel ok. 30% trafień w stojącego
+- szansaUniku 0.35, czasReakcji 0.35
+- mnoznikPrzeladowania 1, szansaBonusu 0.15, szansaStanowiska 0.1
+Cena umiejętności: bardzo słaba celność.
+2. skladPoziomow (wpisy { typ, ile, zycia }):
+   6: zielony 3 po 3, limonkowy 2 po 2, zolty 1 po 2
+   7: zielony 3 po 3, zielony 1 po 2, limonkowy 2 po 2, zolty 1 po 2
+   Poziom 8 i dalej na razie biorą skład poziomu 7.
+
+PO ZMIANIE
+- Zaktualizuj CLAUDE.md i docs/snowcraft-plan.md (karta Żółtego zrobiona, poziomy 6–7).
+- Powiedz Jakubowi, jak sprawdzić (z poziomStartowy 6, jeśli C0 zrobione): poziom 6, Żółty biega szybciej niż gracz i często pudłuje; sprawdź, czy da się go w ogóle trafić i czy jest zabawny, nie irytujący.
+```
+
+## C4. Pomarańczowy (Snajper) + poziomy 8–9
+
+```
+Zadanie: dodaj typ Pomarańczowy (Snajper) i poziomy 8–9.
+
+Najpierw przeczytaj CLAUDE.md, docs/snowcraft-plan.md ("Koncepcja typów A", "Poziomy Areny 1–20"), config.js, ai.js (rzucWGracza, zamach). Pracuj wg zasad CLAUDE.md i wspólnych zasad części C.
+
+CO ZROBIĆ
+1. W config.typy dodaj `pomaranczowy` (kolor "pomaranczowy").
+POMARAŃCZOWY, WARTOŚCI (Snajper: celny i daleko, ale z długim zamachem i długą przerwą)
+- czasOgluszenia 1.2, mnoznikPredkosci 0.8
+- ruch: krok 0.06–0.10, odchylenieKroku 25, postój 1.0–2.0
+- odlegloscRzutu 0.50–0.60, czasAwaryjny 5
+- przerwa 5–6, sila 0.35–0.55, zamachMin 0.9
+- rozrzut: start 0.038 (cel: praktycznie zawsze trafia stojącego)
+- szansaUniku 0.1, czasReakcji 0.7
+- mnoznikPrzeladowania 1, szansaBonusu 0.1, szansaStanowiska 0.1
+2. WAŻNE: sprawdź w ai.js, w którym momencie ustalany jest punkt celu: ma być zapamiętany na początku zamachu, żeby gracz widział ostrzeżenie (zamach z ręką za głową) i mógł zejść z miejsca. Jeśli cel jest ustalany dopiero przy puszczeniu, powiedz Jakubowi i zaproponuj zmianę tylko dla tego typu (nie zmieniaj reszty bez zgody).
+3. W małej Arenie (trójkąt) odległość 0.5–0.6 bywa nieosiągalna; zasada awaryjna (czasAwaryjny 5 s) ma wtedy sprawić, że rzuca z miejsca. Sprawdź, że tak działa.
+4. skladPoziomow:
+   8: zielony 3 po 3, zielony 1 po 2, limonkowy 2 po 2, zolty 1 po 2, pomaranczowy 1 po 2
+   9: zielony 3 po 3, zielony 2 po 2, limonkowy 2 po 2, zolty 1 po 2, pomaranczowy 1 po 2
+   Poziom 10 i dalej biorą skład poziomu 9.
+
+PO ZMIANIE: zaktualizuj CLAUDE.md i docs/snowcraft-plan.md. Powiedz Jakubowi, jak sprawdzić (poziom 8): Pomarańczowy stoi daleko, długo zamierza się (ostrzeżenie), rzuca szybką gałką i prawie zawsze trafia, jeśli nie zejdziesz z miejsca.
+```
+
+## C5. Turkusowy (Szybkostrzelec) + poziomy 10–11
+
+```
+Zadanie: dodaj typ Turkusowy (Szybkostrzelec) i poziomy 10–11.
+
+Najpierw przeczytaj CLAUDE.md, docs/snowcraft-plan.md i config.js. Pracuj wg zasad CLAUDE.md i wspólnych zasad części C.
+
+CO ZROBIĆ
+1. W config.typy dodaj `turkusowy` (kolor "turkusowy").
+TURKUSOWY, WARTOŚCI (Szybkostrzelec: często rzuca, ale słabo i niecelnie)
+- czasOgluszenia 1.2, mnoznikPredkosci 0.9
+- ruch: krok 0.06–0.10, odchylenieKroku 25, postój 0.5–1.0
+- odlegloscRzutu 0.35–0.45, czasAwaryjny 5
+- przerwa 1.5–2.5, sila 0.1–0.2, zamachMin 0.3
+- rozrzut: start 0.071, cel ok. 40%
+- szansaUniku 0.25, czasReakcji 0.5
+- mnoznikPrzeladowania 1, szansaBonusu 0.15, szansaStanowiska 0.2
+2. skladPoziomow:
+   10: zielony 3 po 3, zielony 2 po 2, limonkowy 2 po 2, zolty, pomaranczowy, turkusowy po 1 (każdy po 2 życia)
+   11: zielony 3 po 3, zielony 3 po 2, limonkowy 2 po 2, zolty, pomaranczowy, turkusowy po 1 po 2
+   Poziom 12 i dalej biorą skład poziomu 11.
+
+PO ZMIANIE: zaktualizuj CLAUDE.md i docs/snowcraft-plan.md. Powiedz Jakubowi, jak sprawdzić (poziom 10): Turkusowy rzuca bardzo często słabymi, wolnymi gałkami; poziom 10 ma 10 przeciwników, na planszy jest ich naraz najwyżej maxNaraz (8), reszta wchodzi z kolejki.
+```
+
+## C6. Błękitny (Unikacz) + poziomy 12–13
+
+```
+Zadanie: dodaj typ Błękitny (Unikacz) z nowym zachowaniem "ucieka" i poziomy 12–13.
+
+Najpierw przeczytaj CLAUDE.md, docs/snowcraft-plan.md, config.js, ai.js (ruch w Arenie) i tryby.js (celWielkiejAreny już cofa się, gdy jest za blisko). Pracuj wg zasad CLAUDE.md i wspólnych zasad części C. To nowe zachowanie, więc koniecznie najpierw pokaż plan i poczekaj na zgodę.
+
+CO ZROBIĆ
+1. W config.typy dodaj `blekitny` (kolor "blekitny").
+BŁĘKITNY, WARTOŚCI (Unikacz: często unika i trzyma dystans, ale rzuca słabo)
+- czasOgluszenia 1.0, mnoznikPredkosci 1.0
+- ruch: krok 0.08–0.12, odchylenieKroku 25, postój 0.3–0.8
+- odlegloscRzutu 0.45–0.55, czasAwaryjny 5
+- NOWE pole `ucieka`: true. Gdy gracz jest bliżej niż 0.8 × odlegloscRzutuMin, przeciwnik zamiast podchodzić robi krok od gracza (kierunek od gracza z odchyleniem odchylenieKroku), z uwzględnieniem granic, przekątnej (Arena) i przeszkód. Jeśli jest w rogu i nie ma dokąd uciec, stoi i rzuca. W Wielkiej arenie cofanie już istnieje dla wszystkich typów, więc tam bez zmian; pole `ucieka` dotyczy Areny.
+- przerwa 3–4.5, sila 0.1–0.3, zamachMin 0.45
+- rozrzut: start 0.068, cel ok. 45%
+- szansaUniku 0.6, czasReakcji 0.25
+- mnoznikPrzeladowania 1, szansaBonusu 0.2, szansaStanowiska 0.1
+2. skladPoziomow:
+   12: zielony 3 po 3, zielony 3 po 2, limonkowy 2 po 2, zolty, pomaranczowy, turkusowy, blekitny po 1 po 2
+   13: zielony 3 po 3, zielony 4 po 2, limonkowy 2 po 2, zolty, pomaranczowy, turkusowy, blekitny po 1 po 2
+   Poziom 14 i dalej biorą skład poziomu 13.
+
+PO ZMIANIE: zaktualizuj CLAUDE.md i docs/snowcraft-plan.md. Powiedz Jakubowi, jak sprawdzić (poziom 12): Błękitny cofa się, gdy do niego podchodzisz, często robi uniki; w rogu w końcu staje i rzuca.
+```
+
+## C7. Szary (Wytrwały) + poziomy 14–15
+
+```
+Zadanie: dodaj typ Szary (Wytrwały) i poziomy 14–15.
+
+Najpierw przeczytaj CLAUDE.md, docs/snowcraft-plan.md i config.js. Pracuj wg zasad CLAUDE.md i wspólnych zasad części C.
+
+CO ZROBIĆ
+1. W config.typy dodaj `szary` (kolor "szary").
+SZARY, WARTOŚCI (Wytrwały: wolny, krótko ogłuszony, rzadko rzuca)
+- czasOgluszenia 0.4 (krótkie)
+- mnoznikPredkosci 0.5
+- ruch: krok 0.04–0.07, odchylenieKroku 25, postój 1.5–2.5
+- odlegloscRzutu 0.70–0.80 (praktycznie stoi tam, gdzie jest; zasada awaryjna po 5 s), czasAwaryjny 5
+- przerwa 5–6.5, sila 0.15–0.35, zamachMin 0.5
+- rozrzut: start 0.059, cel ok. 60%
+- szansaUniku 0.2, czasReakcji 0.6
+- mnoznikPrzeladowania 1, szansaBonusu 0.05, szansaStanowiska 0.1
+2. skladPoziomow:
+   14: zielony 3 po 3, zielony 4 po 2, limonkowy 2 po 2, zolty, pomaranczowy, turkusowy, blekitny, szary po 1 po 2
+   15: zielony 3 po 3, zielony 5 po 2, reszta jak na 14
+   Poziom 16 i dalej biorą skład poziomu 15.
+
+PO ZMIANIE: zaktualizuj CLAUDE.md i docs/snowcraft-plan.md. Powiedz Jakubowi, jak sprawdzić (poziom 14): Szary wolno chodzi, rzadko rzuca, a po trafieniu prawie od razu wraca do gry.
+```
+
+## C8. Fioletowy (Siłacz) + poziomy 16–17
+
+```
+Zadanie: dodaj typ Fioletowy (Siłacz) i poziomy 16–17.
+
+Najpierw przeczytaj CLAUDE.md, docs/snowcraft-plan.md i config.js. Pracuj wg zasad CLAUDE.md i wspólnych zasad części C.
+
+CO ZROBIĆ
+1. W config.typy dodaj `fioletowy` (kolor "fioletowy").
+FIOLETOWY, WARTOŚCI (Siłacz: bardzo szybkie gałki, ale długi zamach i rzadkie rzuty)
+- czasOgluszenia 1.2, mnoznikPredkosci 0.6
+- ruch: krok 0.05–0.08, odchylenieKroku 25, postój 1.0–2.0
+- odlegloscRzutu 0.40–0.50, czasAwaryjny 5
+- przerwa 5–6, sila 0.85–1.0, zamachMin 0.8 (uwaga: zamach = max(zamachMin, sila × 1,5 s), więc w praktyce ok. 1,3–1,5 s, to jest zamierzone ostrzeżenie)
+- rozrzut: start 0.053, cel ok. 70%
+- szansaUniku 0.1, czasReakcji 0.7
+- mnoznikPrzeladowania 1, szansaBonusu 0.1, szansaStanowiska 0.3
+2. skladPoziomow:
+   16: zielony 3 po 3, zielony 5 po 2, limonkowy 2 po 2, zolty, pomaranczowy, turkusowy, blekitny, szary, fioletowy po 1 po 2
+   17: zielony 3 po 3, zielony 6 po 2, reszta jak na 16
+   Poziom 18 i dalej biorą skład poziomu 17.
+
+PO ZMIANIE: zaktualizuj CLAUDE.md i docs/snowcraft-plan.md. Powiedz Jakubowi, jak sprawdzić (poziom 16): Fioletowy długo się zamierza, jego gałka leci wyraźnie szybciej niż inne; da się ją ominąć, jeśli zareagujesz na zamach.
+```
+
+## C9. Brązowy (od stanowisk) + poziomy 18–19
+
+```
+Zadanie: dodaj typ Brązowy (przeciwnik od stanowisk) i poziomy 18–19.
+
+Najpierw przeczytaj CLAUDE.md, docs/snowcraft-plan.md, config.js i stanowiska.js (jak przeciwnicy wybierają stanowisko, szansaStanowiska). Pracuj wg zasad CLAUDE.md i wspólnych zasad części C.
+
+CO ZROBIĆ
+1. W config.typy dodaj `brazowy` (kolor "brazowy").
+BRĄZOWY, WARTOŚCI (po każdym rzucie z dużą szansą idzie do stosu albo armatki)
+- czasOgluszenia 1.2, mnoznikPredkosci 0.9
+- ruch: krok 0.06–0.10, odchylenieKroku 25, postój 0.5–1.0
+- odlegloscRzutu 0.375–0.45, czasAwaryjny 5
+- przerwa 3–4.5, sila 0.2–0.4, zamachMin 0.4
+- rozrzut: start 0.050, cel ok. 75%
+- szansaUniku 0.25, czasReakcji 0.5
+- mnoznikPrzeladowania 1, szansaBonusu 0.2, szansaStanowiska 0.9
+2. Sprawdź, że przy dużej szansie (0.9) kilku przeciwników nie blokuje się nawzajem przy jednym stanowisku (zasada: najwyżej jeden przy stanowisku, reszta robi to, co zwykle).
+3. skladPoziomow:
+   18: zielony 3 po 3, zielony 6 po 2, limonkowy 2 po 2, zolty, pomaranczowy, turkusowy, blekitny, szary, fioletowy, brazowy po 1 po 2
+   19: zielony 3 po 3, zielony 7 po 2, reszta jak na 18
+   Poziom 20 i dalej biorą skład poziomu 19.
+
+PO ZMIANIE: zaktualizuj CLAUDE.md i docs/snowcraft-plan.md. Powiedz Jakubowi, jak sprawdzić (poziom 18): Brązowy po rzucie idzie do stosu albo armatki i tam stoi, rzucając szybko.
+```
+
+## C10. Magenta (od bonusów) + poziom 20
+
+```
+Zadanie: dodaj typ Magenta (zbieracz bonusów) i poziom 20, na koniec podsumowanie.
+
+Najpierw przeczytaj CLAUDE.md, docs/snowcraft-plan.md, config.js i bonusy.js (przeciwnicyZbierajaBonusy, szansaBonusu). Pracuj wg zasad CLAUDE.md i wspólnych zasad części C.
+
+CO ZROBIĆ
+1. W config.typy dodaj `magenta` (kolor "magenta").
+MAGENTA, WARTOŚCI (poluje na bonusy)
+- czasOgluszenia 1.0, mnoznikPredkosci 1.1
+- ruch: krok 0.08–0.12, odchylenieKroku 35, postój 0.4–0.9
+- odlegloscRzutu 0.375–0.45, czasAwaryjny 5
+- przerwa 3–4.5, sila 0.2–0.4, zamachMin 0.4
+- rozrzut: start 0.053, cel ok. 70%
+- szansaUniku 0.3, czasReakcji 0.5
+- mnoznikPrzeladowania 1, szansaBonusu 0.8, szansaStanowiska 0.1
+2. skladPoziomow:
+   20: zielony 3 po 3, zielony 7 po 2, limonkowy 2 po 2, zolty, pomaranczowy, turkusowy, blekitny, szary, fioletowy, brazowy, magenta po 1 po 2. Poziom 21 i dalej biorą skład poziomu 20.
+3. Sprawdź, że suma przeciwników to dokładnie N na poziomach 1–20 poza poziomami 1–5 (1–5: 2, 4, 3, 5, 5) i że poziom N od 6 w górę ma N przeciwników.
+
+PO ZMIANIE
+- Zaktualizuj CLAUDE.md i docs/snowcraft-plan.md (komplet 20 poziomów zrobiony, test na Wielkiej arenie).
+- Powiedz Jakubowi, jak sprawdzić: Magenta często celuje w bonusy zamiast w gracza. Przejdź kilka poziomów w Wielkiej arenie (np. 1, 6, 10, 15, 20) i napisz, które są za łatwe, za trudne albo nieczytelne; zmiany stroi się w config.js (życia we wpisach składu, maxNaraz, parametry typów).
 ```
