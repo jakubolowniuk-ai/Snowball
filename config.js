@@ -220,6 +220,10 @@ const CONFIG = {
       // strzał co odstepStrzalow s z siłą silaStrzalu i rozrzutem; z szansą szansaNajblizszego
       // w najbliższego z drużyny przeciwnej, inaczej w losowego; promien trafienia wieżyczki.
       { id: "wiezyczka", nazwa: "Wieżyczka", kolor: "#6e6e7a", czasTrwania: 0, waga: 1, grafika: "assets/bonusy/wiezyczka.png", zycia: 3, amunicja: 30, odstepStrzalow: 3, silaStrzalu: 0.5, rozrzut: 0.05, szansaNajblizszego: 0.6, promienTrafienia: 0.025 },
+      // Sojusznik: obok zbierającego pojawia się zawodnik jego drużyny sterowany przez komputer,
+      // z parametrami losowego typu i zycia życiami, do końca poziomu (sojusznik gracza w kurtce
+      // w kolorze gracza). Najwyżej jeden naraz na drużynę. odleglosc: jak daleko od zbierającego.
+      { id: "sojusznik", nazwa: "Sojusznik", kolor: "#d93a3a", czasTrwania: 0, waga: 1, grafika: "assets/bonusy/czapka.png", zycia: 3, odleglosc: 0.1 },
       // Upicie: bonus wybucha, wszyscy żywi w kręgu idą krzywo (czas i reszta w sekcji upicie wyżej)
       { id: "upicie", nazwa: "Upicie", kolor: "#a64ad6", waga: 2, grafika: "assets/bonusy/upicie.png" },
     ],

@@ -73,6 +73,11 @@ function typyPoziomu(poziom) {
   return lista;
 }
 
+// Wszystkie postacie: gracz, jego sojusznicy (bonus Sojusznik) i przeciwnicy
+function wszystkiePostacie(stan) {
+  return [stan.gracz, ...stan.sojusznicy, ...stan.przeciwnicy];
+}
+
 // Stan gry (wypełnia go zacznijPoziom). tryb: "arena" albo "wielkaArena"; wMenu: widać menu
 const stan = { tryb: "arena", wMenu: true };
 
@@ -111,6 +116,7 @@ function zacznijPoziom(stan, poziom) {
   resetPrzeszkod(); // wszystkie dekoracje z powrotem (zamieć mogła je usunąć)
   const wielka = jestWielka(stan);
   stan.gracz = nowaPostac("czerwoni", wielka ? CONFIG.tryby.wielkaArena.startGracz : CONFIG.startGracz);
+  stan.sojusznicy = []; // sojusznicy gracza (bonus Sojusznik), nowy poziom ich usuwa
   const typy = typyPoziomu(poziom);
   const ilu = wielka ? Math.max(1, Math.round(typy.length * CONFIG.tryby.wielkaArena.mnoznikPrzeciwnikow)) : typy.length;
   const pozycje = wielka ? pozycjePrzeciwnikowWielka(ilu) : pozycjePrzeciwnikow(ilu);
@@ -141,8 +147,22 @@ function nowyPrzeciwnik(stan, typId, start) {
   return p;
 }
 
-// Miękkie odpychanie: dwaj żywi przeciwnicy bliżej niż rozmiarPostaci rozsuwają się powoli
+// Miękkie odpychanie: dwaj żywi przeciwnicy bliżej niż rozmiarPostaci rozsuwają się powoli.
+// Sojusznik gracza odsuwa się od gracza (gracz się nie przesuwa).
 function odepchnijPrzeciwnikow(stan, dt) {
+  const g = stan.gracz;
+  for (const s of stan.sojusznicy) {
+    if (s.wyeliminowany || g.wyeliminowany) continue;
+    const dx = s.x - g.x || 1; // ten sam punkt: w poziomie
+    const dy = s.y - g.y;
+    const d = Math.hypot(dx, dy);
+    if (d >= j(CONFIG.rozmiarPostaci)) continue;
+    const przesun = (j(CONFIG.rozmiarPostaci) - d) * Math.min(1, CONFIG.odpychaniePrzeciwnikow * dt);
+    s.x += (dx / d) * przesun;
+    s.y += (dy / d) * przesun;
+    ograniczDoSwojejStrony(s);
+    wypchnijZPrzeszkod(s);
+  }
   const zywi = stan.przeciwnicy.filter((p) => !p.wyeliminowany);
   const min = j(CONFIG.rozmiarPostaci);
   const k = Math.min(1, CONFIG.odpychaniePrzeciwnikow * dt);
@@ -249,7 +269,7 @@ function lotSniezki(stan, sn, dt) {
   const zasiegTrafienia = PROMIEN_POSTACI + j(CONFIG.promienSniezki);
   let pierwszy = null;
   let najblizej = Infinity;
-  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+  for (const z of wszystkiePostacie(stan)) {
     if (z === sn.rzucajacy || z.wyeliminowany) continue;
     // Swoich (drużyna rzucającego) nie trafia, chyba że rzucał upity albo trafianieSwoich: true
     if (z.druzyna === sn.rzucajacy.druzyna && !CONFIG.trafianieSwoich && !sn.upita) continue;
@@ -653,7 +673,7 @@ function aktualizuj(dt) {
   stan.sniezki = zostaja.concat(stan.sniezki);
 
   // Odliczanie ogłuszenia i przeładowania (niezależnie od siebie)
-  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+  for (const z of wszystkiePostacie(stan)) {
     if (z.ogluszenie > 0) z.ogluszenie = Math.max(z.ogluszenie - dt, 0);
     if (z.przeladowanie > 0) z.przeladowanie = Math.max(z.przeladowanie - dt, 0);
   }
@@ -688,6 +708,7 @@ function aktualizuj(dt) {
 
   // Przeciwnicy (ruch, uniki, rzuty) - logika w ai.js
   for (const p of stan.przeciwnicy) aktualizujPrzeciwnika(stan, p, dt);
+  for (const s of stan.sojusznicy) aktualizujPrzeciwnika(stan, s, dt); // ten sam kod AI, druga strona
 
   // Wieżyczki z bonusu strzelają same
   aktualizujWiezyczki(stan, dt);

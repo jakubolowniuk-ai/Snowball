@@ -26,9 +26,9 @@ function postawWiezyczke(stan, druzyna, x, y) {
 // Z szansą szansaNajblizszego najbliższy, inaczej losowy. Niewidzialnego gracza widzi
 // tylko w zapamiętanym miejscu (jak przeciwnicy). Zwraca punkt albo null.
 function celWiezyczki(stan, w) {
-  const cele = [stan.gracz, ...stan.przeciwnicy]
+  const cele = wszystkiePostacie(stan)
     .filter((z) => !z.wyeliminowany && z.druzyna !== w.druzyna)
-    .map((z) => (z === stan.gracz ? widocznyCel(stan) : { x: z.x, y: z.y }))
+    .map((z) => widocznyCel(stan, z))
     .filter((p) => !jestWielka(stan) || odleglosc(w.x, w.y, p.x, p.y) <= j(CONFIG.tryby.wielkaArena.zasiegSniezki));
   if (!cele.length) return null;
   if (Math.random() < WZ().szansaNajblizszego) {

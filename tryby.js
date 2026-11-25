@@ -72,7 +72,7 @@ function aktualizujZamiec(stan, dt) {
 
   // Wiatr: postać poza granicą jest spychana do środka (przez przeszkody, bez obrażeń)
   const v = j(WA().predkoscWiatru) * dt;
-  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+  for (const z of wszystkiePostacie(stan)) {
     if (z.wyeliminowany) continue;
     z.wiatr = pozaGranica(stan, z.x, z.y, -PROMIEN_POSTACI);
     if (!z.wiatr) continue;
@@ -207,7 +207,8 @@ function pozycjePrzeciwnikowWielka(n) {
 // Rzuca tylko, gdy sam jest w widoku kamery (gracz go widzi), gracz jest w zasięgu
 // i między nimi nie ma przeszkody
 function mozeRzucicWielka(stan, z) {
-  const g = celPrzeciwnika(stan, z); // gracz albo jego wieżyczka (niewidzialny: zapamiętane miejsce)
+  const g = celPrzeciwnika(stan, z); // najbliższy z drużyny przeciwnej (niewidzialny: zapamiętane miejsce)
+  if (!g) return false;
   if (!naEkranie(z.x, z.y, j(WA().marginesWidoku))) return false;
   if (odleglosc(z.x, z.y, g.x, g.y) > j(WA().maxOdlegloscRzutuAI)) return false;
   const stopy = PROMIEN_POSTACI * 0.85;
@@ -216,7 +217,7 @@ function mozeRzucicWielka(stan, z) {
 
 // Dokąd iść: daleko od gracza - podchodzi, za blisko - cofa się, w sam raz - kręci się w pobliżu
 function celWielkiejAreny(stan, z) {
-  const g = celPrzeciwnika(stan, z);
+  const g = celPrzeciwnika(stan, z) || z; // brak celu: kręci się w miejscu
   const d = odleglosc(z.x, z.y, g.x, g.y) || 1;
   const idealna = j(WA().odlegloscAI);
   const kx = (z.x - g.x) / d; // kierunek od gracza do przeciwnika

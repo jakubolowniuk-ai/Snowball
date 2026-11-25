@@ -22,10 +22,10 @@ function zacznijBonusy(stan) {
   stan.doBonusu = B().pierwszyPoSekundach;
 }
 
-// Losowanie typu według wag
-function losujTypBonusu() {
-  const typy = B().typy;
+// Losowanie typu według wag. Sojusznik nie losuje się, gdy gracz już ma żywego sojusznika.
+function losujTypBonusu(stan) {
   if (B().wymusTyp) return typBonusu(B().wymusTyp); // tryb testowy: zawsze ten typ
+  const typy = B().typy.filter((t) => t.id !== "sojusznik" || !maSojusznika(stan, "czerwoni"));
   const suma = typy.reduce((s, t) => s + t.waga, 0);
   let r = Math.random() * suma;
   for (const t of typy) {
@@ -56,7 +56,7 @@ function dobreMiejsceBonusu(stan, x, y) {
   const pad = oknoNaSwiat(pozycjaPada()); // pad jest na ekranie, przeliczamy na świat
   if (odleglosc(x, y, pad.x, pad.y) < j(CONFIG.promienPadu) + j(CONFIG.promienDotykuPadu) + r) return false;
   // Nie za blisko żadnej postaci
-  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+  for (const z of wszystkiePostacie(stan)) {
     if (odleglosc(x, y, z.x, z.y) < j(B().odstepOdPostaci)) return false;
   }
   // Gracz musi móc go trafić: odcinek od gracza nie przecina przeszkody
@@ -84,7 +84,7 @@ function polozBonus(stan) {
     const x = t * W + nx * o;
     const y = (1 - t) * H + ny * o;
     if (dobreMiejsceBonusu(stan, x, y)) {
-      const typ = losujTypBonusu();
+      const typ = losujTypBonusu(stan);
       stan.bonusy.push({ typ: typ.id, x, y, zostalo: B().czasZycia });
       return true;
     }
@@ -99,7 +99,7 @@ function polozBonusWielka(stan) {
     const x = losuj(sw.x0, sw.x1);
     const y = losuj(sw.y0, sw.y1);
     if (dobreMiejsceBonusu(stan, x, y)) {
-      stan.bonusy.push({ typ: losujTypBonusu().id, x, y, zostalo: B().czasZycia });
+      stan.bonusy.push({ typ: losujTypBonusu(stan).id, x, y, zostalo: B().czasZycia });
       return true;
     }
   }
@@ -126,7 +126,7 @@ function aktualizujBonusy(stan, dt) {
     }
   }
 
-  for (const z of [stan.gracz, ...stan.przeciwnicy]) {
+  for (const z of wszystkiePostacie(stan)) {
     for (const ab of z.bonusy) {
       ab.pozostalo -= dt;
       if (ab.typ === "upicie") aktualizujUpicie(ab, dt);
@@ -193,7 +193,7 @@ function zdobadzBonus(stan, z, b) {
   if (typ.id === "upicie") {
     const promien = j(B().upicie.promien);
     stan.chmurki.push({ wybuch: true, x: b.x, y: b.y, promien, kolor: typ.kolor, czas: 0 });
-    for (const p of [stan.gracz, ...stan.przeciwnicy]) {
+    for (const p of wszystkiePostacie(stan)) {
       if (p.wyeliminowany || odleglosc(p.x, p.y, b.x, b.y) > promien) continue;
       const ab = dodajEfekt(p, "upicie");
       if (ab.kat === undefined) {
@@ -215,6 +215,12 @@ function zdobadzBonus(stan, z, b) {
   if (z.wyeliminowany) return; // rzucający odpadł, zanim śnieżka doleciała
   chmurkaSniegu(stan, b.x, b.y);
 
+  // Sojusznik: nowy zawodnik drużyny zbierającego (gdy drużyna już ma żywego, nic się nie dzieje)
+  if (typ.id === "sojusznik") {
+    if (!maSojusznika(stan, z.druzyna)) dodajSojusznika(stan, z);
+    return;
+  }
+
   // Pierniczek działa od razu: zdejmuje jedno trafienie (jeśli jest) i pokazuje serduszko
   if (typ.id === "pierniczek") {
     if (z.trafienia > 0) z.trafienia -= 1;
@@ -224,7 +230,7 @@ function zdobadzBonus(stan, z, b) {
 
   // Spowolnienie przeciwników: efekt dostają wszyscy żywi z drużyny przeciwnej
   if (typ.id === "spowolnieniePrzeciwnikow") {
-    for (const p of [stan.gracz, ...stan.przeciwnicy]) {
+    for (const p of wszystkiePostacie(stan)) {
       if (!p.wyeliminowany && p.druzyna !== z.druzyna) dodajEfekt(p, typ.id);
     }
     return;
@@ -236,6 +242,35 @@ function zdobadzBonus(stan, z, b) {
     ab.widzianyX = z.x;
     ab.widzianyY = z.y;
   }
+}
+
+// Czy drużyna ma żywego sojusznika z bonusu?
+function maSojusznika(stan, druzyna) {
+  return wszystkiePostacie(stan).some((p) => p.sojusznik && p.druzyna === druzyna && !p.wyeliminowany);
+}
+
+// Obok postaci z pojawia się sojusznik jej drużyny: parametry losowego typu, życia z bonusu.
+// Sojusznik gracza ma kurtkę w kolorze gracza i jest w stan.sojusznicy (nie liczy się do wygranej);
+// sojusznik przeciwników to zwykły dodatkowy przeciwnik (trzeba go wyeliminować).
+function dodajSojusznika(stan, z) {
+  const ustawienia = typBonusu("sojusznik");
+  const typy = Object.keys(CONFIG.typy);
+  const s = nowaPostac(z.druzyna, { x: 0, y: 0 });
+  ustawTyp(s, typy[Math.floor(Math.random() * typy.length)], stan.poziom);
+  s.sojusznik = true;
+  s.maxTrafien = ustawienia.zycia;
+  if (z.druzyna === "czerwoni") s.kolor = CONFIG.kolorGracza;
+  // Miejsce: obok zbierającego, w losową stronę
+  const kat = Math.random() * Math.PI * 2;
+  s.x = z.x + Math.cos(kat) * j(ustawienia.odleglosc);
+  s.y = z.y + Math.sin(kat) * j(ustawienia.odleglosc);
+  ograniczDoSwojejStrony(s);
+  wypchnijZPrzeszkod(s);
+  s.ai = nowyStanAI(parametryPrzeciwnika(stan, s));
+  s.ai.przerwa -= CONFIG.czasNapisuLevel; // napis "Level N" już minął
+  chmurkaSniegu(stan, s.x, s.y);
+  if (z.druzyna === "czerwoni") stan.sojusznicy.push(s);
+  else stan.przeciwnicy.push(s);
 }
 
 // Gdzie przeciwnicy "widzą" gracza: zwykle tam, gdzie stoi; niewidzialnego tylko
@@ -303,7 +338,7 @@ function tarczaPochlania(stan, z, sn) {
 // rzucającemu. Liczony co klatkę, więc działa też na śnieżki już w locie.
 function mnoznikPredkosciSniezki(stan, sn) {
   const druzyna = sn.rzucajacy.druzyna;
-  const ktos = [stan.gracz, ...stan.przeciwnicy].some(
+  const ktos = wszystkiePostacie(stan).some(
     (p) => !p.wyeliminowany && p.druzyna !== druzyna && maEfekt(p, "spowolnienieSniezek")
   );
   return ktos ? typBonusu("spowolnienieSniezek").mnoznikPredkosci : 1;

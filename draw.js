@@ -281,7 +281,7 @@ function rysujBlysk(ctx, z, k, x, y, odbicie, sila, kolor = "230, 40, 40") {
 // Delikatny okrąg strefy na ziemi, gdy w strefie stoi postać tej drużyny
 function rysujStrefeStanowiska(ctx, stan, st) {
   if (st.amunicja <= 0) return;
-  const ktos = [stan.gracz, ...stan.przeciwnicy].some(
+  const ktos = wszystkiePostacie(stan).some(
     (z) => stanowiskoDlaDruzyny(st, z) && !z.wyeliminowany && wStrefieStanowiska(z, st)
   );
   if (!ktos) return;
@@ -812,7 +812,7 @@ function rysujSwiat(ctx, stan) {
 
   // Najpierw leżący (są na ziemi), potem stojący od góry do dołu,
   // żeby bliżsi (niżej) zasłaniali dalszych
-  const wszyscy = [stan.gracz, ...stan.przeciwnicy];
+  const wszyscy = wszystkiePostacie(stan);
   const lezacy = wszyscy.filter((z) => z.wyeliminowany);
   const stojacy = wszyscy.filter((z) => !z.wyeliminowany);
   for (const z of lezacy) rysujZawodnika(ctx, z, z === stan.gracz);
