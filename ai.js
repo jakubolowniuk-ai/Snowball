@@ -13,7 +13,8 @@ function nowyStanAI(param) {
     cel: null, // punkt, do którego idzie (null = stoi)
     postoj: losuj(param.postojMin, param.postojMax), // ile jeszcze postoi
     // Pierwszy rzut dopiero po napisie "Level N"
-    przerwa: CONFIG.czasNapisuLevel + losuj(param.przerwaMin, param.przerwaMax),
+    // (plus losowe opóźnienie, żeby przeciwnicy nie rzucali naraz)
+    przerwa: CONFIG.czasNapisuLevel + losuj(param.przerwaMin, param.przerwaMax) + losuj(0, CONFIG.opoznienieStartuMax),
     unoszenie: null, // { czas, calosc } gdy unosi śnieżkę nad głowę (ładuje siłę)
     unik: null, // { za, sn } zaplanowany unik przed śnieżką sn za "za" sekund
     widziane: new Set(), // śnieżki, które już ocenił (każdą ocenia tylko raz)
@@ -137,24 +138,18 @@ function aktualizujPrzeciwnika(stan, z, dt) {
   }
 }
 
-// Początek zamachu (ostrzeżenie przed rzutem). Przeciwnik z typem losuje siłę z typu,
-// a zamach trwa max(zamachMin, siła × MAX_CHARGE). Bez typu zamach = czas ładowania siły.
+// Początek zamachu (ostrzeżenie przed rzutem). Przeciwnik losuje siłę z typu,
+// a zamach trwa max(zamachMin, siła × MAX_CHARGE).
 function zacznijZamach(stan, z, param) {
   const g = stan.gracz;
-  let calosc;
-  let silaTypu; // undefined = siła z czasu zamachu (stara tabela)
-  if (z.typ) {
-    silaTypu = losuj(param.silaMin, param.silaMax);
-    calosc = Math.max(param.zamachMin, silaTypu * CONFIG.MAX_CHARGE);
-  } else if (CONFIG.zasiegZalezyOdSily) {
-    // Siła tak dobrana, żeby dorzucić do gracza (plus mały zapas)
+  let silaTypu = losuj(param.silaMin, param.silaMax);
+  if (CONFIG.zasiegZalezyOdSily) {
+    // Gdy zasięg zależy od siły: co najmniej tyle siły, żeby dorzucić do gracza
     const d = odleglosc(z.x, z.y, g.x, g.y) / SZEROKOSC_POLA;
     const potrzebna = (d - CONFIG.zasiegMin) / (CONFIG.zasiegMax - CONFIG.zasiegMin);
-    calosc = Math.min(Math.max(potrzebna, 0) * CONFIG.MAX_CHARGE + CONFIG.zapasSily, CONFIG.MAX_CHARGE);
-  } else {
-    // Śnieżka i tak doleci, więc siła (czyli prędkość) jest losowa z zakresu poziomu
-    calosc = losuj(param.silaMin, param.silaMax) * CONFIG.MAX_CHARGE;
+    silaTypu = Math.min(Math.max(silaTypu, potrzebna), 1);
   }
+  const calosc = Math.max(param.zamachMin, silaTypu * CONFIG.MAX_CHARGE);
   // Z szansą szansaBonusu celuje w bonus zamiast w gracza
   const bonus = Math.random() < param.szansaBonusu ? wybierzBonusDlaPrzeciwnika(stan, z) : null;
   z.ai.unoszenie = { czas: 0, calosc, bonus, sila: silaTypu };
