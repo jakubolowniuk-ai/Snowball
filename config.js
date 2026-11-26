@@ -579,7 +579,7 @@ const CONFIG = {
     lepionaSniezkaX: 0.3, // przesunięcie w bok od stóp (ułamek szerokości postaci), żeby było ją widać
   },
 
-  // Kolory zawodników: nazwa atlasu w assets/gracze/atlasy/ (16 kolorów, lista w README_GRAFIKI)
+  // Kolory zawodników: nazwa atlasu w assets/gracze/atlasy/ (16 kolorów, lista w docs/GRAFIKI.md)
   kolorGracza: "czerwony",
   kolorPrzeciwnika: "zielony",
   skalaGrafik: 1,
