@@ -1,7 +1,7 @@
 # Snowcraft: instrukcje dla agenta
 
 ## O projekcie
-Snowcraft to gra na telefon (przeglądarka) inspirowana klasyczną grą Flash z 1998 r. od Nicholson NY. Gracz (czerwony zawodnik) rzuca śnieżkami w przeciwników (zieloni, sterowani przez komputer). Gra jest dla właściciela projektu (Jakub) i jego znajomych. Dokładna specyfikacja jest w `docs/snowcraft-plan.md`. Przeczytaj ją przed rozpoczęciem pracy, a ten plik traktuj jako skrót. **Na razie gramy jednym zawodnikiem po stronie gracza.** Wyjątek: bonus Sojusznik daje zawodnika sterowanego przez komputer.
+Snowcraft to gra na telefon (przeglądarka) inspirowana klasyczną grą Flash z 1998 r. od Nicholson NY. Gracz (czerwony zawodnik) rzuca śnieżkami w przeciwników (zieloni, sterowani przez komputer). Gra jest dla właściciela projektu (Jakub) i jego znajomych. Dokładna specyfikacja jest w `docs/snowcraft-plan.md`. Przeczytaj ją przed rozpoczęciem pracy, a ten plik traktuj jako skrót. Kierunek rozwoju (etapy, edytor map z kafelkami terenu) opisują `docs/snowcraft-strategia.md` i `docs/snowcraft-plan-edytora-map.md` (stan na 25.11.2026; pytania otwarte jeszcze nierozstrzygnięte, nie implementuj bez prośby Jakuba). **Na razie gramy jednym zawodnikiem po stronie gracza.** Wyjątek: bonus Sojusznik daje zawodnika sterowanego przez komputer.
 
 ## Jak ze mną pracować (Jakub)
 - Piszemy po polsku. Komentarze w kodzie też po polsku, proste i krótkie.
