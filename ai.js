@@ -174,7 +174,10 @@ function zacznijZamach(stan, z, param) {
   const calosc = Math.max(param.zamachMin, silaTypu * CONFIG.MAX_CHARGE);
   // Z szansą szansaBonusu celuje w bonus zamiast w gracza
   const bonus = Math.random() < param.szansaBonusu ? wybierzBonusDlaPrzeciwnika(stan, z) : null;
-  z.ai.unoszenie = { czas: 0, calosc, bonus, sila: silaTypu };
+  // Typ z celNaPoczatkuZamachu (Snajper) zapamiętuje punkt celu już teraz: gracz widzi zamach
+  // (ostrzeżenie) i może zejść z miejsca. Inne typy wybierają punkt dopiero przy rzucie.
+  const punkt = param.celNaPoczatkuZamachu && !bonus ? punktRzutuWGracza(stan, z, param) : null;
+  z.ai.unoszenie = { czas: 0, calosc, bonus, sila: silaTypu, punkt };
 }
 
 // Przeciwnik z typem w zwykłej Arenie: krótkie kroki w stronę gracza (z losowym odchyleniem),
@@ -349,8 +352,8 @@ function punktRzutuWGracza(stan, z, param) {
 
 // Rzut w gracza po zamachu
 function rzucWGracza(stan, z, param) {
-  const p = punktRzutuWGracza(stan, z, param);
-  if (!p) return;
   const u = z.ai.unoszenie;
+  const p = u.punkt || punktRzutuWGracza(stan, z, param); // punkt z początku zamachu albo teraz
+  if (!p) return;
   wykonajRzut(stan, z, p.x, p.y, u.czas, u.sila);
 }

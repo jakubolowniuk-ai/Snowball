@@ -139,6 +139,33 @@ const CONFIG = {
       szansaBonusu: 0.15,
       szansaStanowiska: 0.1,
     },
+    // Pomarańczowy: Snajper. Celny i z daleka; cena: długi zamach (ostrzeżenie) i długa przerwa.
+    pomaranczowy: {
+      nazwa: "Pomarańczowy (Snajper)",
+      kolor: "pomaranczowy",
+      czasOgluszenia: 1.2,
+      mnoznikPredkosci: 0.8,
+      krokMin: 0.06,
+      krokMax: 0.1,
+      odchylenieKroku: 25,
+      postojMin: 1.0,
+      postojMax: 2.0,
+      odlegloscRzutuMin: 0.5,
+      odlegloscRzutuMax: 0.6,
+      czasAwaryjny: 5,
+      przerwaMin: 5,
+      przerwaMax: 6,
+      silaMin: 0.35,
+      silaMax: 0.55,
+      zamachMin: 0.9,
+      rozrzut: 0.038, // ok. 99% trafień w stojącego (symulacja)
+      celNaPoczatkuZamachu: true, // punkt celu zapamiętany na początku zamachu: zejście z miejsca w trakcie zamachu ratuje
+      szansaUniku: 0.1,
+      czasReakcji: 0.7,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.1,
+      szansaStanowiska: 0.1,
+    },
   },
   // Skład poziomu: lista { typ, ile, zycia } (zycia = ile trafień eliminuje; 1 = od razu,
   // bez ogłuszenia). Ten sam typ może mieć kilka wpisów z różnymi życiami.
@@ -151,7 +178,9 @@ const CONFIG = {
     5: [{ typ: "zielony", ile: 3, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 1 }],
     6: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }],
     7: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 1, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }],
-    // poziom 8 i dalej: skład ostatniego wpisu
+    8: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 1, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }],
+    9: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 2, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }],
+    // poziom 10 i dalej: skład ostatniego wpisu
   },
   // Ilu przeciwników naraz na planszy (null = wszyscy od razu). Reszta czeka w kolejce
   // i wchodzi opoznienieWejscia s po tym, jak zwolni się miejsce (ktoś odpadnie).
