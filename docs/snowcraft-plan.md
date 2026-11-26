@@ -198,11 +198,12 @@ Dodatki typów 1–10 (pełne wartości są w promptach C3–C10 w `docs/PROMPTY
 - Poziomy 3 i 4 mają po 1 życiu (założenie, Jakub nie podał). Poziom 20: 10 Zielonych (3 po 3ż, 7 po 2ż), 2 Limonkowe, po jednym z ośmiu kolorów.
 - Trafień przybywa równo o 2 na poziom. Dla porównania stara wersja (życia Zielonego rosnące do 4, Limonkowy 3 życia) miała 18 trafień na poziomie 5 i 38 na poziomie 11, czego Jakub nie mógł przejść.
 - Słabe punkty do sprawdzenia w grze: poziomy 15–20 mogą być za długie (ok. 2 min i więcej, w Wielkiej arenie zamieć zwęża świat po 90 s: do testów można ustawić `czasDoZwezania` bardzo duże); połowa wrogów na wysokich poziomach to Zielone; Żółty (chód 1,4, trafia 30%) może być nie do trafienia; Snajper (100% trafień, zamach 0,9 s) wymaga, żeby punkt celu był ustalony na początku zamachu, inaczej ostrzeżenie nic nie daje.
+- **Stan wdrożenia:** C0 (poziomStartowy) i C1 (życia w składzie, Limonkowy bez Laski, poziomy 1–5, `maxNaraz` 8) zrobione. C2 (Wielka arena: dystans z typu) zrobione; `maxOdlegloscRzutuAI` 0,9 wystarcza dla wszystkich typów do 20 (największa odległość rzutu: Szary 0,8). C3 zrobione. C4 zrobione. C5 zrobione. C6 zrobione. C7 zrobione. C8 zrobione. C9 zrobione. C10 zrobione.
 - Kolejność robienia (prompty C0–C10 w `docs/PROMPTY_DLA_AGENTA.md`): C0 poziom startowy do testów (opcjonalnie), C1 życia w składzie + Limonkowy bez Laski + poziomy 1–5, C2 dystans z typu w Wielkiej arenie, C3 Żółty (6–7), C4 Pomarańczowy (8–9), C5 Turkusowy (10–11), C6 Błękitny (12–13), C7 Szary (14–15), C8 Fioletowy (16–17), C9 Brązowy (18–19), C10 Magenta (20).
 
 #### Karty typów
-(Uwaga: życia i „Laska cukrowa" Limonkowego z poniższych kart są nieaktualne od decyzji z 25.11: życia są w składzie poziomu, Limonkowy ma chód ×1,0. Tabela życi Zielonego 2/3/4 też nieaktualna.)
-**Zielony (najsłabszy, Rekrut): ZROBIONY (krok A1), poziomy 1–3 w obu arenach.** Uwagi z wdrożenia: rozmiar ×1,15 pominięty (promień postaci jest wspólny i używany w wielu plikach). Rozrzut z karty (0,045) dawał w grze ok. 83% trafień, nie 70% (pudło „za” graczem i tak przez niego przelatuje), więc w krokach A3 poprawiony na 0,053 (ok. 70%). W Wielkiej arenie Zielony podchodzi po staremu (`odlegloscAI` 0,5), nie na 5–6 ludzików. Zamach przy sile 0,05–0,15 to zawsze 0,5 s (zamachMin).
+(Uwaga: życia i „Laska cukrowa" Limonkowego z poniższych kart są nieaktualne od decyzji z 25.11, **wdrożone w kroku C1**: życia są w składzie poziomu (`{typ, ile, zycia}`), Limonkowy (Standard) ma chód ×1,0. Tabela życi Zielonego 2/3/4 też nieaktualna. Skład z kroku A4 (1–12) zastąpiony poziomami 1–5 z planu 1–20.)
+**Zielony (najsłabszy, Rekrut): ZROBIONY (krok A1), poziomy 1–3 w obu arenach.** Uwagi z wdrożenia: rozmiar ×1,15 pominięty (promień postaci jest wspólny i używany w wielu plikach). Rozrzut z karty (0,045) dawał w grze ok. 83% trafień, nie 70% (pudło „za” graczem i tak przez niego przelatuje), więc w krokach A3 poprawiony na 0,053 (ok. 70%). W Wielkiej arenie od kroku C2 Zielony podchodzi na 5–6 ludzików (dystans z typu). Zamach przy sile 0,05–0,15 to zawsze 0,5 s (zamachMin).
 - Życia zależne od poziomu: 1–2: 2 życia, 3–4: 3, od 5: 4.
 - Ogłuszenie 1,5 s. Rozmiar postaci ×1,15 (do potwierdzenia).
 - Chodzenie ×0,7, krótkie kroki w stronę gracza, postój 1–1,5 s po kroku.
@@ -218,6 +219,22 @@ Dodatki typów 1–10 (pełne wartości są w promptach C3–C10 w `docs/PROMPTY
 - Kroki 0,08–0,12 w stronę gracza (±25°), postój 0,5–1 s, rzuca z 0,375–0,4375 (6–7 ludzików), zasada awaryjna jak u Zielonego.
 - Przerwa 3–4,5 s, siła 0,1–0,3, zamach min. 0,4 s, rozrzut 0,047 (ok. 80% trafień w stojącego).
 - Unik 30%, reakcja 0,6 s, bonusy 20%, stanowiska 10%. Cena umiejętności: słabe śnieżki i rzadkie rzuty.
+
+**Żółty (Biegacz): ZROBIONY (krok C3), od poziomu 6.** Wartości jak w prompcie C3. Rozrzut ze startu (0,077) dawał w symulacji ok. 45% trafień w stojącego, więc poprawiony na 0,111 (ok. 30%).
+
+**Pomarańczowy (Snajper): ZROBIONY (krok C4), od poziomu 8.** Rozrzut 0,038 = ok. 99% trafień w stojącego (symulacja). W kodzie punkt celu był ustalany przy puszczeniu, więc dodane pole typu `celNaPoczatkuZamachu` (decyzja Jakuba: tylko Snajper): punkt celu zapamiętany na początku zamachu. W małej Arenie odległość 0,5–0,6 często jest nieosiągalna, wtedy rzuca z miejsca po zasadzie awaryjnej (5 s).
+
+**Turkusowy (Szybkostrzelec): ZROBIONY (krok C5), od poziomu 10.** Rozrzut ze startu (0,071) dawał ok. 49%, poprawiony na 0,084 (ok. 40%).
+
+**Błękitny (Unikacz): ZROBIONY (krok C6), od poziomu 12.** Nowe pola typu `ucieka` i `progUcieczki` (0,8), działają w Arenie (`podchodzenieWArenie` w ai.js). Rozrzut ze startu (0,068) dawał ok. 50%, poprawiony na 0,075 (ok. 45%).
+
+**Szary (Wytrwały): ZROBIONY (krok C7), od poziomu 14.** Rozrzut 0,058 = ok. 60% (symulacja). W małej Arenie odległość 0,7–0,8 jest prawie nieosiągalna, więc rzuca z miejsca po zasadzie awaryjnej.
+
+**Fioletowy (Siłacz): ZROBIONY (krok C8), od poziomu 16.** Rozrzut 0,052 = ok. 70% (symulacja).
+
+**Brązowy (od stanowisk): ZROBIONY (krok C9), od poziomu 18.** Rozrzut 0,049 = ok. 75% (symulacja). Przy stanowisku najwyżej jeden przeciwnik (zajęte stanowisko nie jest „wolne”), reszta zachowuje się zwyczajnie.
+
+**Magenta (od bonusów): ZROBIONA (krok C10), poziom 20.** Rozrzut 0,052 = ok. 70% (symulacja). Komplet 20 poziomów zrobiony; poziom N od 6 ma N przeciwników (sprawdzone).
 
 ### Odłożone na później
 - Drużyna 3 zawodników: zaznaczanie zawodnika, zaznaczanie celów, automatyczne uniki i rzuty niezaznaczonych.

@@ -34,16 +34,12 @@ function nowaPostac(druzyna, start) {
   };
 }
 
-// Przeciwnik dostaje typ: kolor, życia (zależne od poziomu), ogłuszenie, prędkość, przeładowanie
-function ustawTyp(z, typId, poziom) {
+// Przeciwnik dostaje typ: kolor, ogłuszenie, prędkość, przeładowanie.
+// Życia (maxTrafien) nie są w typie: ustawia je wpis składu poziomu albo bonus Sojusznik.
+function ustawTyp(z, typId) {
   const t = CONFIG.typy[typId];
   z.typ = typId;
   z.kolor = t.kolor;
-  // Życia: stała liczba albo { poczatkowe, coIlePoziomow, max } (rosną z poziomem)
-  z.maxTrafien =
-    typeof t.zycia === "number"
-      ? t.zycia
-      : Math.min(t.zycia.max, t.zycia.poczatkowe + Math.floor((poziom - 1) / t.zycia.coIlePoziomow));
   z.czasOgluszenia = t.czasOgluszenia;
   z.mnoznikPredkosci = t.mnoznikPredkosci;
   z.mnoznikPrzeladowania = t.mnoznikPrzeladowania;
@@ -54,18 +50,18 @@ function parametryPrzeciwnika(stan, z) {
   return CONFIG.typy[z.typ];
 }
 
-// Lista typów przeciwników na poziomie (np. ["zielony", "zielony"]).
-// Poziom bez wpisu w skladPoziomow bierze skład najbliższego niższego (13+ jak 12).
+// Lista przeciwników na poziomie: { typ, zycia } (np. [{ typ: "zielony", zycia: 1 }, ...]).
+// Poziom bez wpisu w skladPoziomow bierze skład najbliższego niższego.
 function typyPoziomu(poziom) {
   const numery = Object.keys(CONFIG.skladPoziomow).map(Number).filter((n) => n <= poziom);
   const sklad = CONFIG.skladPoziomow[Math.max(...numery)];
-  // Typy przeplatane (Z, L, Z, L, ...), żeby przy limicie maxNaraz na planszy były oba
+  // Wpisy przeplatane (Z, L, Z, L, ...), żeby przy limicie maxNaraz na planszy były różne typy
   const lista = [];
-  const zostalo = sklad.map(({ typ, ile }) => ({ typ, ile }));
+  const zostalo = sklad.map(({ typ, ile, zycia }) => ({ typ, ile, zycia }));
   while (zostalo.some((s) => s.ile > 0)) {
     for (const s of zostalo) {
       if (s.ile > 0) {
-        lista.push(s.typ);
+        lista.push({ typ: s.typ, zycia: s.zycia });
         s.ile -= 1;
       }
     }
@@ -137,10 +133,11 @@ function zacznijPoziom(stan, poziom) {
 }
 zacznijPoziom(stan, 1);
 
-// Nowy przeciwnik typu typId w punkcie start (ułamki szerokości pola)
-function nowyPrzeciwnik(stan, typId, start) {
+// Nowy przeciwnik z wpisu składu { typ, zycia } w punkcie start (ułamki szerokości pola)
+function nowyPrzeciwnik(stan, wpis, start) {
   const p = nowaPostac("zieloni", start);
-  ustawTyp(p, typId, stan.poziom);
+  ustawTyp(p, wpis.typ);
+  p.maxTrafien = wpis.zycia; // życia ze składu poziomu
   ograniczDoSwojejStrony(p); // nie za blisko brzegu
   wypchnijZPrzeszkod(p); // nie w środku dekoracji
   p.ai = nowyStanAI(parametryPrzeciwnika(stan, p));

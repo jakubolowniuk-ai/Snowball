@@ -3,7 +3,7 @@
 Każdy prompt wklejasz osobno, w osobnej rozmowie z agentem, i sprawdzasz grę na telefonie przed następnym. Agent czyta CLAUDE.md i docs/snowcraft-plan.md z `main`, więc **najpierw scal gałąź z dokumentacją** (pull request), inaczej nie zobaczy ustaleń. Po scaleniu zamiast wklejać cały prompt możesz napisać agentowi: „Wykonaj krok A1 z docs/PROMPTY_DLA_AGENTA.md".
 
 ## Stan na 25.11
-Kroki A1–A4 i B2–B5 są zrobione i scalone w `main`. **Teraz obowiązuje część C na końcu pliku** (koncepcja typów A i 20 poziomów, test na Wielkiej arenie). Część C zastępuje ustalenia z A1/A3/A4 o życiach (życia są w składzie poziomu, nie w typie) i o Limonkowym (bez Laski cukrowej). Kroki wklejaj po kolei: C0 (opcjonalny), C1, C2, ..., C10.
+Kroki A1–A4 i B2–B5 są zrobione i scalone w `main`. **Teraz obowiązuje część C na końcu pliku** (koncepcja typów A i 20 poziomów, test na Wielkiej arenie). Część C zastępuje ustalenia z A1/A3/A4 o życiach (życia są w składzie poziomu, nie w typie) i o Limonkowym (bez Laski cukrowej). Kroki wklejaj po kolei: C0 (opcjonalny), C1, C2, ..., C10. **Aktualizacja 26.11: kroki C0–C10 zrobione** (nie wklejaj ich ponownie; prompty zostają jako zapis).
 
 ## Zalecana kolejność (stara, kroki A i B zrobione)
 1. **A1** typy + Zielony na poziomach 1–3

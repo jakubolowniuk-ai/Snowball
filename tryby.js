@@ -215,11 +215,20 @@ function mozeRzucicWielka(stan, z) {
   return !przeszkodaNaOdcinku(z.x, z.y + stopy, g.x, g.y + stopy);
 }
 
+// Idealna odległość od celu w Wielkiej arenie: z przedziału odległości rzutu typu
+// (losowana raz i trzymana do następnego rzutu). Postać bez typu: odlegloscAI.
+function idealnaOdlegloscWielka(z) {
+  const t = z.typ && CONFIG.typy[z.typ];
+  if (!t) return j(WA().odlegloscAI);
+  if (z.ai.odlRzutu === null) z.ai.odlRzutu = j(losuj(t.odlegloscRzutuMin, t.odlegloscRzutuMax));
+  return z.ai.odlRzutu;
+}
+
 // Dokąd iść: daleko od gracza - podchodzi, za blisko - cofa się, w sam raz - kręci się w pobliżu
 function celWielkiejAreny(stan, z) {
   const g = celPrzeciwnika(stan, z) || z; // brak celu: kręci się w miejscu
   const d = odleglosc(z.x, z.y, g.x, g.y) || 1;
-  const idealna = j(WA().odlegloscAI);
+  const idealna = idealnaOdlegloscWielka(z);
   const kx = (z.x - g.x) / d; // kierunek od gracza do przeciwnika
   const ky = (z.y - g.y) / d;
   let x;
@@ -298,7 +307,7 @@ function zacznijTryb(stan, tryb) {
   stan.tryb = tryb;
   stan.wMenu = false;
   menu.style.display = "none";
-  zacznijPoziom(stan, 1);
+  zacznijPoziom(stan, CONFIG.poziomStartowy); // normalnie 1, do testów można zacząć wyżej
 }
 
 document.getElementById("przyciskArena").addEventListener("click", () => zacznijTryb(stan, "arena"));

@@ -6,6 +6,10 @@ const CONFIG = {
   // Pole gry: szerokość do wysokości (2 = pole dwa razy szersze niż wyższe)
   ASPECT: 2,
 
+  // Do testów: od którego poziomu zaczyna się gra z menu (np. 15 = start od poziomu 15,
+  // po wygranej idzie 16 itd.). Normalnie 1.
+  poziomStartowy: 1,
+
   // Zawodnik
   rozmiarPostaci: 1 / 16, // średnica okręgu trafień (hitbox) zawodnika
   predkoscZawodnika: 0.3, // limit prędkości: szerokości pola na sekundę
@@ -47,7 +51,8 @@ const CONFIG = {
   czasChmurki: 0.5, // jak długo widać obłoczek i rozbryzg po trafieniu
   czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem
 
-  // Typy przeciwników: każdy typ ma stałe parametry, a poziom to skład (ile i jakich typów).
+  // Typy przeciwników: każdy typ ma stałe parametry, a poziom to skład (ile i jakich typów
+  // oraz ile żyć). Życia nie są parametrem typu, tylko wpisu w składzie poziomu.
   // Gracz ich nie używa, ma wspólne ustawienia (trafieniaDoEliminacji, czasOgluszenia, ...).
   // Odległości i kroki to ułamki szerokości pola, czasy w sekundach, siła 0-1.
   typy: {
@@ -56,8 +61,6 @@ const CONFIG = {
     zielony: {
       nazwa: "Zielony (Rekrut)",
       kolor: "zielony", // atlas assets/gracze/atlasy/<kolor>.webp
-      // Życia: na starcie poczatkowe, +1 co coIlePoziomow poziomów, najwyżej max
-      zycia: { poczatkowe: 2, coIlePoziomow: 2, max: 4 },
       czasOgluszenia: 1.5,
       mnoznikPredkosci: 0.7, // chodzi wolniej niż gracz
       // Ruch w Arenie: krótkie kroki w stronę gracza, kierunek z losowym odchyleniem
@@ -84,14 +87,12 @@ const CONFIG = {
       szansaBonusu: 0.1,
       szansaStanowiska: 0,
     },
-    // Limonkowy: Zwiadowca. Stała umiejętność "Laska cukrowa" (szybszy niż gracz bez bonusu);
-    // cena: słabe śnieżki i rzadkie rzuty.
+    // Limonkowy: Standard. Chodzi tak szybko jak gracz, celniejszy niż Zielony.
     limonkowy: {
-      nazwa: "Limonkowy (Zwiadowca)",
+      nazwa: "Limonkowy (Standard)",
       kolor: "limonkowy",
-      zycia: 3, // liczba = stałe życia (nie zależą od poziomu)
       czasOgluszenia: 1.2,
-      mnoznikPredkosci: 1.4,
+      mnoznikPredkosci: 1.0,
       krokMin: 0.08,
       krokMax: 0.12,
       odchylenieKroku: 25,
@@ -112,26 +113,247 @@ const CONFIG = {
       szansaBonusu: 0.2,
       szansaStanowiska: 0.1,
     },
+    // Żółty: Biegacz. Szybki i nerwowy, ale bardzo niecelny (cena umiejętności).
+    zolty: {
+      nazwa: "Żółty (Biegacz)",
+      kolor: "zolty",
+      czasOgluszenia: 1.0,
+      mnoznikPredkosci: 1.4,
+      krokMin: 0.1,
+      krokMax: 0.16,
+      odchylenieKroku: 45,
+      postojMin: 0.3,
+      postojMax: 0.7,
+      odlegloscRzutuMin: 0.3,
+      odlegloscRzutuMax: 0.4,
+      czasAwaryjny: 5,
+      przerwaMin: 2.5,
+      przerwaMax: 3.5,
+      silaMin: 0.1,
+      silaMax: 0.3,
+      zamachMin: 0.4,
+      rozrzut: 0.111, // ok. 30% trafień w stojącego (symulacja; start z planu 0,077 dawał ok. 45%)
+      szansaUniku: 0.35,
+      czasReakcji: 0.35,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.15,
+      szansaStanowiska: 0.1,
+    },
+    // Pomarańczowy: Snajper. Celny i z daleka; cena: długi zamach (ostrzeżenie) i długa przerwa.
+    pomaranczowy: {
+      nazwa: "Pomarańczowy (Snajper)",
+      kolor: "pomaranczowy",
+      czasOgluszenia: 1.2,
+      mnoznikPredkosci: 0.8,
+      krokMin: 0.06,
+      krokMax: 0.1,
+      odchylenieKroku: 25,
+      postojMin: 1.0,
+      postojMax: 2.0,
+      odlegloscRzutuMin: 0.5,
+      odlegloscRzutuMax: 0.6,
+      czasAwaryjny: 5,
+      przerwaMin: 5,
+      przerwaMax: 6,
+      silaMin: 0.35,
+      silaMax: 0.55,
+      zamachMin: 0.9,
+      rozrzut: 0.038, // ok. 99% trafień w stojącego (symulacja)
+      celNaPoczatkuZamachu: true, // punkt celu zapamiętany na początku zamachu: zejście z miejsca w trakcie zamachu ratuje
+      szansaUniku: 0.1,
+      czasReakcji: 0.7,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.1,
+      szansaStanowiska: 0.1,
+    },
+    // Turkusowy: Szybkostrzelec. Rzuca często; cena: słabe i niecelne gałki.
+    turkusowy: {
+      nazwa: "Turkusowy (Szybkostrzelec)",
+      kolor: "turkusowy",
+      czasOgluszenia: 1.2,
+      mnoznikPredkosci: 0.9,
+      krokMin: 0.06,
+      krokMax: 0.1,
+      odchylenieKroku: 25,
+      postojMin: 0.5,
+      postojMax: 1.0,
+      odlegloscRzutuMin: 0.35,
+      odlegloscRzutuMax: 0.45,
+      czasAwaryjny: 5,
+      przerwaMin: 1.5,
+      przerwaMax: 2.5,
+      silaMin: 0.1,
+      silaMax: 0.2,
+      zamachMin: 0.3,
+      rozrzut: 0.084, // ok. 40% trafień w stojącego (symulacja; start z planu 0,071 dawał ok. 49%)
+      szansaUniku: 0.25,
+      czasReakcji: 0.5,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.15,
+      szansaStanowiska: 0.2,
+    },
+    // Błękitny: Unikacz. Często unika i ucieka przed graczem; cena: słabe, niecelne rzuty.
+    blekitny: {
+      nazwa: "Błękitny (Unikacz)",
+      kolor: "blekitny",
+      czasOgluszenia: 1.0,
+      mnoznikPredkosci: 1.0,
+      krokMin: 0.08,
+      krokMax: 0.12,
+      odchylenieKroku: 25,
+      postojMin: 0.3,
+      postojMax: 0.8,
+      odlegloscRzutuMin: 0.45,
+      odlegloscRzutuMax: 0.55,
+      czasAwaryjny: 5,
+      ucieka: true, // Arena: gdy gracz bliżej niż progUcieczki × odlegloscRzutuMin, robi krok od niego
+      progUcieczki: 0.8,
+      przerwaMin: 3,
+      przerwaMax: 4.5,
+      silaMin: 0.1,
+      silaMax: 0.3,
+      zamachMin: 0.45,
+      rozrzut: 0.075, // ok. 45% trafień w stojącego (symulacja; start z planu 0,068 dawał ok. 50%)
+      szansaUniku: 0.6,
+      czasReakcji: 0.25,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.2,
+      szansaStanowiska: 0.1,
+    },
+    // Szary: Wytrwały. Krótkie ogłuszenie; cena: wolny i rzadko rzuca.
+    szary: {
+      nazwa: "Szary (Wytrwały)",
+      kolor: "szary",
+      czasOgluszenia: 0.4, // krótkie: po trafieniu prawie od razu wraca do gry
+      mnoznikPredkosci: 0.5,
+      krokMin: 0.04,
+      krokMax: 0.07,
+      odchylenieKroku: 25,
+      postojMin: 1.5,
+      postojMax: 2.5,
+      odlegloscRzutuMin: 0.7, // praktycznie stoi tam, gdzie jest (w Arenie rzuca po zasadzie awaryjnej)
+      odlegloscRzutuMax: 0.8,
+      czasAwaryjny: 5,
+      przerwaMin: 5,
+      przerwaMax: 6.5,
+      silaMin: 0.15,
+      silaMax: 0.35,
+      zamachMin: 0.5,
+      rozrzut: 0.058, // ok. 60% trafień w stojącego (symulacja)
+      szansaUniku: 0.2,
+      czasReakcji: 0.6,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.05,
+      szansaStanowiska: 0.1,
+    },
+    // Fioletowy: Siłacz. Bardzo szybkie gałki; cena: długi zamach (ok. 1,3-1,5 s) i rzadkie rzuty.
+    fioletowy: {
+      nazwa: "Fioletowy (Siłacz)",
+      kolor: "fioletowy",
+      czasOgluszenia: 1.2,
+      mnoznikPredkosci: 0.6,
+      krokMin: 0.05,
+      krokMax: 0.08,
+      odchylenieKroku: 25,
+      postojMin: 1.0,
+      postojMax: 2.0,
+      odlegloscRzutuMin: 0.4,
+      odlegloscRzutuMax: 0.5,
+      czasAwaryjny: 5,
+      przerwaMin: 5,
+      przerwaMax: 6,
+      silaMin: 0.85,
+      silaMax: 1.0,
+      zamachMin: 0.8, // zamach = max(zamachMin, siła × MAX_CHARGE), w praktyce ok. 1,3-1,5 s
+      rozrzut: 0.052, // ok. 70% trafień w stojącego (symulacja)
+      szansaUniku: 0.1,
+      czasReakcji: 0.7,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.1,
+      szansaStanowiska: 0.3,
+    },
+    // Brązowy: po rzucie z dużą szansą idzie do stosu albo armatki i tam rzuca szybko.
+    brazowy: {
+      nazwa: "Brązowy (od stanowisk)",
+      kolor: "brazowy",
+      czasOgluszenia: 1.2,
+      mnoznikPredkosci: 0.9,
+      krokMin: 0.06,
+      krokMax: 0.1,
+      odchylenieKroku: 25,
+      postojMin: 0.5,
+      postojMax: 1.0,
+      odlegloscRzutuMin: 0.375,
+      odlegloscRzutuMax: 0.45,
+      czasAwaryjny: 5,
+      przerwaMin: 3,
+      przerwaMax: 4.5,
+      silaMin: 0.2,
+      silaMax: 0.4,
+      zamachMin: 0.4,
+      rozrzut: 0.049, // ok. 75% trafień w stojącego (symulacja)
+      szansaUniku: 0.25,
+      czasReakcji: 0.5,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.2,
+      szansaStanowiska: 0.9,
+    },
+    // Magenta: poluje na bonusy (często celuje w bonus zamiast w gracza).
+    magenta: {
+      nazwa: "Magenta (od bonusów)",
+      kolor: "magenta",
+      czasOgluszenia: 1.0,
+      mnoznikPredkosci: 1.1,
+      krokMin: 0.08,
+      krokMax: 0.12,
+      odchylenieKroku: 35,
+      postojMin: 0.4,
+      postojMax: 0.9,
+      odlegloscRzutuMin: 0.375,
+      odlegloscRzutuMax: 0.45,
+      czasAwaryjny: 5,
+      przerwaMin: 3,
+      przerwaMax: 4.5,
+      silaMin: 0.2,
+      silaMax: 0.4,
+      zamachMin: 0.4,
+      rozrzut: 0.052, // ok. 70% trafień w stojącego (symulacja)
+      szansaUniku: 0.3,
+      czasReakcji: 0.5,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.8,
+      szansaStanowiska: 0.1,
+    },
   },
-  // Skład poziomu: lista { typ, ile }. Poziom bez wpisu bierze skład najbliższego niższego.
+  // Skład poziomu: lista { typ, ile, zycia } (zycia = ile trafień eliminuje; 1 = od razu,
+  // bez ogłuszenia). Ten sam typ może mieć kilka wpisów z różnymi życiami.
+  // Poziom bez wpisu bierze skład najbliższego niższego.
   skladPoziomow: {
-    1: [{ typ: "zielony", ile: 1 }],
-    2: [{ typ: "zielony", ile: 2 }],
-    3: [{ typ: "zielony", ile: 3 }],
-    4: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 1 }],
-    5: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 2 }],
-    6: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 3 }],
-    7: [{ typ: "zielony", ile: 3 }, { typ: "limonkowy", ile: 4 }],
-    8: [{ typ: "zielony", ile: 4 }, { typ: "limonkowy", ile: 4 }],
-    9: [{ typ: "zielony", ile: 4 }, { typ: "limonkowy", ile: 5 }],
-    10: [{ typ: "zielony", ile: 5 }, { typ: "limonkowy", ile: 5 }],
-    11: [{ typ: "zielony", ile: 5 }, { typ: "limonkowy", ile: 6 }],
-    12: [{ typ: "zielony", ile: 6 }, { typ: "limonkowy", ile: 6 }],
-    // poziom 13 i dalej: skład ostatniego wpisu (12)
+    1: [{ typ: "zielony", ile: 2, zycia: 1 }],
+    2: [{ typ: "zielony", ile: 4, zycia: 1 }],
+    3: [{ typ: "zielony", ile: 2, zycia: 1 }, { typ: "limonkowy", ile: 1, zycia: 1 }],
+    4: [{ typ: "zielony", ile: 3, zycia: 1 }, { typ: "limonkowy", ile: 2, zycia: 1 }],
+    5: [{ typ: "zielony", ile: 3, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 1 }],
+    6: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }],
+    7: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 1, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }],
+    8: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 1, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }],
+    9: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 2, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }],
+    10: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 2, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }],
+    11: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 3, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }],
+    12: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 3, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }],
+    13: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 4, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }],
+    14: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 4, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }],
+    15: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 5, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }],
+    16: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 5, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }, { typ: "fioletowy", ile: 1, zycia: 2 }],
+    17: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 6, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }, { typ: "fioletowy", ile: 1, zycia: 2 }],
+    18: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 6, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }, { typ: "fioletowy", ile: 1, zycia: 2 }, { typ: "brazowy", ile: 1, zycia: 2 }],
+    19: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 7, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }, { typ: "fioletowy", ile: 1, zycia: 2 }, { typ: "brazowy", ile: 1, zycia: 2 }],
+    20: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 7, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }, { typ: "fioletowy", ile: 1, zycia: 2 }, { typ: "brazowy", ile: 1, zycia: 2 }, { typ: "magenta", ile: 1, zycia: 2 }],
+    // poziom 21 i dalej: skład ostatniego wpisu
   },
   // Ilu przeciwników naraz na planszy (null = wszyscy od razu). Reszta czeka w kolejce
   // i wchodzi opoznienieWejscia s po tym, jak zwolni się miejsce (ktoś odpadnie).
-  maxNaraz: 6,
+  maxNaraz: 8,
   opoznienieWejscia: 2,
   // Pierwszy rzut każdego przeciwnika: po napisie "Level N" + zwykła przerwa + losowo 0-tyle s
   opoznienieStartuMax: 3,
@@ -259,8 +481,8 @@ const CONFIG = {
       startGracz: { x: 1.6, y: 0.82 }, // prawa dolna część świata
       liniaPrzeciwnikow: 0.55, // przeciwnicy na linii w lewej górnej części (0 = róg)
       mnoznikPrzeciwnikow: 1, // liczba przeciwników = suma ze składu poziomu razy to
-      odlegloscAI: 0.5, // z jakiej odległości od gracza przeciwnik chce rzucać
-      maxOdlegloscRzutuAI: 0.9, // dalej nie rzuca
+      odlegloscAI: 0.5, // zapasowa odległość od gracza dla postaci bez typu (typy mają odlegloscRzutuMin/Max)
+      maxOdlegloscRzutuAI: 0.9, // dalej nie rzuca (musi być co najmniej największa odlegloscRzutuMax typów)
       marginesWidoku: 0.05, // przeciwnik rzuca tylko na ekranie gracza (z tym zapasem)
       zasiegSniezki: 1, // śnieżka leci najwyżej tyle (szerokość widoku = 1), nie przez cały świat
       bonusyMaxNaraz: [2, 3, 4], // ile bonusów naraz na poziomie 1, 2, 3 i dalej
