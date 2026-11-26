@@ -115,6 +115,11 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     podchodzenieWArenie(stan, z, param, dt);
     return;
   }
+  // To samo w Wielkiej arenie (z daleka idzie bez postojów, rzuca tylko na ekranie gracza)
+  if (z.typ && jestWielka(stan) && !ai.stanowisko) {
+    podchodzenieWielka(stan, z, param, dt);
+    return;
+  }
 
   // Czy pora zacząć rzut? (jest w kogo: celPrzeciwnika nie jest pusty)
   // W Wielkiej arenie rzuca tylko, gdy jest na ekranie gracza, w zasięgu i z czystą linią
@@ -246,6 +251,77 @@ function krokOdCelu(z, g, param) {
   const krok = Math.hypot(cel.x - z.x, cel.y - z.y);
   if (krok < j(param.krokMin) * 0.3 || stopyWPrzeszkodzie(cel.x, cel.y + PROMIEN_POSTACI * 0.85)) return;
   z.ai.cel = { x: cel.x, y: cel.y };
+}
+
+// Przeciwnik z typem w Wielkiej arenie. Daleko (poza ekranem albo dalej niż zaDaleko × odległość
+// typu) idzie do celu bez postojów. Blisko: krótkie kroki z postojami jak w Arenie, za blisko
+// (mniej niż zaBlisko × odległość typu) krok od celu. Rzuca z odległości typu albo bliżej, tylko na
+// ekranie gracza i z czystą linią. Zasada awaryjna: po czasAwaryjny s bez podejścia bliżej rzuca
+// z miejsca, jeśli jest na ekranie, ma czystą linię i cel jest w maxOdlegloscRzutuAI.
+function podchodzenieWielka(stan, z, param, dt) {
+  const ai = z.ai;
+  const WAu = CONFIG.tryby.wielkaArena;
+  const g = celPrzeciwnika(stan, z);
+  if (!g) return;
+  const idealna = idealnaOdlegloscWielka(z); // losowana z typu, trzymana do następnego rzutu
+  const d = odleglosc(z.x, z.y, g.x, g.y);
+
+  // Postęp jak w Arenie: podszedł bliżej; gdy cel odszedł dalej niż o długość kroku, od nowa
+  if (d < ai.najblizej - 1 || d > ai.najblizej + j(param.krokMax)) {
+    ai.najblizej = d;
+    ai.bezPostepu = 0;
+  } else {
+    ai.bezPostepu += dt;
+  }
+  const naEkr = naEkranie(z.x, z.y, j(WAu.marginesWidoku));
+  const stopy = PROMIEN_POSTACI * 0.85;
+  const czysta = !przeszkodaNaOdcinku(z.x, z.y + stopy, g.x, g.y + stopy);
+  const wZasiegu = d <= idealna;
+  const awaryjnie = ai.bezPostepu >= param.czasAwaryjny && d <= j(WAu.maxOdlegloscRzutuAI);
+
+  // Rzut: w zasięgu typu albo awaryjnie, na ekranie, z czystą linią, nie w trakcie kroku
+  if ((wZasiegu || awaryjnie) && naEkr && czysta && ai.przerwa <= 0 && z.przeladowanie <= 0 && !ai.cel) {
+    zacznijZamach(stan, z, param);
+    return;
+  }
+
+  // Krok (albo dłuższe przejście, albo odskok po uniku) w toku
+  if (ai.cel) {
+    const przedX = z.x;
+    const przedY = z.y;
+    const doszedl = idzDo(z, ai.cel.x, ai.cel.y, dt);
+    const ruszyl = Math.hypot(z.x - przedX, z.y - przedY) > predkoscPostaci(z) * dt * 0.2;
+    if (doszedl || !ruszyl) {
+      ai.cel = null;
+      ai.postoj = losuj(param.postojMin, param.postojMax);
+    }
+    return;
+  }
+
+  // Daleko: idzie w stronę celu bez postojów, odcinkami najwyżej przejscieDaleko
+  // (po każdym odcinku na nowo celuje, bo gracz mógł się przesunąć)
+  if (!naEkr || d > idealna * WAu.zaDaleko) {
+    const dl = Math.min(d - idealna, j(WAu.przejscieDaleko));
+    const kat = Math.atan2(g.y - z.y, g.x - z.x) + (losuj(-1, 1) * param.odchylenieKroku * Math.PI) / 180;
+    const cel = { druzyna: z.druzyna, x: z.x + Math.cos(kat) * dl, y: z.y + Math.sin(kat) * dl };
+    ograniczDoSwojejStrony(cel);
+    if (!stopyWPrzeszkodzie(cel.x, cel.y + stopy)) ai.cel = { x: cel.x, y: cel.y };
+    return;
+  }
+
+  // Blisko: po postoju krok od celu (za blisko) albo krótki krok do celu (poza zasięgiem)
+  ai.postoj -= dt;
+  if (ai.postoj > 0) return;
+  if (d < idealna * WAu.zaBlisko) {
+    krokOdCelu(z, g, param);
+    return;
+  }
+  if (wZasiegu) return; // w zasięgu stoi i czeka na rzut
+  const kat = Math.atan2(g.y - z.y, g.x - z.x) + (losuj(-1, 1) * param.odchylenieKroku * Math.PI) / 180;
+  const dl = j(losuj(param.krokMin, param.krokMax));
+  const cel = { druzyna: z.druzyna, x: z.x + Math.cos(kat) * dl, y: z.y + Math.sin(kat) * dl };
+  ograniczDoSwojejStrony(cel);
+  if (!stopyWPrzeszkodzie(cel.x, cel.y + stopy)) ai.cel = { x: cel.x, y: cel.y };
 }
 
 // Ocenia nowe śnieżki lecące w jego stronę: z pewną szansą planuje unik

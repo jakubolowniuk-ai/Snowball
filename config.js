@@ -483,6 +483,11 @@ const CONFIG = {
       mnoznikPrzeciwnikow: 1, // liczba przeciwników = suma ze składu poziomu razy to
       odlegloscAI: 0.5, // zapasowa odległość od gracza dla postaci bez typu (typy mają odlegloscRzutuMin/Max)
       maxOdlegloscRzutuAI: 0.9, // dalej nie rzuca (musi być co najmniej największa odlegloscRzutuMax typów)
+      // Przeciwnik z typem: dalej niż zaDaleko × odległość typu (albo poza ekranem) idzie bez postojów,
+      // odcinkami najwyżej przejscieDaleko; bliżej niż zaBlisko × odległość typu cofa się
+      zaDaleko: 1.25,
+      zaBlisko: 0.6,
+      przejscieDaleko: 0.25,
       marginesWidoku: 0.05, // przeciwnik rzuca tylko na ekranie gracza (z tym zapasem)
       zasiegSniezki: 1, // śnieżka leci najwyżej tyle (szerokość widoku = 1), nie przez cały świat
       bonusyMaxNaraz: [2, 3, 4], // ile bonusów naraz na poziomie 1, 2, 3 i dalej
