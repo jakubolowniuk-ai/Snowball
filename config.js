@@ -246,6 +246,32 @@ const CONFIG = {
       szansaBonusu: 0.05,
       szansaStanowiska: 0.1,
     },
+    // Fioletowy: Siłacz. Bardzo szybkie gałki; cena: długi zamach (ok. 1,3-1,5 s) i rzadkie rzuty.
+    fioletowy: {
+      nazwa: "Fioletowy (Siłacz)",
+      kolor: "fioletowy",
+      czasOgluszenia: 1.2,
+      mnoznikPredkosci: 0.6,
+      krokMin: 0.05,
+      krokMax: 0.08,
+      odchylenieKroku: 25,
+      postojMin: 1.0,
+      postojMax: 2.0,
+      odlegloscRzutuMin: 0.4,
+      odlegloscRzutuMax: 0.5,
+      czasAwaryjny: 5,
+      przerwaMin: 5,
+      przerwaMax: 6,
+      silaMin: 0.85,
+      silaMax: 1.0,
+      zamachMin: 0.8, // zamach = max(zamachMin, siła × MAX_CHARGE), w praktyce ok. 1,3-1,5 s
+      rozrzut: 0.052, // ok. 70% trafień w stojącego (symulacja)
+      szansaUniku: 0.1,
+      czasReakcji: 0.7,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.1,
+      szansaStanowiska: 0.3,
+    },
   },
   // Skład poziomu: lista { typ, ile, zycia } (zycia = ile trafień eliminuje; 1 = od razu,
   // bez ogłuszenia). Ten sam typ może mieć kilka wpisów z różnymi życiami.
@@ -266,7 +292,9 @@ const CONFIG = {
     13: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 4, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }],
     14: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 4, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }],
     15: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 5, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }],
-    // poziom 16 i dalej: skład ostatniego wpisu
+    16: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 5, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }, { typ: "fioletowy", ile: 1, zycia: 2 }],
+    17: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 6, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }, { typ: "szary", ile: 1, zycia: 2 }, { typ: "fioletowy", ile: 1, zycia: 2 }],
+    // poziom 18 i dalej: skład ostatniego wpisu
   },
   // Ilu przeciwników naraz na planszy (null = wszyscy od razu). Reszta czeka w kolejce
   // i wchodzi opoznienieWejscia s po tym, jak zwolni się miejsce (ktoś odpadnie).
