@@ -45,8 +45,10 @@ function aktualizujPrzeciwnika(stan, z, dt) {
     zwolnijStanowisko(z);
     return;
   }
-  // Stanowisko bez amunicji: odchodzi
+  // Stanowisko bez amunicji: odchodzi. W Wielkiej arenie odchodzi też, gdy cel jest od stanowiska
+  // dalej niż odległość rzutu typu (wtedy znowu podchodzi krokami)
   if (ai.stanowisko && ai.stanowisko.amunicja <= 0) zwolnijStanowisko(z);
+  if (ai.stanowisko && !stanowiskoBlisko(stan, z, ai.stanowisko, param)) zwolnijStanowisko(z);
 
   zauwazSniezki(stan, z, param);
 
@@ -401,7 +403,7 @@ function przerwaBezSpowolnienia(stan, z, param) {
     return zwykla * Math.min(CONFIG.stanowiska.stos.mnoznikPrzeladowania, bonus);
   }
   if (!st && Math.random() < param.szansaStanowiska) {
-    const wolne = wolneStanowiska(stan, z);
+    const wolne = wolneStanowiska(stan, z).filter((st) => stanowiskoBlisko(stan, z, st, param));
     if (wolne.length) {
       const wybrane = wolne[Math.floor(Math.random() * wolne.length)];
       wybrane.zajety = z;
@@ -410,6 +412,17 @@ function przerwaBezSpowolnienia(stan, z, param) {
     }
   }
   return zwykla * bonus;
+}
+
+// Wielka arena: przeciwnik z typem używa stanowiska tylko, gdy jego cel jest od miejsca stania
+// przy stanowisku najwyżej w odległości rzutu typu (odlegloscRzutuMax). W Arenie zawsze można.
+function stanowiskoBlisko(stan, z, st, param) {
+  if (!jestWielka(stan) || !z.typ) return true;
+  const g = celPrzeciwnika(stan, z);
+  if (!g) return false;
+  const x = st.typ === "armatka" ? st.stoiX : st.x;
+  const y = st.typ === "armatka" ? st.stoiY : st.y;
+  return odleglosc(x, y, g.x, g.y) <= j(param.odlegloscRzutuMax);
 }
 
 // Cel postaci sterowanej przez komputer (przeciwnika albo sojusznika gracza): najbliższy żywy
