@@ -48,6 +48,9 @@ const CONFIG = {
   trafieniaDoEliminacji: 3, // wcześniejsze trafienia tylko ogłuszają
   czasOgluszenia: 1, // sekundy bez ruchu i bez rzutu
   wibracjaTrafienia: 60, // milisekundy wibracji telefonu przy trafieniu (Android)
+  // Zbijanie śnieżek: gdy śnieżka typu z zbijaSniezki: true i śnieżka drużyny przeciwnej
+  // znajdą się bliżej siebie niż tyle (ułamek szerokości pola), obie znikają z rozbryzgiem
+  promienZderzeniaSniezek: 0.015,
   czasChmurki: 0.5, // jak długo widać obłoczek i rozbryzg po trafieniu
   czasNapisuKonca: 2, // ile sekund widać "Wygrana!"/"Przegrana" przed restartem
 
@@ -77,7 +80,9 @@ const CONFIG = {
       przerwaMax: 4.5,
       silaMin: 0.05, // siła rzutu = prędkość śnieżki (0-1)
       silaMax: 0.15,
-      zamachMin: 0.5, // zamach (ostrzeżenie) trwa max(zamachMin, sila × MAX_CHARGE)
+      zamachMin: 0.6, // zamach (ostrzeżenie) trwa max(zamachMin, sila × MAX_CHARGE)
+      celPrzedRzutem: [0.35, 0.6], // ile sekund przed rzutem wybiera cel (losowo od-do; czas na reakcję gracza)
+      zbijaSniezki: false, // true: jego śnieżki zderzają się ze śnieżkami drużyny przeciwnej (obie znikają)
       // Celuje w miejsce gracza z tym błędem: 0,053 = ok. 70% trafień w stojącego (sprawdzone
       // symulacją; pudło "za" graczem i tak przez niego przelatuje, więc wzór z planu zaniżał)
       rozrzut: 0.053,
@@ -106,6 +111,8 @@ const CONFIG = {
       silaMin: 0.1,
       silaMax: 0.3,
       zamachMin: 0.4,
+      celPrzedRzutem: [0.15, 0.35],
+      zbijaSniezki: false,
       rozrzut: 0.047, // ok. 80% trafień w stojącego
       szansaUniku: 0.3,
       czasReakcji: 0.6,
@@ -132,6 +139,8 @@ const CONFIG = {
       silaMin: 0.1,
       silaMax: 0.3,
       zamachMin: 0.4,
+      celPrzedRzutem: [0, 0.2],
+      zbijaSniezki: false,
       rozrzut: 0.111, // ok. 30% trafień w stojącego (symulacja; start z planu 0,077 dawał ok. 45%)
       szansaUniku: 0.35,
       czasReakcji: 0.35,
@@ -158,8 +167,9 @@ const CONFIG = {
       silaMin: 0.35,
       silaMax: 0.55,
       zamachMin: 0.9,
+      celPrzedRzutem: [0.7, 0.7],
+      zbijaSniezki: false,
       rozrzut: 0.038, // ok. 99% trafień w stojącego (symulacja)
-      celNaPoczatkuZamachu: true, // punkt celu zapamiętany na początku zamachu: zejście z miejsca w trakcie zamachu ratuje
       szansaUniku: 0.1,
       czasReakcji: 0.7,
       mnoznikPrzeladowania: 1,
@@ -185,6 +195,8 @@ const CONFIG = {
       silaMin: 0.1,
       silaMax: 0.2,
       zamachMin: 0.3,
+      celPrzedRzutem: [0, 0.15],
+      zbijaSniezki: false,
       rozrzut: 0.084, // ok. 40% trafień w stojącego (symulacja; start z planu 0,071 dawał ok. 49%)
       szansaUniku: 0.25,
       czasReakcji: 0.5,
@@ -213,6 +225,8 @@ const CONFIG = {
       silaMin: 0.1,
       silaMax: 0.3,
       zamachMin: 0.45,
+      celPrzedRzutem: [0, 0.23],
+      zbijaSniezki: false,
       rozrzut: 0.075, // ok. 45% trafień w stojącego (symulacja; start z planu 0,068 dawał ok. 50%)
       szansaUniku: 0.6,
       czasReakcji: 0.25,
@@ -239,6 +253,8 @@ const CONFIG = {
       silaMin: 0.15,
       silaMax: 0.35,
       zamachMin: 0.5,
+      celPrzedRzutem: [0, 0.26],
+      zbijaSniezki: false,
       rozrzut: 0.058, // ok. 60% trafień w stojącego (symulacja)
       szansaUniku: 0.2,
       czasReakcji: 0.6,
@@ -265,6 +281,8 @@ const CONFIG = {
       silaMin: 0.85,
       silaMax: 1.0,
       zamachMin: 0.8, // zamach = max(zamachMin, siła × MAX_CHARGE), w praktyce ok. 1,3-1,5 s
+      celPrzedRzutem: [0.51, 1.2],
+      zbijaSniezki: false,
       rozrzut: 0.052, // ok. 70% trafień w stojącego (symulacja)
       szansaUniku: 0.1,
       czasReakcji: 0.7,
@@ -291,6 +309,8 @@ const CONFIG = {
       silaMin: 0.2,
       silaMax: 0.4,
       zamachMin: 0.4,
+      celPrzedRzutem: [0, 0.3],
+      zbijaSniezki: false,
       rozrzut: 0.049, // ok. 75% trafień w stojącego (symulacja)
       szansaUniku: 0.25,
       czasReakcji: 0.5,
@@ -317,6 +337,8 @@ const CONFIG = {
       silaMin: 0.2,
       silaMax: 0.4,
       zamachMin: 0.4,
+      celPrzedRzutem: [0, 0.3],
+      zbijaSniezki: false,
       rozrzut: 0.052, // ok. 70% trafień w stojącego (symulacja)
       szansaUniku: 0.3,
       czasReakcji: 0.5,
@@ -486,6 +508,8 @@ const CONFIG = {
       // Przeciwnik z typem: dalej niż zaDaleko × odległość typu (albo poza ekranem) idzie bez postojów,
       // odcinkami najwyżej przejscieDaleko; bliżej niż zaBlisko × odległość typu cofa się
       zaDaleko: 1.25,
+      // true: po czasAwaryjny s bez podejścia bliżej rzuca z miejsca (jak w Arenie); false: tylko z odległości typu
+      zasadaAwaryjna: false,
       zaBlisko: 0.6,
       przejscieDaleko: 0.25,
       marginesWidoku: 0.05, // przeciwnik rzuca tylko na ekranie gracza (z tym zapasem)

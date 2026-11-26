@@ -113,7 +113,7 @@ function wektorCelowania(stan, z) {
   if (z === stan.gracz && stan.celowanie) return { dx: stan.celowanie.x - z.x, dy: stan.celowanie.y - z.y };
   if (z.ai && z.ai.unoszenie) {
     const b = z.ai.unoszenie.bonus;
-    // Snajper patrzy w punkt zapamiętany na początku zamachu, inni w obecny cel
+    // Po wyborze celu w zamachu patrzy w ten punkt, wcześniej w obecny cel
     const cel = b && stan.bonusy.includes(b) ? b : z.ai.unoszenie.punkt || celPrzeciwnika(stan, z);
     if (!cel) return null;
     return { dx: cel.x - z.x, dy: cel.y - z.y };

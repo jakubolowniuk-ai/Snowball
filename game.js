@@ -258,6 +258,8 @@ function odlegloscOdOdcinka(px, py, ax, ay, bx, by) {
 // Zwraca true, gdy śnieżka ma zniknąć.
 function lotSniezki(stan, sn, dt) {
   const przed = pozycjaSniezki(sn);
+  sn.poprzX = przed.x; // pozycja z poprzedniej klatki (do zbijania śnieżek)
+  sn.poprzY = przed.y;
   // Spowolnienie śnieżek zmienia tylko prędkość, więc po końcu efektu śnieżka nie skacze
   const predkosc = sn.predkosc * mnoznikPredkosciSniezki(stan, sn);
   sn.przebyte = Math.min(sn.przebyte + predkosc * dt, sn.dlugosc);
@@ -337,6 +339,56 @@ function lotSniezki(stan, sn, dt) {
     return true;
   }
   return sn.przebyte >= sn.dlugosc;
+}
+
+// --- Zbijanie śnieżek ---
+
+// Czy rzucający ma typ, którego śnieżki zbijają się z innymi (zbijaSniezki w config.js)
+function zbijajaca(sn) {
+  const t = sn.rzucajacy.typ && CONFIG.typy[sn.rzucajacy.typ];
+  return !!(t && t.zbijaSniezki);
+}
+
+// Najmniejsza odległość dwóch śnieżek w tej klatce. Obie leciały prosto od poprzedniej pozycji
+// do obecnej, więc liczymy najbliższe zbliżenie w czasie klatki (szybkie śnieżki lecące na siebie
+// nie przeskoczą przez siebie między klatkami).
+function zblizenieSniezek(a, b) {
+  const pa = pozycjaSniezki(a);
+  const pb = pozycjaSniezki(b);
+  const ax = a.poprzX ?? pa.x, ay = a.poprzY ?? pa.y;
+  const bx = b.poprzX ?? pb.x, by = b.poprzY ?? pb.y;
+  const dx = ax - bx, dy = ay - by; // odstęp na początku klatki
+  const vx = pa.x - ax - (pb.x - bx), vy = pa.y - ay - (pb.y - by); // zmiana odstępu w klatce
+  const v2 = vx * vx + vy * vy;
+  const t = v2 > 0 ? Math.min(Math.max(-(dx * vx + dy * vy) / v2, 0), 1) : 0;
+  return { d: Math.hypot(dx + vx * t, dy + vy * t), x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2, wys: (pa.wysokosc + pb.wysokosc) / 2 };
+}
+
+// Śnieżka typu z zbijaSniezki i śnieżka drużyny przeciwnej, które się zderzą, znikają z rozbryzgiem
+function zbijSniezki(stan) {
+  const zbite = new Set();
+  const lista = stan.sniezki;
+  for (let i = 0; i < lista.length; i++) {
+    for (let k = i + 1; k < lista.length; k++) {
+      const a = lista[i];
+      const b = lista[k];
+      if (zbite.has(a) || zbite.has(b)) continue;
+      if (a.rzucajacy.druzyna === b.rzucajacy.druzyna) continue;
+      if (!zbijajaca(a) && !zbijajaca(b)) continue;
+      const z = zblizenieSniezek(a, b);
+      if (z.d > j(CONFIG.promienZderzeniaSniezek)) continue;
+      zbite.add(a);
+      zbite.add(b);
+      stan.chmurki.push({
+        x: z.x,
+        y: z.y - z.wys,
+        czas: 0,
+        obloczek: null,
+        rozbryzg: `assets/efekty/rozbryzg_${1 + Math.floor(Math.random() * 8)}.png`,
+      });
+    }
+  }
+  if (zbite.size) stan.sniezki = lista.filter((sn) => !zbite.has(sn));
 }
 
 // Wygrana: wszyscy przeciwnicy wyeliminowani. Przegrana: gracz wyeliminowany.
@@ -668,6 +720,7 @@ function aktualizuj(dt) {
   stan.sniezki = [];
   const zostaja = lecace.filter((sn) => !lotSniezki(stan, sn, dt));
   stan.sniezki = zostaja.concat(stan.sniezki);
+  zbijSniezki(stan);
 
   // Odliczanie ogłuszenia i przeładowania (niezależnie od siebie)
   for (const z of wszystkiePostacie(stan)) {
