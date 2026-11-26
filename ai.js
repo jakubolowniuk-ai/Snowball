@@ -219,8 +219,14 @@ function podchodzenieWArenie(stan, z, param, dt) {
     }
     return;
   }
-  // W zasięgu stoi w miejscu; poza zasięgiem po postoju robi następny krok
   ai.postoj -= dt;
+  // Typ z ucieka (Błękitny): cel za blisko, więc po postoju robi krok od niego.
+  // Gdy nie ma dokąd (róg, przeszkoda), stoi i rzuca (rzut wyżej, bo jest w zasięgu).
+  if (param.ucieka && d < param.progUcieczki * j(param.odlegloscRzutuMin)) {
+    if (ai.postoj <= 0) krokOdCelu(z, g, param);
+    return;
+  }
+  // W zasięgu stoi w miejscu; poza zasięgiem po postoju robi następny krok
   if (wZasiegu || ai.postoj > 0) return;
   const kat = Math.atan2(g.y - z.y, g.x - z.x) + (losuj(-1, 1) * param.odchylenieKroku * Math.PI) / 180;
   const dl = j(losuj(param.krokMin, param.krokMax));
@@ -228,6 +234,18 @@ function podchodzenieWArenie(stan, z, param, dt) {
   ograniczDoSwojejStrony(cel); // przekątnej nie przekracza
   // Punktu w przeszkodzie nie wybiera; spróbuje znowu w następnej klatce
   if (!stopyWPrzeszkodzie(cel.x, cel.y + PROMIEN_POSTACI * 0.85)) ai.cel = { x: cel.x, y: cel.y };
+}
+
+// Krok od celu g (ucieczka) z losowym odchyleniem. Cel kroku ograniczony do swojej strony
+// przekątnej; gdy po ograniczeniu krok jest bardzo krótki albo w przeszkodzie, nie idzie.
+function krokOdCelu(z, g, param) {
+  const kat = Math.atan2(z.y - g.y, z.x - g.x) + (losuj(-1, 1) * param.odchylenieKroku * Math.PI) / 180;
+  const dl = j(losuj(param.krokMin, param.krokMax));
+  const cel = { druzyna: z.druzyna, x: z.x + Math.cos(kat) * dl, y: z.y + Math.sin(kat) * dl };
+  ograniczDoSwojejStrony(cel);
+  const krok = Math.hypot(cel.x - z.x, cel.y - z.y);
+  if (krok < j(param.krokMin) * 0.3 || stopyWPrzeszkodzie(cel.x, cel.y + PROMIEN_POSTACI * 0.85)) return;
+  z.ai.cel = { x: cel.x, y: cel.y };
 }
 
 // Ocenia nowe śnieżki lecące w jego stronę: z pewną szansą planuje unik

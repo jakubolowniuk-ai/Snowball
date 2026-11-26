@@ -192,6 +192,34 @@ const CONFIG = {
       szansaBonusu: 0.15,
       szansaStanowiska: 0.2,
     },
+    // Błękitny: Unikacz. Często unika i ucieka przed graczem; cena: słabe, niecelne rzuty.
+    blekitny: {
+      nazwa: "Błękitny (Unikacz)",
+      kolor: "blekitny",
+      czasOgluszenia: 1.0,
+      mnoznikPredkosci: 1.0,
+      krokMin: 0.08,
+      krokMax: 0.12,
+      odchylenieKroku: 25,
+      postojMin: 0.3,
+      postojMax: 0.8,
+      odlegloscRzutuMin: 0.45,
+      odlegloscRzutuMax: 0.55,
+      czasAwaryjny: 5,
+      ucieka: true, // Arena: gdy gracz bliżej niż progUcieczki × odlegloscRzutuMin, robi krok od niego
+      progUcieczki: 0.8,
+      przerwaMin: 3,
+      przerwaMax: 4.5,
+      silaMin: 0.1,
+      silaMax: 0.3,
+      zamachMin: 0.45,
+      rozrzut: 0.075, // ok. 45% trafień w stojącego (symulacja; start z planu 0,068 dawał ok. 50%)
+      szansaUniku: 0.6,
+      czasReakcji: 0.25,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.2,
+      szansaStanowiska: 0.1,
+    },
   },
   // Skład poziomu: lista { typ, ile, zycia } (zycia = ile trafień eliminuje; 1 = od razu,
   // bez ogłuszenia). Ten sam typ może mieć kilka wpisów z różnymi życiami.
@@ -208,7 +236,9 @@ const CONFIG = {
     9: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 2, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }],
     10: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 2, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }],
     11: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 3, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }],
-    // poziom 12 i dalej: skład ostatniego wpisu
+    12: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 3, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }],
+    13: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 4, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }, { typ: "blekitny", ile: 1, zycia: 2 }],
+    // poziom 14 i dalej: skład ostatniego wpisu
   },
   // Ilu przeciwników naraz na planszy (null = wszyscy od razu). Reszta czeka w kolejce
   // i wchodzi opoznienieWejscia s po tym, jak zwolni się miejsce (ktoś odpadnie).

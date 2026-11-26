@@ -198,7 +198,7 @@ Dodatki typów 1–10 (pełne wartości są w promptach C3–C10 w `docs/PROMPTY
 - Poziomy 3 i 4 mają po 1 życiu (założenie, Jakub nie podał). Poziom 20: 10 Zielonych (3 po 3ż, 7 po 2ż), 2 Limonkowe, po jednym z ośmiu kolorów.
 - Trafień przybywa równo o 2 na poziom. Dla porównania stara wersja (życia Zielonego rosnące do 4, Limonkowy 3 życia) miała 18 trafień na poziomie 5 i 38 na poziomie 11, czego Jakub nie mógł przejść.
 - Słabe punkty do sprawdzenia w grze: poziomy 15–20 mogą być za długie (ok. 2 min i więcej, w Wielkiej arenie zamieć zwęża świat po 90 s: do testów można ustawić `czasDoZwezania` bardzo duże); połowa wrogów na wysokich poziomach to Zielone; Żółty (chód 1,4, trafia 30%) może być nie do trafienia; Snajper (100% trafień, zamach 0,9 s) wymaga, żeby punkt celu był ustalony na początku zamachu, inaczej ostrzeżenie nic nie daje.
-- **Stan wdrożenia:** C0 (poziomStartowy) i C1 (życia w składzie, Limonkowy bez Laski, poziomy 1–5, `maxNaraz` 8) zrobione. C2 (Wielka arena: dystans z typu) zrobione; `maxOdlegloscRzutuAI` 0,9 wystarcza dla wszystkich typów do 20 (największa odległość rzutu: Szary 0,8). C3 zrobione. C4 zrobione. C5 zrobione.
+- **Stan wdrożenia:** C0 (poziomStartowy) i C1 (życia w składzie, Limonkowy bez Laski, poziomy 1–5, `maxNaraz` 8) zrobione. C2 (Wielka arena: dystans z typu) zrobione; `maxOdlegloscRzutuAI` 0,9 wystarcza dla wszystkich typów do 20 (największa odległość rzutu: Szary 0,8). C3 zrobione. C4 zrobione. C5 zrobione. C6 zrobione.
 - Kolejność robienia (prompty C0–C10 w `docs/PROMPTY_DLA_AGENTA.md`): C0 poziom startowy do testów (opcjonalnie), C1 życia w składzie + Limonkowy bez Laski + poziomy 1–5, C2 dystans z typu w Wielkiej arenie, C3 Żółty (6–7), C4 Pomarańczowy (8–9), C5 Turkusowy (10–11), C6 Błękitny (12–13), C7 Szary (14–15), C8 Fioletowy (16–17), C9 Brązowy (18–19), C10 Magenta (20).
 
 #### Karty typów
@@ -225,6 +225,8 @@ Dodatki typów 1–10 (pełne wartości są w promptach C3–C10 w `docs/PROMPTY
 **Pomarańczowy (Snajper): ZROBIONY (krok C4), od poziomu 8.** Rozrzut 0,038 = ok. 99% trafień w stojącego (symulacja). W kodzie punkt celu był ustalany przy puszczeniu, więc dodane pole typu `celNaPoczatkuZamachu` (decyzja Jakuba: tylko Snajper): punkt celu zapamiętany na początku zamachu. W małej Arenie odległość 0,5–0,6 często jest nieosiągalna, wtedy rzuca z miejsca po zasadzie awaryjnej (5 s).
 
 **Turkusowy (Szybkostrzelec): ZROBIONY (krok C5), od poziomu 10.** Rozrzut ze startu (0,071) dawał ok. 49%, poprawiony na 0,084 (ok. 40%).
+
+**Błękitny (Unikacz): ZROBIONY (krok C6), od poziomu 12.** Nowe pola typu `ucieka` i `progUcieczki` (0,8), działają w Arenie (`podchodzenieWArenie` w ai.js). Rozrzut ze startu (0,068) dawał ok. 50%, poprawiony na 0,075 (ok. 45%).
 
 ### Odłożone na później
 - Drużyna 3 zawodników: zaznaczanie zawodnika, zaznaczanie celów, automatyczne uniki i rzuty niezaznaczonych.
