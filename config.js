@@ -113,6 +113,32 @@ const CONFIG = {
       szansaBonusu: 0.2,
       szansaStanowiska: 0.1,
     },
+    // Żółty: Biegacz. Szybki i nerwowy, ale bardzo niecelny (cena umiejętności).
+    zolty: {
+      nazwa: "Żółty (Biegacz)",
+      kolor: "zolty",
+      czasOgluszenia: 1.0,
+      mnoznikPredkosci: 1.4,
+      krokMin: 0.1,
+      krokMax: 0.16,
+      odchylenieKroku: 45,
+      postojMin: 0.3,
+      postojMax: 0.7,
+      odlegloscRzutuMin: 0.3,
+      odlegloscRzutuMax: 0.4,
+      czasAwaryjny: 5,
+      przerwaMin: 2.5,
+      przerwaMax: 3.5,
+      silaMin: 0.1,
+      silaMax: 0.3,
+      zamachMin: 0.4,
+      rozrzut: 0.111, // ok. 30% trafień w stojącego (symulacja; start z planu 0,077 dawał ok. 45%)
+      szansaUniku: 0.35,
+      czasReakcji: 0.35,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.15,
+      szansaStanowiska: 0.1,
+    },
   },
   // Skład poziomu: lista { typ, ile, zycia } (zycia = ile trafień eliminuje; 1 = od razu,
   // bez ogłuszenia). Ten sam typ może mieć kilka wpisów z różnymi życiami.
@@ -123,7 +149,9 @@ const CONFIG = {
     3: [{ typ: "zielony", ile: 2, zycia: 1 }, { typ: "limonkowy", ile: 1, zycia: 1 }],
     4: [{ typ: "zielony", ile: 3, zycia: 1 }, { typ: "limonkowy", ile: 2, zycia: 1 }],
     5: [{ typ: "zielony", ile: 3, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 1 }],
-    // poziom 6 i dalej: skład ostatniego wpisu
+    6: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }],
+    7: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 1, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }],
+    // poziom 8 i dalej: skład ostatniego wpisu
   },
   // Ilu przeciwników naraz na planszy (null = wszyscy od razu). Reszta czeka w kolejce
   // i wchodzi opoznienieWejscia s po tym, jak zwolni się miejsce (ktoś odpadnie).
