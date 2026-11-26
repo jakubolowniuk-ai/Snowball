@@ -495,6 +495,8 @@ const CONFIG = {
       // Przeciwnik z typem: dalej niż zaDaleko × odległość typu (albo poza ekranem) idzie bez postojów,
       // odcinkami najwyżej przejscieDaleko; bliżej niż zaBlisko × odległość typu cofa się
       zaDaleko: 1.25,
+      // true: po czasAwaryjny s bez podejścia bliżej rzuca z miejsca (jak w Arenie); false: tylko z odległości typu
+      zasadaAwaryjna: false,
       zaBlisko: 0.6,
       przejscieDaleko: 0.25,
       marginesWidoku: 0.05, // przeciwnik rzuca tylko na ekranie gracza (z tym zapasem)

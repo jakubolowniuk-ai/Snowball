@@ -267,8 +267,8 @@ function krokOdCelu(z, g, param) {
 // Przeciwnik z typem w Wielkiej arenie. Daleko (poza ekranem albo dalej niż zaDaleko × odległość
 // typu) idzie do celu bez postojów. Blisko: krótkie kroki z postojami jak w Arenie, za blisko
 // (mniej niż zaBlisko × odległość typu) krok od celu. Rzuca z odległości typu albo bliżej, tylko na
-// ekranie gracza i z czystą linią. Zasada awaryjna: po czasAwaryjny s bez podejścia bliżej rzuca
-// z miejsca, jeśli jest na ekranie, ma czystą linię i cel jest w maxOdlegloscRzutuAI.
+// ekranie gracza i z czystą linią. Zasada awaryjna (gdy zasadaAwaryjna: true): po czasAwaryjny s bez
+// podejścia bliżej rzuca z miejsca, jeśli jest na ekranie, ma czystą linię i cel jest w maxOdlegloscRzutuAI.
 function podchodzenieWielka(stan, z, param, dt) {
   const ai = z.ai;
   const WAu = CONFIG.tryby.wielkaArena;
@@ -288,7 +288,8 @@ function podchodzenieWielka(stan, z, param, dt) {
   const stopy = PROMIEN_POSTACI * 0.85;
   const czysta = !przeszkodaNaOdcinku(z.x, z.y + stopy, g.x, g.y + stopy);
   const wZasiegu = d <= idealna;
-  const awaryjnie = ai.bezPostepu >= param.czasAwaryjny && d <= j(WAu.maxOdlegloscRzutuAI);
+  // Zasada awaryjna tylko, gdy włączona w config (domyślnie nie: w Wielkiej arenie zawsze może podejść)
+  const awaryjnie = WAu.zasadaAwaryjna && ai.bezPostepu >= param.czasAwaryjny && d <= j(WAu.maxOdlegloscRzutuAI);
 
   // Rzut: w zasięgu typu albo awaryjnie, na ekranie, z czystą linią, nie w trakcie kroku
   if ((wZasiegu || awaryjnie) && naEkr && czysta && ai.przerwa <= 0 && z.przeladowanie <= 0 && !ai.cel) {
