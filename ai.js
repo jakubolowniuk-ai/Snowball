@@ -81,6 +81,7 @@ function aktualizujPrzeciwnika(stan, z, dt) {
   // Unoszenie śnieżki nad głowę (ładowanie siły). Wtedy stoi.
   if (ai.unoszenie) {
     ai.unoszenie.czas += dt;
+    wybierzCelWZamachu(stan, z, param);
     if (ai.unoszenie.czas >= ai.unoszenie.calosc) {
       const b = ai.unoszenie.bonus;
       if (b && stan.bonusy.includes(b)) {
@@ -181,10 +182,18 @@ function zacznijZamach(stan, z, param) {
   const calosc = Math.max(param.zamachMin, silaTypu * CONFIG.MAX_CHARGE);
   // Z szansą szansaBonusu celuje w bonus zamiast w gracza
   const bonus = Math.random() < param.szansaBonusu ? wybierzBonusDlaPrzeciwnika(stan, z) : null;
-  // Typ z celNaPoczatkuZamachu (Snajper) zapamiętuje punkt celu już teraz: gracz widzi zamach
-  // (ostrzeżenie) i może zejść z miejsca. Inne typy wybierają punkt dopiero przy rzucie.
-  const punkt = param.celNaPoczatkuZamachu && !bonus ? punktRzutuWGracza(stan, z, param) : null;
-  z.ai.unoszenie = { czas: 0, calosc, bonus, sila: silaTypu, punkt };
+  // Cel (punkt rzutu) wybiera celPrzedRzutem sekund przed rzutem (losowo od-do); dłuższy czas
+  // niż cały zamach = wybór na początku. Gracz ma tyle czasu, żeby zejść z miejsca.
+  const celZa = Math.max(0, calosc - losuj(param.celPrzedRzutem[0], param.celPrzedRzutem[1]));
+  z.ai.unoszenie = { czas: 0, calosc, bonus, sila: silaTypu, punkt: null, celZa };
+  wybierzCelWZamachu(stan, z, param);
+}
+
+// W chwili celZa zamachu zapamiętuje punkt rzutu (przy rzucie w bonus nie trzeba)
+function wybierzCelWZamachu(stan, z, param) {
+  const u = z.ai.unoszenie;
+  if (u.punkt || u.bonus || u.czas < u.celZa) return;
+  u.punkt = punktRzutuWGracza(stan, z, param);
 }
 
 // Przeciwnik z typem w zwykłej Arenie: krótkie kroki w stronę gracza (z losowym odchyleniem),
@@ -460,7 +469,7 @@ function punktRzutuWGracza(stan, z, param) {
 // Rzut w gracza po zamachu
 function rzucWGracza(stan, z, param) {
   const u = z.ai.unoszenie;
-  const p = u.punkt || punktRzutuWGracza(stan, z, param); // punkt z początku zamachu albo teraz
+  const p = u.punkt || punktRzutuWGracza(stan, z, param); // punkt wybrany w trakcie zamachu albo teraz
   if (!p) return;
   wykonajRzut(stan, z, p.x, p.y, u.czas, u.sila);
 }
