@@ -166,6 +166,32 @@ const CONFIG = {
       szansaBonusu: 0.1,
       szansaStanowiska: 0.1,
     },
+    // Turkusowy: Szybkostrzelec. Rzuca często; cena: słabe i niecelne gałki.
+    turkusowy: {
+      nazwa: "Turkusowy (Szybkostrzelec)",
+      kolor: "turkusowy",
+      czasOgluszenia: 1.2,
+      mnoznikPredkosci: 0.9,
+      krokMin: 0.06,
+      krokMax: 0.1,
+      odchylenieKroku: 25,
+      postojMin: 0.5,
+      postojMax: 1.0,
+      odlegloscRzutuMin: 0.35,
+      odlegloscRzutuMax: 0.45,
+      czasAwaryjny: 5,
+      przerwaMin: 1.5,
+      przerwaMax: 2.5,
+      silaMin: 0.1,
+      silaMax: 0.2,
+      zamachMin: 0.3,
+      rozrzut: 0.084, // ok. 40% trafień w stojącego (symulacja; start z planu 0,071 dawał ok. 49%)
+      szansaUniku: 0.25,
+      czasReakcji: 0.5,
+      mnoznikPrzeladowania: 1,
+      szansaBonusu: 0.15,
+      szansaStanowiska: 0.2,
+    },
   },
   // Skład poziomu: lista { typ, ile, zycia } (zycia = ile trafień eliminuje; 1 = od razu,
   // bez ogłuszenia). Ten sam typ może mieć kilka wpisów z różnymi życiami.
@@ -180,7 +206,9 @@ const CONFIG = {
     7: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 1, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }],
     8: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 1, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }],
     9: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 2, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }],
-    // poziom 10 i dalej: skład ostatniego wpisu
+    10: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 2, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }],
+    11: [{ typ: "zielony", ile: 3, zycia: 3 }, { typ: "zielony", ile: 3, zycia: 2 }, { typ: "limonkowy", ile: 2, zycia: 2 }, { typ: "zolty", ile: 1, zycia: 2 }, { typ: "pomaranczowy", ile: 1, zycia: 2 }, { typ: "turkusowy", ile: 1, zycia: 2 }],
+    // poziom 12 i dalej: skład ostatniego wpisu
   },
   // Ilu przeciwników naraz na planszy (null = wszyscy od razu). Reszta czeka w kolejce
   // i wchodzi opoznienieWejscia s po tym, jak zwolni się miejsce (ktoś odpadnie).
