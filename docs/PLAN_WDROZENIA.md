@@ -9,9 +9,9 @@ Statusy: ✅ zrobione · 🔨 teraz · ⏳ później · ❓ do decyzji.
 | # | Etap | Status |
 |---|---|---|
 | 0 | Gra podstawowa: Arena, Wielka arena, bonusy, stanowiska, typy przeciwników, 20 poziomów | ✅ (strojenie po graniu trwa) |
-| 1 | Umowa dla grafik i partia próbna | 🔨 następny |
-| 2 | Format map i ładowanie z pliku (kroki E0–E2) | ⏳ |
-| 3 | Edytor map (kroki E3–E7) | ⏳ |
+| 1 | Umowa dla grafik i partia próbna | ✅ (27.11; brakuje tylko muru ze śnieżnych bloków w stylu gry) |
+| 2 | Format map i ładowanie z pliku (kroki E0–E2) | 🔨 teraz (E0 zrobione) |
+| 3 | Edytor map (kroki E3–E7) | ⏳ zaraz po E2 |
 | 4 | Poziomy jako dane i wybór mapy w menu (krok E8 i dalej) | ⏳ |
 | 5 | Hurtowa produkcja grafik i map | ⏳ |
 | 6 | Kampania | ⏳ |
@@ -104,7 +104,8 @@ MAPY.arena_1 = {
 - Znaki w `wiersze` to identyfikatory kafelków z opisu zestawu `assets/teren/<zestaw>/zestaw.js`.
 
 ### Teren z kafelków
-- Kafelek 50 × 50 jednostek (100 × 100 px). Arena ma 20 × 10 kafelków, Wielka arena 40 × 20 (800 kafelków).
+- Siatka 50 × 50 jednostek. Arena ma 20 × 10 pól siatki, Wielka arena 40 × 20 (800).
+- **Zmiana z 27.11:** pole siatki zapisuje tylko **materiał** (np. śnieg, ubity śnieg, lód). Gra wypełnia obszar materiału jego teksturą dopasowaną do świata, więc tekstura może być duża i prostokątna (otrzymane tekstury są 16:9) i zawsze się łączy. Wycinanie kwadratów 100 × 100 px psułoby łączenie.
 - Zestaw kafelków: folder `assets/teren/<zestaw>/` z plikiem `zestaw.js` (jednoznakowy `id`, plik, nazwa, liczba wariantów). Wariant wynika z pozycji kafelka (zawsze ten sam, bez migania).
 - **Rysowanie:** kafelki rysowane raz do bufora (osobne płótno), w każdej klatce gra tylko kopiuje gotowy obraz. **Bufor w kawałkach** (np. jedno pole na płótno) albo w skali ekranu: cała Wielka arena w 2 px na jednostkę to 4000 × 2000 px, a po pomnożeniu przez gęstość ekranu telefonu przekracza limity przeglądarek (zwłaszcza iPhone’a, ok. 16,7 mln pikseli na płótno).
 - W wersji 1 kafelki zmieniają tylko wygląd. Pole na właściwości (spowolnienie, ślizg, woda) jest w opisie zestawu od początku, ale gra go nie używa.
@@ -120,7 +121,7 @@ MAPY.arena_1 = {
 ### Kroki
 | Krok | Co | Wynik |
 |---|---|---|
-| E0 | Dane wstępne: `dane/dekoracje.js` dla 16 dekoracji (kategoria, rozmiar, kolizja `owal`), zestaw `zima` (co najmniej 3 kafelki) z `zestaw.js` | pliki z danymi, gra bez zmian |
+| E0 ✅ | Dane wstępne: `dane/dekoracje.js` dla 16 dekoracji (kategoria, rozmiar, kolizja `owal`), zestaw `zima` (co najmniej 3 kafelki) z `zestaw.js` | pliki z danymi, gra bez zmian |
 | E1 | Format mapy i ładowanie: Arena i Wielka arena z `mapy/*.js` zamiast z `config.js`, teren z jednego kafelka | obie areny wyglądają i grają jak dziś (porównanie liczb) |
 | E2 | Rysowanie terenu w grze z bufora (w kawałkach), test na ręcznie wpisanej mapie | teren z kafelków bez spadku płynności |
 | E3 | Szkielet `editor.html`: wczytanie mapy, widok, przesuwanie i powiększanie, siatka | można oglądać mapy na telefonie |
@@ -137,7 +138,12 @@ MAPY.arena_1 = {
 ## Etapy 5–8
 - **5. Hurtowa produkcja grafik i map:** dopiero po edytorze, gdy widać rozmiary i styl na mapie.
 - **6. Kampania:** kolejność poziomów, mapa kampanii odkrywana od prawej do lewej, zapis postępów w pamięci telefonu, bossowie, inne cele (flaga, fort, przetrwaj 60 s), gwiazdki, odblokowywanie skórek.
-- **7. PWA albo aplikacja:** instalacja na ekranie głównym, pełny ekran, numer wersji wymuszający odświeżenie.
+- **7. PWA albo aplikacja:** instalacja na ekranie głównym, pełny ekran, numer wersji wymuszający odświeżenie. Jakub chce PWA zaraz po edytorze (decyzja 27.11). Co PWA zmienia w edytorze (sprawdzone 27.11):
+  - Kroki E0–E6 bez zmian: PWA to tylko manifest (opis aplikacji) i service worker (skrypt, który zapamiętuje pliki gry w telefonie), logika i rysowanie zostają.
+  - E7 (eksport): w zainstalowanej PWA na iPhonie zwykłe pobieranie pliku nie działa dobrze. Eksport ma używać udostępniania pliku (Web Share API), a gdy go brak, pobierania; dodatkowo „Kopiuj tekst mapy”.
+  - Zapis roboczy w `localStorage` (pamięci strony w telefonie) jest wspólny dla gry i edytora z tego samego adresu, więc „Zagraj tę mapę” działa także w PWA.
+  - Service worker musi zapamiętywać `editor.html`, `mapy/*.js` i `dane/*.js`. Numer wersji `?v=` zastąpi wersja pamięci service workera.
+  - Wniosek: PWA nie trzeba robić przed edytorem. Robienie jej wcześniej utrudniłoby testowanie (telefon trzymałby stare pliki przy każdej zmianie).
 - **8. Multiplayer:** najpierw stały krok czasu i losowość z ziarnem, potem serwer, na końcu tryb dwóch graczy. Po kampanii.
 
 ## Odłożone pomysły (bez etapu)
@@ -156,7 +162,9 @@ Przy każdym propozycja. Wystarczy odpowiedzieć „domyślnie” albo poprawić
 - [ ] Długie poziomy 15–20 a zamieć po 90 s w Wielkiej arenie. Propozycja: sprawdzić w grze, ewentualnie zamieć zależna od liczby przeciwników.
 
 **Mapy i edytor**
-- [ ] Rozmiar kafelka 50 × 50 jednostek? Propozycja: tak.
+- [x] Kolizje nowych przeszkód (27.11, Jakub): blokują głaz, kamienie_trzy, kamień średni, kłoda, pniak, krzak średni i duży, ostrokrzew, zaspy (wysoka, długa, z sankami, z łopatą), pagórek, murek, szopa, dom; same ozdoby: trawa, gałęzie, kamień mały, krzak mały, zaspa mała, staw.
+- [ ] Rozmieszczenie przeszkód: na stałe w mapie, losowo co poziom czy mieszane? Jakub (27.11): ustalimy po zbudowaniu edytora.
+- [ ] Rozmiar pola siatki 50 × 50 jednostek? Propozycja: tak.
 - [ ] Kafelki wpływają na grę (spowolnienie, ślizg, woda) od wersji 1? Propozycja: tylko wygląd, właściwości później.
 - [ ] Zestawy kafelków na start? Propozycja: jeden zestaw „zima”, 3–5 kafelków, 2 warianty każdego.
 - [ ] Obie areny od razu? Propozycja: tak, format jest ten sam.

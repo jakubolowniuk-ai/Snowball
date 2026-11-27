@@ -35,6 +35,7 @@ Gra na telefon w przeglądarce dla Jakuba i znajomych, inspirowana grą Snowcraf
 | 26.11 | Przeciwnik wybiera cel w trakcie zamachu (czas na reakcję gracza w typie). |
 | 26.11 | W Wielkiej arenie przeciwnik rzuca tylko z odległości typu, bez zasady awaryjnej. |
 | 26.11 | Zbijanie śnieżek jako cecha typu (kolor do wyboru). |
+| 27.11 | Najpierw edytor map, PWA zaraz po nim (PWA nie zmienia kroków edytora poza eksportem). Teren jako materiały z teksturami zamiast kwadratowych kafelków. |
 
 ## Kierunek rozwoju (etapy)
 Szczegóły i status każdego etapu: `PLAN_WDROZENIA.md`.
