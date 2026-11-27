@@ -379,7 +379,7 @@ const CONFIG = {
   opoznienieWejscia: 2,
   // Pierwszy rzut każdego przeciwnika: po napisie "Level N" + zwykła przerwa + losowo 0-tyle s
   opoznienieStartuMax: 3,
-  // Ustawienie na starcie w Arenie: rzędy równoległe do przekątnej (pierwszy: liniaPrzeciwnikow),
+  // Ustawienie na starcie w Arenie: rzędy równoległe do przekątnej (pierwszy: linia startu z mapy),
   // kolejne bliżej lewego górnego rogu co odstepRzedow, najwyżej maxWRzedzie w rzędzie,
   // postacie nie bliżej siebie niż minOdstep × rozmiarPostaci
   odstepRzedow: 0.14, // z przesunięciem rzędów daje odstęp co najmniej minOdstep × rozmiarPostaci
@@ -392,12 +392,6 @@ const CONFIG = {
   // Zachowanie przeciwników wspólne dla wszystkich typów
   wedrowka: 0.12, // Wielka arena: jak daleko odchodzi przy losowym chodzeniu
   odskok: 0.08, // jak daleko odskakuje w bok przy uniku
-
-  // Pozycje startowe (y też jako ułamek szerokości; wysokość pola to 1 / ASPECT)
-  startGracz: { x: 0.62, y: 0.42 }, // prawa dolna część pola, poza padem
-  // Przeciwnicy stoją w lewym górnym trójkącie, równo rozłożeni na linii równoległej
-  // do przekątnej. 0 = w samym lewym górnym rogu, 1 = na przekątnej (granicy).
-  liniaPrzeciwnikow: 0.55,
 
   // Niebieskawe przyciemnienie przy brzegach pola: jak głęboko wchodzi
   glebokoscBrzegu: 0.05,
@@ -487,21 +481,15 @@ const CONFIG = {
       promienStania: 0.035,
       grafika: null,
     },
-    // Pozycje (punkt na ziemi, ułamki szerokości pola)
-    pozycje: {
-      czerwoni: { stos: { x: 0.54, y: 0.4 }, armatka: { x: 0.3, y: 0.42 } },
-      zieloni: { stos: { x: 0.46, y: 0.1 }, armatka: { x: 0.7, y: 0.08 } },
-    },
   },
 
-  // Tryby gry. Arena działa jak dotąd (świat = pole). Wielka arena: większy świat i kamera.
+  // Tryby gry. Arena: świat = jedno pole. Wielka arena: większy świat i kamera.
+  // Układ planszy (rozmiar świata, dekoracje, stanowiska, starty) jest w plikach map (mapy/*.js).
   tryby: {
+    // Która mapa dla którego trybu (każdy poziom dostanie własną mapę w etapie 4)
+    mapy: { arena: "arena_1", wielkaArena: "wielka_1" },
     wielkaArena: {
-      swiatSzerokosc: 2, // świat ma tyle szerokości pola
-      swiatWysokosc: 2, // i tyle wysokości pola
       wygladzanieKamery: 4, // jak szybko kamera dogania gracza (większe = szybciej)
-      startGracz: { x: 1.6, y: 0.82 }, // prawa dolna część świata
-      liniaPrzeciwnikow: 0.55, // przeciwnicy na linii w lewej górnej części (0 = róg)
       mnoznikPrzeciwnikow: 1, // liczba przeciwników = suma ze składu poziomu razy to
       odlegloscAI: 0.5, // zapasowa odległość od gracza dla postaci bez typu (typy mają odlegloscRzutuMin/Max)
       maxOdlegloscRzutuAI: 0.9, // dalej nie rzuca (musi być co najmniej największa odlegloscRzutuMax typów)
@@ -519,8 +507,6 @@ const CONFIG = {
       // i czasie życia 10 s na planszy nigdy nie byłoby więcej niż jeden bonus)
       bonusyOdstepMin: 4,
       bonusyOdstepMax: 7,
-      // Neutralne stanowiska (dla każdego, kto pierwszy dojdzie; amunicja wspólna)
-      stanowiska: { stos: { x: 1.0, y: 0.52 }, armatka: { x: 1.3, y: 0.3 } },
       // Strzałki przy krawędzi ekranu do przeciwników poza widokiem
       strzalkaRozmiar: 0.018,
       strzalkaMargines: 0.03, // odstęp strzałki od krawędzi ekranu
@@ -533,27 +519,6 @@ const CONFIG = {
       gestoscZamieci: 0.75, // jak gęsta jest mgła poza granicą (0-1)
       kolorZamieci: "196, 212, 230", // kolor mgły (r, g, b): szaroniebieski, żeby było ją widać na śniegu
       wysokoscPodskoku: 0.012, // podskok postaci niesionej wiatrem (tylko wygląd)
-      // Dekoracje (przeszkody) w całym świecie: x od 0 do 2, y od 0 do 1
-      dekoracje: [
-        { plik: "choinka_1", x: 0.1, y: 0.12 },
-        { plik: "fort_1", x: 0.45, y: 0.2 },
-        { plik: "balwan_1", x: 0.85, y: 0.1 },
-        { plik: "plot_1", x: 1.3, y: 0.15 },
-        { plik: "choinka_2", x: 1.75, y: 0.12 },
-        { plik: "balwan_2", x: 0.2, y: 0.45 },
-        { plik: "plot_2", x: 0.7, y: 0.42 },
-        { plik: "choinka_3", x: 1.05, y: 0.35 },
-        { plik: "fort_2", x: 1.45, y: 0.45 },
-        { plik: "balwan_3", x: 1.9, y: 0.4 },
-        { plik: "fort_3", x: 0.35, y: 0.72 },
-        { plik: "choinka_4", x: 0.8, y: 0.68 },
-        { plik: "balwan_4", x: 1.15, y: 0.75 },
-        { plik: "plot_3", x: 1.55, y: 0.65 },
-        { plik: "choinka_1", x: 0.08, y: 0.92 },
-        { plik: "plot_4", x: 0.6, y: 0.92 },
-        { plik: "fort_4", x: 1.1, y: 0.93 },
-        { plik: "choinka_2", x: 1.92, y: 0.88 },
-      ],
     },
   },
 
@@ -586,21 +551,6 @@ const CONFIG = {
   skalaSniezki: 1.6, // śnieżka rysowana większa niż jej okrąg trafień (lepiej widoczna)
   promienKropekZycia: 0.006, // kropki z trafieniami nad głową
   gruboscPierscienia: 0.004, // linia pierścienia pod stopami gracza
-
-  // Dekoracje: zatrzymują śnieżki, zawodnicy nie mogą przez nie przejść.
-  // plik: nazwa z assets/dekoracje/; x, y: środek podstawy (ułamek szerokości pola)
-  dekoracje: [
-    { plik: "choinka_1", x: 0.06, y: 0.105 }, // róg zielonych
-    { plik: "plot_2", x: 0.33, y: 0.23 }, // osłona przed linią zielonych
-    { plik: "balwan_3", x: 0.09, y: 0.44 }, // lewy dolny róg
-    { plik: "fort_1", x: 0.6, y: 0.28 }, // osłona gracza
-    { plik: "balwan_1", x: 0.47, y: 0.47 }, // strona gracza, u dołu
-    { plik: "choinka_2", x: 0.96, y: 0.14 }, // prawy górny róg
-  ],
-
-  // Podstawa (owal na ziemi) jako ułamek szerokości grafiki dekoracji
-  podstawaSzerokosc: 0.4, // połowa szerokości owalu
-  podstawaGlebokosc: 0.15, // połowa głębokości owalu
 
   // Kolory
   kolorCzerwony: "#d93a3a",

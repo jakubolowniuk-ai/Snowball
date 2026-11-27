@@ -10,7 +10,7 @@ Statusy: ✅ zrobione · 🔨 teraz · ⏳ później · ❓ do decyzji.
 |---|---|---|
 | 0 | Gra podstawowa: Arena, Wielka arena, bonusy, stanowiska, typy przeciwników, 20 poziomów | ✅ (strojenie po graniu trwa) |
 | 1 | Umowa dla grafik i partia próbna | ✅ (27.11; brakuje tylko muru ze śnieżnych bloków w stylu gry) |
-| 2 | Format map i ładowanie z pliku (kroki E0–E2) | 🔨 teraz (E0 zrobione) |
+| 2 | Format map i ładowanie z pliku (kroki E0–E2) | 🔨 teraz (E0, E1 zrobione) |
 | 3 | Edytor map (kroki E3–E7) | ⏳ zaraz po E2 |
 | 4 | Poziomy jako dane i wybór mapy w menu (krok E8 i dalej) | ⏳ |
 | 5 | Hurtowa produkcja grafik i map | ⏳ |
@@ -122,7 +122,7 @@ MAPY.arena_1 = {
 | Krok | Co | Wynik |
 |---|---|---|
 | E0 ✅ | Dane wstępne: `dane/dekoracje.js` dla 16 dekoracji (kategoria, rozmiar, kolizja `owal`), zestaw `zima` (co najmniej 3 kafelki) z `zestaw.js` | pliki z danymi, gra bez zmian |
-| E1 | Format mapy i ładowanie: Arena i Wielka arena z `mapy/*.js` zamiast z `config.js`, teren z jednego kafelka | obie areny wyglądają i grają jak dziś (porównanie liczb) |
+| E1 ✅ | Format mapy i ładowanie: Arena i Wielka arena z `mapy/*.js` zamiast z `config.js`, teren z jednego kafelka | obie areny wyglądają i grają jak dziś (porównanie liczb) |
 | E2 | Rysowanie terenu w grze z bufora (w kawałkach), test na ręcznie wpisanej mapie | teren z kafelków bez spadku płynności |
 | E3 | Szkielet `editor.html`: wczytanie mapy, widok, przesuwanie i powiększanie, siatka | można oglądać mapy na telefonie |
 | E4 | Malowanie terenu, cofnij i ponów | można zmienić podłoże |
@@ -155,23 +155,25 @@ MAPY.arena_1 = {
 ## Pytania otwarte ❓
 Przy każdym propozycja. Wystarczy odpowiedzieć „domyślnie” albo poprawić wybrane.
 
-**Rozgrywka (strojenie)**
-- [ ] Który kolor dostaje `zbijaSniezki: true`? Propozycja: na razie żaden, przetestować na jednym (np. Turkusowym).
-- [ ] Najnowszy kolor stoi na początku poziomu w kolejce (od poziomu 16 Fioletowy, Brązowy i Magenta wchodzą dopiero po kilku trafieniach). Zmienić kolejność, żeby nowy kolor był od startu? Propozycja: tak.
-- [ ] Skok trudności z poziomu 5 na 6 (8 → 15 trafień). Zostawić? Propozycja: sprawdzić w grze.
-- [ ] Długie poziomy 15–20 a zamieć po 90 s w Wielkiej arenie. Propozycja: sprawdzić w grze, ewentualnie zamieć zależna od liczby przeciwników.
+Odpowiedzi Jakuba z 27.11 są zapisane przy pytaniach (✔). Otwarte zostają tylko pytania, które pojawią się później.
 
-**Mapy i edytor**
-- [x] Kolizje nowych przeszkód (27.11, Jakub): blokują głaz, kamienie_trzy, kamień średni, kłoda, pniak, krzak średni i duży, ostrokrzew, zaspy (wysoka, długa, z sankami, z łopatą), pagórek, murek, szopa, dom; same ozdoby: trawa, gałęzie, kamień mały, krzak mały, zaspa mała, staw.
-- [ ] Rozmieszczenie przeszkód: na stałe w mapie, losowo co poziom czy mieszane? Jakub (27.11): ustalimy po zbudowaniu edytora.
-- [ ] Rozmiar pola siatki 50 × 50 jednostek? Propozycja: tak.
-- [ ] Kafelki wpływają na grę (spowolnienie, ślizg, woda) od wersji 1? Propozycja: tylko wygląd, właściwości później.
-- [ ] Zestawy kafelków na start? Propozycja: jeden zestaw „zima”, 3–5 kafelków, 2 warianty każdego.
-- [ ] Obie areny od razu? Propozycja: tak, format jest ten sam.
-- [ ] Zakres wersji 1 edytora? Propozycja: teren, dekoracje, stanowiska, starty, rozmiar świata.
-- [ ] Kolizje nowych obiektów (ściany, pagórki, domy)? Propozycja: owal i brak w wersji 1, prostokąt z pierwszą ścianą.
-- [ ] Tło poza polem wspólne dla wszystkich map? Propozycja: tak.
-- [ ] Przekątna w Arenie zawsze, czy mapa może ją wyłączyć? Propozycja: zawsze.
-- [ ] Powiązanie mapy z poziomem: jedna mapa na poziom, losowa czy wybór w menu? Propozycja: wybór w menu na start, powiązanie z poziomami w etapie 4.
-- [ ] Cofnij i ponów: 50 kroków wystarczy? Propozycja: tak.
-- [ ] Gdzie trzymać liczby po etapie 2? Propozycja: liczby rozgrywki (prędkości, czasy, typy) dalej w `config.js`, w plikach map tylko układ (teren, pozycje). Poziomy przechodzą do danych w etapie 4.
+**Rozgrywka (strojenie)** ✔
+- [x] Zbijanie śnieżek: na razie żaden kolor.
+- [x] Najnowszy kolor na planszy od startu poziomu (zrobione 27.11: przeplatanie wpisów od ostatniego).
+- [x] Skok trudności z poziomu 5 na 6: zostaje.
+- [x] Długie poziomy a zamieć po 90 s: na razie zostaje.
+
+**Mapy i edytor** ✔
+- [x] Kolizje nowych przeszkód: blokują głaz, kamienie_trzy, kamień średni, kłoda, pniak, krzak średni i duży, ostrokrzew, zaspy (wysoka, długa, z sankami, z łopatą), pagórek, murek, szopa, dom; same ozdoby: trawa, gałęzie, kamień mały, krzak mały, zaspa mała, staw.
+- [x] Rozmieszczenie przeszkód: na stałe w mapie.
+- [x] Rozmiar pola siatki terenu: do wpisania w edytorze (pole mapy, domyślnie 50 jednostek).
+- [x] Teren w wersji 1: tylko wygląd.
+- [x] Materiały na start: śnieg, ubity śnieg, lód.
+- [x] Obie areny od razu.
+- [x] Zakres wersji 1 edytora: teren, dekoracje, stanowiska, starty, rozmiar świata.
+- [x] Kolizje w wersji 1: owal i brak; prostokąt dopiero, gdy obiekt go potrzebuje.
+- [x] Tło poza polem wspólne dla wszystkich map.
+- [x] Przekątna w Arenie zawsze.
+- [x] **Każdy poziom ma swoją mapę** (powiązanie poziom → mapa w etapie 4; do tego czasu poziomy bez własnej mapy używają domyślnej mapy trybu).
+- [x] Cofnij i ponów: 50 kroków.
+- [x] Liczby rozgrywki dalej w `config.js`, w plikach map tylko układ (teren, pozycje).

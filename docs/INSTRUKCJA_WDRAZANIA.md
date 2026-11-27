@@ -12,6 +12,7 @@ Stan na 26.11.2026. Ten dokument mówi **jak pracujemy**: od pomysłu na czacie 
 | `docs/INSTRUKCJA_WDRAZANIA.md` | ten plik | zawsze przy pracy nad krokiem |
 | `docs/GRAFIKI.md` | skala, kotwice, pliki grafik, umowa dla nowych grafik | zadanie dotyczy grafik |
 | `config.js` | **wszystkie liczby rozgrywki** | strojenie |
+| `mapy/*.js`, `dane/dekoracje.js` | układ plansz (mapy) i opis dekoracji | zmiany plansz, edytor map |
 | `docs/archiwum/` | stare plany i wykonane prompty | tylko do historii |
 
 ## Zasady pracy

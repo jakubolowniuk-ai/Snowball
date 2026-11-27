@@ -815,6 +815,7 @@ function rysujSwiat(ctx, stan) {
   const wszyscy = wszystkiePostacie(stan);
   const lezacy = wszyscy.filter((z) => z.wyeliminowany);
   const stojacy = wszyscy.filter((z) => !z.wyeliminowany);
+  for (const p of wszystkieDekoracje()) if (p.naZiemi && widac(p.x, p.y)) rysujSprite(ctx, p.sciezka, p.x, p.y);
   for (const z of lezacy) rysujZawodnika(ctx, z, z === stan.gracz);
   for (const st of widoczneStanowiska(stan)) rysujStrefeStanowiska(ctx, stan, st);
 
@@ -822,7 +823,7 @@ function rysujSwiat(ctx, stan) {
   // kto stoi niżej na ekranie (bliżej nas), zasłania tego, kto stoi wyżej
   const obiekty = [
     ...stojacy.map((z) => ({ x: z.x, y: stopyY(z), rysuj: () => rysujZawodnika(ctx, z, z === stan.gracz) })),
-    ...przeszkody().map((p) => ({ x: p.x, y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
+    ...wszystkieDekoracje().filter((p) => !p.naZiemi).map((p) => ({ x: p.x, y: p.y, rysuj: () => rysujSprite(ctx, p.sciezka, p.x, p.y) })),
     ...widoczneStanowiska(stan).map((st) => ({ x: st.x, y: st.y, rysuj: () => rysujStanowisko(ctx, st) })),
     ...stan.bonusy.map((b) => ({ x: b.x, y: b.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujBonusNaPlanszy(ctx, stan, b) })),
     ...stan.wiezyczki.map((w) => ({ x: w.x, y: w.y + PROMIEN_POSTACI * 0.85, rysuj: () => rysujWiezyczke(ctx, w) })),

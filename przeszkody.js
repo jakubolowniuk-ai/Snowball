@@ -1,28 +1,35 @@
-// Przeszkody: dekoracje z config.js (choinki, bałwany, płotki, forty).
-// Każda ma "podstawę", czyli owal na ziemi. W podstawie zatrzymują się śnieżki
-// i nie mogą w nią wejść zawodnicy (stopy zawodnika zostają poza owalem).
+// Przeszkody: dekoracje z mapy (stan.mapa), opisane w dane/dekoracje.js.
+// Dekoracja z kolizją "owal" ma "podstawę", czyli owal na ziemi: w podstawie zatrzymują się
+// śnieżki i nie mogą w nią wejść zawodnicy (stopy zawodnika zostają poza owalem).
+// Dekoracja z kolizją "brak" to sama ozdoba (rysujemy ją, ale nic nie blokuje).
 
 let _przeszkody = null;
-let _przeszkodyTryb = null;
+let _przeszkodyMapa = null;
 
-// Lista przeszkód w jednostkach pola (liczona raz na tryb, przy pierwszym użyciu).
-// Wielka arena ma własną, dłuższą listę dekoracji.
-function przeszkody() {
-  if (_przeszkody && _przeszkodyTryb === stan.tryb) return _przeszkody;
-  _przeszkodyTryb = stan.tryb;
-  const lista = jestWielka(stan) ? CONFIG.tryby.wielkaArena.dekoracje : CONFIG.dekoracje;
-  _przeszkody = lista.map((d) => {
-    const sciezka = `assets/dekoracje/${d.plik}.png`;
-    const szer = SPRITY[sciezka].szer * CONFIG.skalaGrafik;
-    return {
-      sciezka,
-      x: j(d.x),
-      y: j(d.y), // środek podstawy (tu stoi dekoracja)
-      rx: szer * CONFIG.podstawaSzerokosc, // połowa szerokości owalu
-      ry: szer * CONFIG.podstawaGlebokosc, // połowa głębokości owalu
-    };
-  });
+// Lista dekoracji mapy w jednostkach pola (liczona raz na mapę, przy pierwszym użyciu)
+function wszystkieDekoracje() {
+  if (_przeszkody && _przeszkodyMapa === stan.mapa) return _przeszkody;
+  _przeszkodyMapa = stan.mapa;
+  _przeszkody = stan.mapa.dekoracje
+    .filter((d) => DEKORACJE[d.id])
+    .map((d) => {
+      const opis = DEKORACJE[d.id];
+      return {
+        sciezka: opis.plik,
+        x: j(d.x),
+        y: j(d.y), // środek podstawy (tu stoi dekoracja)
+        rx: (opis.podstawa.szer / 2) * CONFIG.skalaGrafik, // połowa szerokości owalu
+        ry: (opis.podstawa.wys / 2) * CONFIG.skalaGrafik, // połowa głębokości owalu
+        kolizja: opis.kolizja !== "brak",
+        naZiemi: opis.warstwa === "ziemia", // rysowana zawsze pod postaciami
+      };
+    });
   return _przeszkody;
+}
+
+// Tylko dekoracje, które blokują ruch i śnieżki
+function przeszkody() {
+  return wszystkieDekoracje().filter((p) => p.kolizja);
 }
 
 // Nowy poziom: lista przeszkód od nowa (zamieć mogła część usunąć)
@@ -32,7 +39,7 @@ function resetPrzeszkod() {
 
 // Zamieć: przeszkody poza granicą świata znikają z chmurką
 function usunPrzeszkodyPoza(stan) {
-  const lista = przeszkody();
+  const lista = wszystkieDekoracje();
   for (let i = lista.length - 1; i >= 0; i--) {
     const p = lista[i];
     if (pozaGranica(stan, p.x, p.y, 0)) {

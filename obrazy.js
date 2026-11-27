@@ -5,22 +5,6 @@
 // szerokości i wysokości), który kładziemy na pozycji obiektu.
 
 const SPRITY = {
-  "assets/dekoracje/choinka_1.png": { szer: 72.0, wys: 102.0, kotwicaX: 0.5, kotwicaY: 0.97 },
-  "assets/dekoracje/choinka_2.png": { szer: 58.0, wys: 87.5, kotwicaX: 0.5, kotwicaY: 0.97 },
-  "assets/dekoracje/choinka_3.png": { szer: 50.5, wys: 64.5, kotwicaX: 0.5, kotwicaY: 0.97 },
-  "assets/dekoracje/choinka_4.png": { szer: 44.5, wys: 51.5, kotwicaX: 0.5, kotwicaY: 0.97 },
-  "assets/dekoracje/balwan_1.png": { szer: 77.0, wys: 83.5, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/balwan_2.png": { szer: 76.0, wys: 85.5, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/balwan_3.png": { szer: 71.5, wys: 81.0, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/balwan_4.png": { szer: 71.0, wys: 81.0, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/plot_1.png": { szer: 78.0, wys: 45.5, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/plot_2.png": { szer: 88.5, wys: 42.5, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/plot_3.png": { szer: 87.0, wys: 43.0, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/plot_4.png": { szer: 75.0, wys: 39.5, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/fort_1.png": { szer: 102.0, wys: 51.0, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/fort_2.png": { szer: 99.5, wys: 43.0, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/fort_3.png": { szer: 99.0, wys: 55.0, kotwicaX: 0.5, kotwicaY: 0.95 },
-  "assets/dekoracje/fort_4.png": { szer: 99.5, wys: 47.5, kotwicaX: 0.5, kotwicaY: 0.95 },
   "assets/efekty/rozbryzg_1.png": { szer: 47.0, wys: 43.5, kotwicaX: 0.5, kotwicaY: 0.5 },
   "assets/efekty/rozbryzg_2.png": { szer: 47.0, wys: 42.0, kotwicaX: 0.5, kotwicaY: 0.5 },
   "assets/efekty/rozbryzg_3.png": { szer: 47.0, wys: 45.5, kotwicaX: 0.5, kotwicaY: 0.5 },
@@ -112,9 +96,10 @@ const OBRAZY = {};
 // Wczytuje wszystkie obrazki z listy SPRITY, potem wywołuje gotowe().
 // Gdy któryś się nie wczyta, piszemy błąd w konsoli, a gra i tak startuje.
 function wczytajObrazy(gotowe) {
-  // Grafiki z sprites.json, atlasy kolorów zawodników w grze, grafiki bonusów i stanowisk
+  // Grafiki z sprites.json (bez dekoracji), dekoracje użyte w mapach, atlasy kolorów zawodników w grze, grafiki bonusów i stanowisk
   const sciezki = [
-    ...Object.keys(SPRITY),
+    ...Object.keys(SPRITY).filter((s) => !s.startsWith("assets/dekoracje/")),
+    ...dekoracjeUzyteWMapach().map((id) => DEKORACJE[id].plik),
     // Set (zbiór) usuwa powtórzone kolory, żeby nie wczytywać atlasu dwa razy
     ...[...new Set([CONFIG.kolorGracza, CONFIG.kolorPrzeciwnika, ...Object.values(CONFIG.typy).map((t) => t.kolor)])].map(
       ZAWODNIK.atlas

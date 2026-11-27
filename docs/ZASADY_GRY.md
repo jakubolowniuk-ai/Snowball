@@ -34,7 +34,7 @@ Stan na 26.11.2026. Ten dokument opisuje **mechanizmy**. Dokładne liczby są ty
 
 ## Poziomy
 - Skład poziomu: `skladPoziomow`, lista wpisów `{ typ, ile, zycia }`. Ten sam typ może mieć kilka wpisów z różnymi życiami. Poziom bez wpisu bierze skład najbliższego niższego (poziom 21+ = 20).
-- Wpisy są przeplatane (jeden z każdego wpisu po kolei), więc przy limicie widać różne typy.
+- Wpisy są przeplatane (jeden z każdego wpisu po kolei, zaczynając od ostatniego wpisu, czyli najnowszego koloru), więc przy limicie widać różne typy, a najnowsze kolory są na planszy od startu.
 - Na planszy najwyżej `maxNaraz` przeciwników. Reszta czeka w kolejce i wchodzi `opoznienieWejscia` s po zwolnieniu miejsca, na swoje miejsce startowe.
 - Start w Arenie: rzędy równoległe do przekątnej. W Wielkiej arenie: linia w lewej górnej części świata. Pierwszy rzut każdego: po napisie „Level N”, zwykłej przerwie i losowo do `opoznienieStartuMax` s.
 - Plan poziomów 1–20 (kto wchodzi na którym poziomie i dlaczego) jest w `PLAN_WDROZENIA.md`, aktualne wartości w `config.js`.
@@ -107,7 +107,8 @@ Ikony: `assets/bonusy/`, przypisanie w polu `grafika` typu bonusu (opis w `GRAFI
 - Gwiazdka (wachlarz) to jeden rzut = jedna gałka. Przy postaci w strefie widać delikatny okrąg.
 
 ## Przeszkody i wygląd
-- Dekoracje (choinki, bałwany, płotki, forty) z `assets/dekoracje/` są przeszkodami: śnieżka rozbija się o ich podstawę (owal na ziemi), postacie nie mogą przez nie przejść. Pozycje: `dekoracje` (Arena) i `tryby.wielkaArena.dekoracje`.
+- **Mapy** (`mapy.js`, pliki `mapy/<nazwa>.js`): układ planszy, czyli rozmiar świata, teren, dekoracje, stanowiska i miejsca startu. Którą mapę ma tryb: `tryby.mapy` w `config.js` (później każdy poziom ma swoją mapę). Mapa z błędem daje komunikat w konsoli.
+- **Dekoracje** (opis w `dane/dekoracje.js`): z kolizją `owal` są przeszkodami (śnieżka rozbija się o podstawę, postacie nie mogą przez nie przejść), z kolizją `brak` to same ozdoby. Dekoracje z warstwy `ziemia` (np. zamarznięty staw) rysują się zawsze pod postaciami.
 - Widok skośnie z góry, tło `assets/tlo/tlo_plansza.png` z niebieskawym przyciemnieniem poza polem i przy brzegach. Cienie, pierścienie, kropki żyć, linie celowania i napisy rysuje kod.
 - Postacie z atlasów animacji (`assets/gracze/atlasy/<kolor>.webp`, dane klatek w `obrazy.js`). Kierunek widoku: ruch w dół = przód, w górę = tył, w bok = przód odbity. Animacje: chód, zamach, rzut, przeładowanie (dopasowane do jego czasu), ogłuszenie, eliminacja. Szczegóły klatek w `GRAFIKI.md`.
 - **Animacje** (`animacje.js`, ustawienia w `config.js` → `animacje`):
