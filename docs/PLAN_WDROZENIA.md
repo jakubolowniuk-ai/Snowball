@@ -10,7 +10,7 @@ Statusy: ✅ zrobione · 🔨 teraz · ⏳ później · ❓ do decyzji.
 |---|---|---|
 | 0 | Gra podstawowa: Arena, Wielka arena, bonusy, stanowiska, typy przeciwników, 20 poziomów | ✅ (strojenie po graniu trwa) |
 | 1 | Umowa dla grafik i partia próbna | ✅ (27.11; brakuje tylko muru ze śnieżnych bloków w stylu gry) |
-| 2 | Format map i ładowanie z pliku (kroki E0–E2) | 🔨 teraz (E0 zrobione) |
+| 2 | Format map i ładowanie z pliku (kroki E0–E2) | 🔨 teraz (E0, E1 zrobione) |
 | 3 | Edytor map (kroki E3–E7) | ⏳ zaraz po E2 |
 | 4 | Poziomy jako dane i wybór mapy w menu (krok E8 i dalej) | ⏳ |
 | 5 | Hurtowa produkcja grafik i map | ⏳ |
@@ -122,7 +122,7 @@ MAPY.arena_1 = {
 | Krok | Co | Wynik |
 |---|---|---|
 | E0 ✅ | Dane wstępne: `dane/dekoracje.js` dla 16 dekoracji (kategoria, rozmiar, kolizja `owal`), zestaw `zima` (co najmniej 3 kafelki) z `zestaw.js` | pliki z danymi, gra bez zmian |
-| E1 | Format mapy i ładowanie: Arena i Wielka arena z `mapy/*.js` zamiast z `config.js`, teren z jednego kafelka | obie areny wyglądają i grają jak dziś (porównanie liczb) |
+| E1 ✅ | Format mapy i ładowanie: Arena i Wielka arena z `mapy/*.js` zamiast z `config.js`, teren z jednego kafelka | obie areny wyglądają i grają jak dziś (porównanie liczb) |
 | E2 | Rysowanie terenu w grze z bufora (w kawałkach), test na ręcznie wpisanej mapie | teren z kafelków bez spadku płynności |
 | E3 | Szkielet `editor.html`: wczytanie mapy, widok, przesuwanie i powiększanie, siatka | można oglądać mapy na telefonie |
 | E4 | Malowanie terenu, cofnij i ponów | można zmienić podłoże |

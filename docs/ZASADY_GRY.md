@@ -107,7 +107,8 @@ Ikony: `assets/bonusy/`, przypisanie w polu `grafika` typu bonusu (opis w `GRAFI
 - Gwiazdka (wachlarz) to jeden rzut = jedna gałka. Przy postaci w strefie widać delikatny okrąg.
 
 ## Przeszkody i wygląd
-- Dekoracje (choinki, bałwany, płotki, forty) z `assets/dekoracje/` są przeszkodami: śnieżka rozbija się o ich podstawę (owal na ziemi), postacie nie mogą przez nie przejść. Pozycje: `dekoracje` (Arena) i `tryby.wielkaArena.dekoracje`.
+- **Mapy** (`mapy.js`, pliki `mapy/<nazwa>.js`): układ planszy, czyli rozmiar świata, teren, dekoracje, stanowiska i miejsca startu. Którą mapę ma tryb: `tryby.mapy` w `config.js` (później każdy poziom ma swoją mapę). Mapa z błędem daje komunikat w konsoli.
+- **Dekoracje** (opis w `dane/dekoracje.js`): z kolizją `owal` są przeszkodami (śnieżka rozbija się o podstawę, postacie nie mogą przez nie przejść), z kolizją `brak` to same ozdoby. Dekoracje z warstwy `ziemia` (np. zamarznięty staw) rysują się zawsze pod postaciami.
 - Widok skośnie z góry, tło `assets/tlo/tlo_plansza.png` z niebieskawym przyciemnieniem poza polem i przy brzegach. Cienie, pierścienie, kropki żyć, linie celowania i napisy rysuje kod.
 - Postacie z atlasów animacji (`assets/gracze/atlasy/<kolor>.webp`, dane klatek w `obrazy.js`). Kierunek widoku: ruch w dół = przód, w górę = tył, w bok = przód odbity. Animacje: chód, zamach, rzut, przeładowanie (dopasowane do jego czasu), ogłuszenie, eliminacja. Szczegóły klatek w `GRAFIKI.md`.
 - **Animacje** (`animacje.js`, ustawienia w `config.js` → `animacje`):

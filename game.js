@@ -87,10 +87,11 @@ function pozycjePrzeciwnikow(n) {
   const r = CONFIG.rozmiarPostaci / 2; // promień postaci (ułamek szerokości): zapas od brzegu
   const odstep = CONFIG.minOdstep * CONFIG.rozmiarPostaci;
   const pozycje = [];
-  let a = CONFIG.liniaPrzeciwnikow;
+  const linia = stan.mapa.start.przeciwnicy.wartosc; // pierwszy rząd z mapy
+  let a = linia;
   for (let rzad = 0; pozycje.length < n; rzad++, a -= CONFIG.odstepRzedow) {
     // Brak miejsca w trójkącie (bardzo dużo przeciwników): kolejni znów od pierwszego rzędu
-    if (a < 4 * CONFIG.rozmiarPostaci) a = CONFIG.liniaPrzeciwnikow - CONFIG.odstepRzedow / 2;
+    if (a < 4 * CONFIG.rozmiarPostaci) a = linia - CONFIG.odstepRzedow / 2;
     // Punkt rzędu: (t × a, (1 - t) × a × wysokosc); t tylko tam, gdzie postać nie dotyka brzegu
     const tMin = r / a;
     const tMax = 1 - r / (a * wysokosc);
@@ -109,10 +110,13 @@ function pozycjePrzeciwnikow(n) {
 // Ustawia wszystko od nowa na początek poziomu o numerze "poziom"
 function zacznijPoziom(stan, poziom) {
   stan.poziom = poziom;
+  stan.mapa = mapaDlaTrybu(stan.tryb); // układ planszy z pliku mapy (mapy/*.js)
+  const bledy = bledyMapy(stan.mapa);
+  if (bledy.length) console.error("Błędy mapy: " + bledy.join("; "));
   ustawSwiat(stan); // Arena: świat = pole; Wielka arena: większy świat
   resetPrzeszkod(); // wszystkie dekoracje z powrotem (zamieć mogła je usunąć)
   const wielka = jestWielka(stan);
-  stan.gracz = nowaPostac("czerwoni", wielka ? CONFIG.tryby.wielkaArena.startGracz : CONFIG.startGracz);
+  stan.gracz = nowaPostac("czerwoni", stan.mapa.start.gracz);
   stan.sojusznicy = []; // sojusznicy gracza (bonus Sojusznik), nowy poziom ich usuwa
   const typy = typyPoziomu(poziom);
   const ilu = wielka ? Math.max(1, Math.round(typy.length * CONFIG.tryby.wielkaArena.mnoznikPrzeciwnikow)) : typy.length;

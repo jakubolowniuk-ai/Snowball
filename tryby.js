@@ -11,11 +11,8 @@ function jestWielka(stan) {
 
 // Granice świata dla obecnego trybu
 function ustawSwiat(stan) {
-  if (jestWielka(stan)) {
-    stan.swiat = { x0: 0, y0: 0, x1: SZEROKOSC_POLA * WA().swiatSzerokosc, y1: WYSOKOSC_POLA * WA().swiatWysokosc };
-  } else {
-    stan.swiat = { x0: 0, y0: 0, x1: SZEROKOSC_POLA, y1: WYSOKOSC_POLA };
-  }
+  // Rozmiar świata z mapy (Arena: jedno pole, Wielka arena: kilka pól)
+  stan.swiat = { x0: 0, y0: 0, x1: SZEROKOSC_POLA * stan.mapa.swiat.szerokoscPol, y1: WYSOKOSC_POLA * stan.mapa.swiat.wysokoscPol };
   // Pełny świat na starcie (zamieć zwęża stan.swiat, a ten zostaje bez zmian)
   stan.swiatPelny = { ...stan.swiat };
 }
@@ -191,9 +188,9 @@ function naEkranie(x, y, zapas) {
 
 // Przeciwnicy na linii w lewej górnej części świata (jak w Arenie, ale w większym świecie)
 function pozycjePrzeciwnikowWielka(n) {
-  const a = WA().liniaPrzeciwnikow;
-  const W = WA().swiatSzerokosc; // w ułamkach szerokości pola
-  const H = WA().swiatWysokosc / CONFIG.ASPECT;
+  const a = stan.mapa.start.przeciwnicy.wartosc; // linia startu z mapy (0 = róg)
+  const W = stan.mapa.swiat.szerokoscPol; // w ułamkach szerokości pola
+  const H = stan.mapa.swiat.wysokoscPol / CONFIG.ASPECT;
   const pozycje = [];
   for (let i = 0; i < n; i++) {
     const t = (i + 0.5) / n;

@@ -13,7 +13,7 @@ function zacznijStanowiska(stan) {
     return;
   }
   for (const druzyna of ["czerwoni", "zieloni"]) {
-    const poz = ST().pozycje[druzyna];
+    const poz = stan.mapa.stanowiska[druzyna]; // pozycje z mapy
     const znak = druzyna === "czerwoni" ? 1 : -1; // miejsce stania lustrzanie dla zielonych
     const iloscStosu = Math.round(losuj(ST().stos.amunicjaMin - 0.49, ST().stos.amunicjaMax + 0.49));
     stan.stanowiska.push({
@@ -42,7 +42,7 @@ function zacznijStanowiska(stan) {
 // Wielka arena: jeden stos i jedna armatka dla każdego (druzyna: null = neutralne,
 // amunicja wspólna, korzysta ten, kto pierwszy dojdzie)
 function zacznijStanowiskaNeutralne(stan) {
-  const poz = CONFIG.tryby.wielkaArena.stanowiska;
+  const poz = stan.mapa.stanowiska.neutralne; // pozycje z mapy
   const iloscStosu = Math.round(losuj(ST().stos.amunicjaMin - 0.49, ST().stos.amunicjaMax + 0.49));
   stan.stanowiska.push({
     typ: "stos",
