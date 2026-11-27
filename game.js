@@ -55,9 +55,10 @@ function parametryPrzeciwnika(stan, z) {
 function typyPoziomu(poziom) {
   const numery = Object.keys(CONFIG.skladPoziomow).map(Number).filter((n) => n <= poziom);
   const sklad = CONFIG.skladPoziomow[Math.max(...numery)];
-  // Wpisy przeplatane (Z, L, Z, L, ...), żeby przy limicie maxNaraz na planszy były różne typy
+  // Wpisy przeplatane, od ostatniego wpisu (najnowszy kolor) do pierwszego, żeby przy limicie
+  // maxNaraz najnowsze kolory były na planszy od startu, a w kolejce czekały Zielone (decyzja Jakuba 27.11)
   const lista = [];
-  const zostalo = sklad.map(({ typ, ile, zycia }) => ({ typ, ile, zycia }));
+  const zostalo = sklad.map(({ typ, ile, zycia }) => ({ typ, ile, zycia })).reverse();
   while (zostalo.some((s) => s.ile > 0)) {
     for (const s of zostalo) {
       if (s.ile > 0) {

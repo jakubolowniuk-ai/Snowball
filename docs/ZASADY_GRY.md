@@ -34,7 +34,7 @@ Stan na 26.11.2026. Ten dokument opisuje **mechanizmy**. Dokładne liczby są ty
 
 ## Poziomy
 - Skład poziomu: `skladPoziomow`, lista wpisów `{ typ, ile, zycia }`. Ten sam typ może mieć kilka wpisów z różnymi życiami. Poziom bez wpisu bierze skład najbliższego niższego (poziom 21+ = 20).
-- Wpisy są przeplatane (jeden z każdego wpisu po kolei), więc przy limicie widać różne typy.
+- Wpisy są przeplatane (jeden z każdego wpisu po kolei, zaczynając od ostatniego wpisu, czyli najnowszego koloru), więc przy limicie widać różne typy, a najnowsze kolory są na planszy od startu.
 - Na planszy najwyżej `maxNaraz` przeciwników. Reszta czeka w kolejce i wchodzi `opoznienieWejscia` s po zwolnieniu miejsca, na swoje miejsce startowe.
 - Start w Arenie: rzędy równoległe do przekątnej. W Wielkiej arenie: linia w lewej górnej części świata. Pierwszy rzut każdego: po napisie „Level N”, zwykłej przerwie i losowo do `opoznienieStartuMax` s.
 - Plan poziomów 1–20 (kto wchodzi na którym poziomie i dlaczego) jest w `PLAN_WDROZENIA.md`, aktualne wartości w `config.js`.
