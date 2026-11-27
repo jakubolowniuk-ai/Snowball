@@ -59,6 +59,11 @@ Punkt grafiki, który kładziemy na pozycji obiektu w grze. Podana jako ułamek 
 | `efekty/rozbryzg_8.png` | 47.0 x 46.5 | 94 x 93 | x 0.5, y 0.5 |
 | `efekty/sniezka.png` | 13.5 x 14.0 | 27 x 28 | x 0.5, y 0.5 |
 
+### Dekoracje „zimowy ogród” (`assets/dekoracje/zima/`, od kroku E0)
+- 59 grafik z paczki „zima” (24.11.2026): kamienie, głazy, pnie, kłody, zaspy, pagórki, krzaki, ostrokrzew, trawa, gałęzie. Każdy obiekt ma warianty `_a`, `_b`, `_c` (czasem `_d`) o tej samej szerokości, kotwica x 0,5, y 0,88.
+- 13 grafik dodanych 27.11.2026 (wygenerowane, przycięte i przeskalowane przez Claude Code): `dom_a`–`dom_d` (170 jednostek szerokości), `szopa_a`–`szopa_d` (140), `murek_a`–`murek_d` (150), `staw_a` (200, zamarznięty staw leżący na ziemi).
+- Rozmiary, kotwice, kolizje i podstawy wszystkich 88 dekoracji (stare i nowe) są w `dane/dekoracje.js`. Bez kolizji (same ozdoby): trawa, gałęzie, kamień mały, krzak mały, zaspa mała, staw. Staw ma warstwę `ziemia` (zawsze pod postaciami).
+
 ## Zawodnik: animacje (przód i tył, 16 kolorów)
 
 Kolory (nazwa: bazowy odcień kurtki): czerwony #E02020, zielony #2E9E3F, niebieski #2A6FD6, zolty #F2C417, pomaranczowy #F28A1C, fioletowy #8E44C9, rozowy #F06BA8, blekitny #4FC3F7, limonkowy #9ACD32, brazowy #8B5A2B, turkusowy #1ABC9C, granatowy #1F3A7A, magenta #D81B8C, szary #7F8C8D, bordowy #8B1E3F, zloty #D4A017. Żółty, błękitny, limonkowy i złoty słabiej widać na białym śniegu, warto je sprawdzić na telefonie.
@@ -151,4 +156,5 @@ Do czasu dodania gra rysuje kształty zastępcze (białe kule, szara armatka). P
 - **Leżący leży głową w lewo.** Druga drużyna ma klatki odbite w poziomie.
 - Ogłuszony zawodnik ma wielkość głowy dopasowaną na oko (±5%).
 - Arkusze źródłowe miały rozdzielczość ok. 800 x 1000 px, więc przy powiększeniu ponad 1 px = 1/2 jednostki grafiki będą miękkie.
-- Brakuje: grafik stanowisk, pagórków/zasp, lodu, śladów, krzaków, kamieni, pniaków, sanek, latarni, stawu.
+- Brakuje: muru ze śnieżnych bloków w stylu gry (próba z 27.11 miała inny styl), śladów, latarni. Grafiki stanowisk są wygenerowane (armatka z niebieskimi obręczami, stos), czekają na podpięcie.
+- Tekstury terenu (śnieg, ubity śnieg, lód) z 27.11: śnieg i pojedynczy ubity łączą się bez szwów, lód ma widoczny szew (do poprawy programowo przy E2). Są prostokątne (16:9), dlatego teren to materiały wypełniane teksturą, a nie kwadratowe kafelki 100 × 100 px (`PLAN_WDROZENIA.md`, E2).
