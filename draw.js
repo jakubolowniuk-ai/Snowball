@@ -56,6 +56,8 @@ function rysujTlo(ctx) {
     ctx.fillRect(X0, Y0, W, H);
   }
 
+  rysujTeren(ctx); // podłoże mapy (materiały z dane/teren.js), pod przyciemnieniem brzegów
+
   // Przyciemnienie: poza światem półprzezroczysty niebieskawy kolor,
   // a przy jego brzegach płynne przejście do przezroczystości
   ctx.save();

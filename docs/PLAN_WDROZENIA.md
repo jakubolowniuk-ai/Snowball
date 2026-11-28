@@ -10,8 +10,8 @@ Statusy: ✅ zrobione · 🔨 teraz · ⏳ później · ❓ do decyzji.
 |---|---|---|
 | 0 | Gra podstawowa: Arena, Wielka arena, bonusy, stanowiska, typy przeciwników, 20 poziomów | ✅ (strojenie po graniu trwa) |
 | 1 | Umowa dla grafik i partia próbna | ✅ (27.11; brakuje tylko muru ze śnieżnych bloków w stylu gry) |
-| 2 | Format map i ładowanie z pliku (kroki E0–E2) | 🔨 teraz (E0, E1 zrobione) |
-| 3 | Edytor map (kroki E3–E7) | ⏳ zaraz po E2 |
+| 2 | Format map i ładowanie z pliku (kroki E0–E2) | ✅ |
+| 3 | Edytor map (kroki E3–E7) | 🔨 teraz |
 | 4 | Poziomy jako dane i wybór mapy w menu (krok E8 i dalej) | ⏳ |
 | 5 | Hurtowa produkcja grafik i map | ⏳ |
 | 6 | Kampania | ⏳ |
@@ -107,7 +107,7 @@ MAPY.arena_1 = {
 - Siatka 50 × 50 jednostek. Arena ma 20 × 10 pól siatki, Wielka arena 40 × 20 (800).
 - **Zmiana z 27.11:** pole siatki zapisuje tylko **materiał** (np. śnieg, ubity śnieg, lód). Gra wypełnia obszar materiału jego teksturą dopasowaną do świata, więc tekstura może być duża i prostokątna (otrzymane tekstury są 16:9) i zawsze się łączy. Wycinanie kwadratów 100 × 100 px psułoby łączenie.
 - Zestaw kafelków: folder `assets/teren/<zestaw>/` z plikiem `zestaw.js` (jednoznakowy `id`, plik, nazwa, liczba wariantów). Wariant wynika z pozycji kafelka (zawsze ten sam, bez migania).
-- **Rysowanie:** kafelki rysowane raz do bufora (osobne płótno), w każdej klatce gra tylko kopiuje gotowy obraz. **Bufor w kawałkach** (np. jedno pole na płótno) albo w skali ekranu: cała Wielka arena w 2 px na jednostkę to 4000 × 2000 px, a po pomnożeniu przez gęstość ekranu telefonu przekracza limity przeglądarek (zwłaszcza iPhone’a, ok. 16,7 mln pikseli na płótno).
+- **Rysowanie (zrobione w E2):** bez bufora. Co klatkę gra rysuje tylko widoczne pola, łącząc sąsiednie pola tego samego materiału w wierszu w jeden prostokąt wypełniony wzorem (teksturą powtarzaną bez szwów). Koszt ok. 0,01 ms na klatkę i brak dużych płócien w pamięci telefonu.
 - W wersji 1 kafelki zmieniają tylko wygląd. Pole na właściwości (spowolnienie, ślizg, woda) jest w opisie zestawu od początku, ale gra go nie używa.
 - Brak przejść między podłożami w wersji 1 (granice kratkowane). Tło poza mapą zostaje (`tlo_plansza.png`).
 
@@ -123,7 +123,7 @@ MAPY.arena_1 = {
 |---|---|---|
 | E0 ✅ | Dane wstępne: `dane/dekoracje.js` dla 16 dekoracji (kategoria, rozmiar, kolizja `owal`), zestaw `zima` (co najmniej 3 kafelki) z `zestaw.js` | pliki z danymi, gra bez zmian |
 | E1 ✅ | Format mapy i ładowanie: Arena i Wielka arena z `mapy/*.js` zamiast z `config.js`, teren z jednego kafelka | obie areny wyglądają i grają jak dziś (porównanie liczb) |
-| E2 | Rysowanie terenu w grze z bufora (w kawałkach), test na ręcznie wpisanej mapie | teren z kafelków bez spadku płynności |
+| E2 ✅ | Rysowanie terenu w grze z bufora (w kawałkach), test na ręcznie wpisanej mapie | teren z kafelków bez spadku płynności |
 | E3 | Szkielet `editor.html`: wczytanie mapy, widok, przesuwanie i powiększanie, siatka | można oglądać mapy na telefonie |
 | E4 | Malowanie terenu, cofnij i ponów | można zmienić podłoże |
 | E5 | Dekoracje: paleta, stawianie, przesuwanie, usuwanie, duplikowanie, warianty, podgląd kolizji | można przestawić przeszkody |

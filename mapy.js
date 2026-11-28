@@ -7,7 +7,10 @@ const MAPY = {};
 const WERSJA_MAPY = 1; // najnowsza wersja formatu mapy
 
 // Mapa dla trybu (każdy poziom dostanie swoją mapę w etapie 4; na razie jedna na tryb)
+// Do testów: adres z ?mapa=nazwa (np. index.html?mapa=arena_2) wybiera inną mapę tego trybu.
 function mapaDlaTrybu(tryb) {
+  const zAdresu = new URLSearchParams(location.search).get("mapa");
+  if (zAdresu && MAPY[zAdresu] && MAPY[zAdresu].tryb === tryb) return MAPY[zAdresu];
   const id = CONFIG.tryby.mapy[tryb];
   const mapa = MAPY[id];
   if (!mapa) throw new Error(`Brak mapy "${id}" dla trybu "${tryb}" (czy plik mapy/${id}.js jest w index.html?)`);
@@ -27,6 +30,9 @@ function bledyMapy(mapa) {
   if (mapa.tryb === "arena" && !(st.czerwoni && st.zieloni)) bledy.push("Arena potrzebuje stanowisk obu drużyn");
   if (mapa.tryb === "wielkaArena" && !st.neutralne) bledy.push("Wielka arena potrzebuje stanowisk neutralnych");
   if (!mapa.start || !mapa.start.gracz || !mapa.start.przeciwnicy) bledy.push("brak miejsc startu");
+  const t = mapa.teren;
+  if (!t || !(t.rozmiarPola > 0)) bledy.push("zły rozmiar pola terenu");
+  else if (t.domyslny !== "tlo" && !MATERIALY[t.domyslny]) bledy.push(`nieznany materiał domyślny "${t.domyslny}"`);
   return bledy;
 }
 

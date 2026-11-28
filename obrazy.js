@@ -100,6 +100,7 @@ function wczytajObrazy(gotowe) {
   const sciezki = [
     ...Object.keys(SPRITY).filter((s) => !s.startsWith("assets/dekoracje/")),
     ...dekoracjeUzyteWMapach().map((id) => DEKORACJE[id].plik),
+    ...Object.values(MATERIALY).map((m) => m.plik), // tekstury terenu
     // Set (zbiór) usuwa powtórzone kolory, żeby nie wczytywać atlasu dwa razy
     ...[...new Set([CONFIG.kolorGracza, CONFIG.kolorPrzeciwnika, ...Object.values(CONFIG.typy).map((t) => t.kolor)])].map(
       ZAWODNIK.atlas
