@@ -393,6 +393,12 @@ const CONFIG = {
   wedrowka: 0.12, // Wielka arena: jak daleko odchodzi przy losowym chodzeniu
   odskok: 0.08, // jak daleko odskakuje w bok przy uniku
 
+  // Płynność: najwyższa gęstość ekranu (pikseli płótna na piksel CSS). Telefony mają 2-3,
+  // przy 2 różnicę w ostrości trudno zobaczyć, a pikseli do malowania jest dużo mniej.
+  maxGestoscEkranu: 2,
+  // Największe płótno warstwy tła (w pikselach; iPhone ma limit ok. 16,7 mln na płótno)
+  maxPikseliTla: 12000000,
+
   // Teren mapy rysowany raz do bufora: ile pikseli bufora na jednostkę pola
   // (2 = jak grafiki; mniej = mniej pamięci telefonu, ale bardziej rozmyty teren)
   rozdzielczoscTerenu: 2,

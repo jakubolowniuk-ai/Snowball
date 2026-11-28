@@ -675,8 +675,13 @@ let przesuniecieY = 0;
 // Widoczny fragment ekranu w jednostkach pola (razem z marginesami poza polem)
 const widoczny = { x0: 0, y0: 0, x1: SZEROKOSC_POLA, y1: WYSOKOSC_POLA };
 
+let gestoscEkranu = 1; // ile pikseli płótna na jeden piksel CSS (z limitem z config.js)
+
 function dopasujDoEkranu() {
-  const dpr = window.devicePixelRatio || 1; // ile pikseli ekranu na jeden piksel CSS
+  // Gęstość ekranu (devicePixelRatio): ile pikseli ekranu na jeden piksel CSS. Ograniczona,
+  // bo przy gęstości 3 płótno ma 2,25 razy więcej pikseli niż przy 2, a różnicę trudno zobaczyć.
+  const dpr = Math.min(window.devicePixelRatio || 1, CONFIG.maxGestoscEkranu);
+  gestoscEkranu = dpr;
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
   canvas.width = Math.round(w * dpr);
@@ -787,9 +792,9 @@ function klatka(teraz) {
   const dt = Math.min((teraz - poprzedniCzas) / 1000, 0.1);
   poprzedniCzas = teraz;
 
-  if (stan.wMenu) {
-    rysujTlo(ctx); // za menu samo tło
-  } else {
+  aktualizujWarstweTla(); // tło na osobnej warstwie: rysowane od nowa tylko po zmianie
+  wyczyscPlansze();
+  if (!stan.wMenu) {
     aktualizuj(dt);
     rysujScene(ctx, stan);
   }
@@ -798,7 +803,7 @@ function klatka(teraz) {
 }
 
 // Start: najpierw napis "Ładowanie...", gra rusza po wczytaniu wszystkich obrazków
-rysujTlo(ctx);
+aktualizujWarstweTla();
 rysujNapis(ctx, "Ładowanie...");
 wczytajObrazy(() => {
   pokazMenu(stan); // po wczytaniu: menu z wyborem trybu

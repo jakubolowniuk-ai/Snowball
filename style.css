@@ -11,7 +11,18 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Warstwa tła: pod płótnem gry, przesuwana za kamerą przez CSS, nie łapie dotyku */
+#tlo {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
 #plansza {
+  position: relative; /* nad warstwą tła */
   display: block;
   width: 100vw;
   height: 100vh;
