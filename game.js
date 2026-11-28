@@ -787,17 +787,52 @@ function aktualizuj(dt) {
 // --- Pętla gry ---
 let poprzedniCzas = 0;
 
+// Licznik płynności (adres z ?fps=1): klatki na sekundę i czas logiki oraz rysowania
+const pokazFps = new URLSearchParams(location.search).has("fps");
+const pomiar = { klatki: [], logika: [], rysowanie: [] }; // ostatnie 60 klatek (ms)
+function zapiszPomiar(lista, ms) {
+  lista.push(ms);
+  if (lista.length > 60) lista.shift();
+}
+function srednia(lista) {
+  return lista.length ? lista.reduce((a, b) => a + b, 0) / lista.length : 0;
+}
+// Rysowane w rogu ekranu, nad grą
+function rysujPomiar() {
+  const ms = srednia(pomiar.klatki);
+  const tekst = `FPS ${ms ? Math.round(1000 / ms) : 0} | klatka ${ms.toFixed(1)} ms | logika ${srednia(pomiar.logika).toFixed(1)} ms | rysowanie ${srednia(pomiar.rysowanie).toFixed(1)} ms | gęstość ${gestoscEkranu}`;
+  ctx.save();
+  ctx.font = `${j(0.018)}px sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  const x = widoczny.x0 + j(0.01);
+  const y = widoczny.y0 + j(0.01);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+  ctx.fillRect(x - j(0.005), y - j(0.004), ctx.measureText(tekst).width + j(0.01), j(0.026));
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(tekst, x, y);
+  ctx.restore();
+}
+
 function klatka(teraz) {
   // Czas od poprzedniej klatki w sekundach (max 0,1 s, gdy karta była w tle)
   const dt = Math.min((teraz - poprzedniCzas) / 1000, 0.1);
+  if (pokazFps) zapiszPomiar(pomiar.klatki, teraz - poprzedniCzas);
   poprzedniCzas = teraz;
 
   aktualizujWarstweTla(); // tło na osobnej warstwie: rysowane od nowa tylko po zmianie
   wyczyscPlansze();
   if (!stan.wMenu) {
+    const t0 = performance.now();
     aktualizuj(dt);
+    const t1 = performance.now();
     rysujScene(ctx, stan);
+    if (pokazFps) {
+      zapiszPomiar(pomiar.logika, t1 - t0);
+      zapiszPomiar(pomiar.rysowanie, performance.now() - t1);
+    }
   }
+  if (pokazFps) rysujPomiar();
   aktualizujPrzyciskMenu(stan);
   requestAnimationFrame(klatka);
 }
