@@ -56,6 +56,7 @@ Stan na 26.11.2026. Ten dokument mówi **jak pracujemy**: od pomysłu na czacie 
 **Narzędzia w `config.js`:**
 - `poziomStartowy`: od którego poziomu zaczyna się gra z menu (po testach wróć do 1).
 - `bonusy.wymusTyp`: id bonusu, każdy nowy bonus jest tego typu (po testach `null`).
+- Edytor map: `editor.html` (np. `editor.html?mapa=arena_2`). Przycisk „Gra” otwiera grę z tą mapą (`index.html?mapa=…`), trzeba wybrać tryb mapy w menu.
 - Adres z `?fps=1`: licznik płynności w rogu ekranu (klatki na sekundę, czas klatki, logiki i rysowania w ms, gęstość płótna). Czas rysowania to tylko wydanie poleceń, prawdziwy koszt malowania widać w czasie klatki. Można łączyć: `?mapa=arena_2&fps=1`.
 - Adres z `?mapa=nazwa` (np. `index.html?mapa=arena_2`): gra w trybie tej mapy używa wskazanej mapy zamiast domyślnej.
 - `tryby.wielkaArena.czasDoZwezania`: duża liczba wyłącza zamieć na czas testu długich poziomów.

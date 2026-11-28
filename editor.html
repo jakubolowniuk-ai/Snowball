@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <!-- Blokuje powiększanie strony gestem na telefonie (edytor ma własne powiększanie mapy) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Snowcraft: edytor map</title>
+  <link rel="stylesheet" href="edytor.css?v=1">
+</head>
+<body>
+  <!-- Widok mapy na cały ekran; pasek u góry z przyciskami -->
+  <canvas id="widok"></canvas>
+  <div id="pasek">
+    <select id="wyborMapy" title="Mapa"></select>
+    <button id="przyciskDopasuj" title="Cała mapa na ekranie">Cała mapa</button>
+    <button id="przyciskSiatka" class="wlaczony" title="Siatka pól terenu">Siatka</button>
+    <a id="przyciskGraj" href="index.html">Gra</a>
+    <span id="info"></span>
+  </div>
+  <div id="obroc">Obróć telefon poziomo</div>
+
+  <!-- Kolejność ma znaczenie. ?v=... to numer wersji: zmień go przy każdej zmianie plików. -->
+  <script src="config.js?v=34"></script>
+  <script src="podstawy.js?v=34"></script>
+  <script src="dane/dekoracje.js?v=34"></script>
+  <script src="dane/teren.js?v=34"></script>
+  <script src="obrazy.js?v=34"></script>
+  <script src="mapy.js?v=34"></script>
+  <script src="mapy/arena_1.js?v=34"></script>
+  <script src="mapy/wielka_1.js?v=34"></script>
+  <script src="mapy/arena_2.js?v=34"></script>
+  <script src="teren.js?v=34"></script>
+  <script src="edytor.js?v=1"></script>
+</body>
+</html>
