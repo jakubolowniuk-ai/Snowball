@@ -5,7 +5,7 @@
   <!-- Blokuje powiększanie strony gestem na telefonie (edytor ma własne powiększanie mapy) -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Snowcraft: edytor map</title>
-  <link rel="stylesheet" href="edytor.css?v=1">
+  <link rel="stylesheet" href="edytor.css?v=3">
 </head>
 <body>
   <!-- Widok mapy na cały ekran; pasek u góry z przyciskami -->
@@ -14,9 +14,15 @@
     <select id="wyborMapy" title="Mapa"></select>
     <button id="przyciskDopasuj" title="Cała mapa na ekranie">Cała mapa</button>
     <button id="przyciskSiatka" class="wlaczony" title="Siatka pól terenu">Siatka</button>
+    <button id="przyciskCofnij" title="Cofnij">↶</button>
+    <button id="przyciskPonow" title="Ponów">↷</button>
+    <label id="poleRozmiar" title="Rozmiar pola terenu (jednostki; pole gry ma 1000 szerokości)">Pole <input id="rozmiarPola" type="number" min="10" max="200" step="5"></label>
     <a id="przyciskGraj" href="index.html">Gra</a>
     <span id="info"></span>
   </div>
+  <!-- Narzędzia (lewo) i materiały terenu (prawo); przyciski tworzy edytorTeren.js -->
+  <div id="narzedzia"></div>
+  <div id="paleta"></div>
   <div id="obroc">Obróć telefon poziomo</div>
 
   <!-- Kolejność ma znaczenie. ?v=... to numer wersji: zmień go przy każdej zmianie plików. -->
@@ -30,6 +36,7 @@
   <script src="mapy/wielka_1.js?v=34"></script>
   <script src="mapy/arena_2.js?v=34"></script>
   <script src="teren.js?v=34"></script>
-  <script src="edytor.js?v=1"></script>
+  <script src="edytor.js?v=3"></script>
+  <script src="edytorTeren.js?v=3"></script>
 </body>
 </html>
