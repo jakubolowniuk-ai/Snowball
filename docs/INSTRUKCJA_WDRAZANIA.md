@@ -56,6 +56,7 @@ Stan na 26.11.2026. Ten dokument mówi **jak pracujemy**: od pomysłu na czacie 
 **Narzędzia w `config.js`:**
 - `poziomStartowy`: od którego poziomu zaczyna się gra z menu (po testach wróć do 1).
 - `bonusy.wymusTyp`: id bonusu, każdy nowy bonus jest tego typu (po testach `null`).
+- Adres z `?mapa=nazwa` (np. `index.html?mapa=arena_2`): gra w trybie tej mapy używa wskazanej mapy zamiast domyślnej.
 - `tryby.wielkaArena.czasDoZwezania`: duża liczba wyłącza zamieć na czas testu długich poziomów.
 
 **Test w przeglądarce (agent):** Chromium z Playwright otwiera `index.html` z dysku, klika „Arena” albo „Wielka arena”, sprawdza konsolę. Przez `page.evaluate` można zmieniać `CONFIG` przed startem, sprawdzać `stan` (np. `stan.przeciwnicy`, `stan.sniezki`) i podmieniać funkcje, żeby zapisywać zdarzenia (np. każdy rzut z odległością). Przed oddaniem zmiany: wszystkie poziomy 1–20 w obu arenach po kilka sekund bez błędów w konsoli.

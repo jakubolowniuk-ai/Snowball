@@ -142,7 +142,10 @@ Do czasu dodania gra rysuje kształty zastępcze (białe kule, szara armatka). P
 - Opis każdej dekoracji (kategoria, rozmiar, typ kolizji) w `dane/dekoracje.js` (od kroku E0, `PLAN_WDROZENIA.md`).
 - Kolizje: `owal` (jak dziś) albo `brak` (sama ozdoba). Prostokąt dla ścian i pagórków dopiero z pierwszą taką grafiką.
 
-### Kafelki terenu
+### Tekstury terenu (zrobione w E2)
+- `assets/teren/zima/snieg.jpg`, `ubity.jpg`, `lod.jpg`: tekstury powtarzane bez szwów (lód poprawiony programowo). Ile jednostek pola zajmuje jedno powtórzenie: `szer` w `dane/teren.js`.
+
+### Kafelki terenu (pierwotna umowa, zastąpiona teksturami materiałów)
 - Kwadrat 100 x 100 px (50 x 50 jednostek), bez cieni i bez elementów wystających poza krawędź.
 - Folder `assets/teren/<zestaw>/` (np. `zima`) z opisem `zestaw.js`: jednoznakowy `id`, plik, nazwa, liczba wariantów.
 - Warianty jako osobne pliki. Przejść między podłożami (miękkich krawędzi) w wersji 1 nie ma.

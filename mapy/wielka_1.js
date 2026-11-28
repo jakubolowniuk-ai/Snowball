@@ -10,7 +10,7 @@ MAPY.wielka_1 = {
   },
   teren: {
     rozmiarPola: 50,
-    domyslny: "snieg",
+    domyslny: "tlo",
     wiersze: []
   },
   dekoracje: [
