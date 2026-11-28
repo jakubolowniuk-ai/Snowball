@@ -393,6 +393,10 @@ const CONFIG = {
   wedrowka: 0.12, // Wielka arena: jak daleko odchodzi przy losowym chodzeniu
   odskok: 0.08, // jak daleko odskakuje w bok przy uniku
 
+  // Teren mapy rysowany raz do bufora: ile pikseli bufora na jednostkę pola
+  // (2 = jak grafiki; mniej = mniej pamięci telefonu, ale bardziej rozmyty teren)
+  rozdzielczoscTerenu: 2,
+
   // Niebieskawe przyciemnienie przy brzegach pola: jak głęboko wchodzi
   glebokoscBrzegu: 0.05,
   silaPrzyciemnienia: 0.6, // 0 = brak przyciemnienia, 1 = pełny kolor brzegu

@@ -5,8 +5,8 @@ const TLO = "assets/tlo/tlo_plansza.png";
 
 // Wzór śniegu do kafelkowania dużego świata: fragment tła z samym polem gry
 let _wzorSniegu = null;
-function wzorSniegu(ctx) {
-  if (_wzorSniegu) return _wzorSniegu;
+function wzorSniegu(ctx, nowy = false) {
+  if (_wzorSniegu && !nowy) return _wzorSniegu;
   const obraz = OBRAZY[TLO];
   if (!obraz) return null;
   const s = SPRITY[TLO];
@@ -17,9 +17,10 @@ function wzorSniegu(ctx) {
   wycinek
     .getContext("2d")
     .drawImage(obraz, s.poleX * px, s.poleY * px, wycinek.width, wycinek.height, 0, 0, wycinek.width, wycinek.height);
-  _wzorSniegu = ctx.createPattern(wycinek, "repeat");
-  _wzorSniegu.setTransform(new DOMMatrix().scale(1 / px)); // piksele obrazka -> jednostki pola
-  return _wzorSniegu;
+  const wzor = ctx.createPattern(wycinek, "repeat");
+  wzor.setTransform(new DOMMatrix().scale(1 / px)); // piksele obrazka -> jednostki pola
+  if (!nowy) _wzorSniegu = wzor;
+  return wzor;
 }
 
 // Tło: śnieg na całym ekranie, przyciemnienie poza światem i przy jego brzegach.
@@ -43,6 +44,16 @@ function rysujTlo(ctx) {
   ctx.fillRect(ekranX, ekranY, ekranW, ekranH);
 
   const obraz = OBRAZY[TLO];
+  // Mapa z terenem: tło w obrębie świata jest już w buforze terenu, więc tu rysujemy je tylko
+  // poza światem (przycięcie: prostokąt ekranu minus prostokąt świata), bez malowania dwa razy
+  const zTerenem = !!buforTerenu();
+  if (zTerenem) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(ekranX, ekranY, ekranW, ekranH);
+    ctx.rect(X0, Y0, W, H);
+    ctx.clip("evenodd");
+  }
   if (obraz && !jestWielka(stan)) {
     // Arena: obrazek tła tak, żeby pole gry leżało dokładnie w miejscu z sprites.json
     const s = SPRITY[TLO];
@@ -55,6 +66,7 @@ function rysujTlo(ctx) {
     ctx.fillStyle = CONFIG.kolorSniegu;
     ctx.fillRect(X0, Y0, W, H);
   }
+  if (zTerenem) ctx.restore();
 
   rysujTeren(ctx); // podłoże mapy (materiały z dane/teren.js), pod przyciemnieniem brzegów
 
