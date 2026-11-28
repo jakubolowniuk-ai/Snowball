@@ -3,15 +3,7 @@
 const canvas = document.getElementById("plansza");
 const ctx = canvas.getContext("2d");
 
-// Wewnątrz kodu pole gry ma 1000 jednostek szerokości.
-// Funkcja j() zamienia ułamek szerokości z config.js na te jednostki.
-const SZEROKOSC_POLA = 1000;
-const WYSOKOSC_POLA = SZEROKOSC_POLA / CONFIG.ASPECT;
-function j(ulamek) {
-  return ulamek * SZEROKOSC_POLA;
-}
-
-const PROMIEN_POSTACI = j(CONFIG.rozmiarPostaci) / 2;
+// Jednostki pola (SZEROKOSC_POLA, j(), PROMIEN_POSTACI) są w podstawy.js
 
 // Nowa postać na starcie poziomu
 function nowaPostac(druzyna, start) {

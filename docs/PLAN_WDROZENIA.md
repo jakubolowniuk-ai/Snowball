@@ -124,7 +124,7 @@ MAPY.arena_1 = {
 | E0 ✅ | Dane wstępne: `dane/dekoracje.js` dla 16 dekoracji (kategoria, rozmiar, kolizja `owal`), zestaw `zima` (co najmniej 3 kafelki) z `zestaw.js` | pliki z danymi, gra bez zmian |
 | E1 ✅ | Format mapy i ładowanie: Arena i Wielka arena z `mapy/*.js` zamiast z `config.js`, teren z jednego kafelka | obie areny wyglądają i grają jak dziś (porównanie liczb) |
 | E2 ✅ | Rysowanie terenu w grze z bufora (w kawałkach), test na ręcznie wpisanej mapie | teren z kafelków bez spadku płynności |
-| E3 | Szkielet `editor.html`: wczytanie mapy, widok, przesuwanie i powiększanie, siatka | można oglądać mapy na telefonie |
+| E3 ✅ | Szkielet `editor.html`: wczytanie mapy, widok, przesuwanie i powiększanie, siatka | można oglądać mapy na telefonie |
 | E4 | Malowanie terenu, cofnij i ponów | można zmienić podłoże |
 | E5 | Dekoracje: paleta, stawianie, przesuwanie, usuwanie, duplikowanie, warianty, podgląd kolizji | można przestawić przeszkody |
 | E6 | Stanowiska i starty, ostrzeżenia (coś w przeszkodzie, za blisko startu) | pełna mapa do edycji |

@@ -1,0 +1,86 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #9fb4c8; /* kolor poza mapą */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: "Helvetica Neue", Roboto, "Segoe UI", sans-serif;
+}
+
+#widok {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  touch-action: none; /* przesuwanie i powiększanie robi edytor, nie przeglądarka */
+}
+
+/* Pasek u góry: przyciski co najmniej 44 px wysokości (łatwo trafić kciukiem) */
+#pasek {
+  position: fixed;
+  left: 8px;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none; /* klik w puste miejsce paska idzie do mapy */
+}
+
+#pasek > * {
+  pointer-events: auto;
+}
+
+#pasek button,
+#pasek select,
+#pasek a {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 2px solid #2a6fd6;
+  border-radius: 22px;
+  background: #ffffff;
+  color: #2a6fd6;
+  font: 600 16px "Helvetica Neue", Roboto, "Segoe UI", sans-serif;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+#pasek button.wlaczony {
+  background: #2a6fd6;
+  color: #ffffff;
+}
+
+#info {
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #2a4a66;
+  font-size: 13px;
+}
+
+#info.blad {
+  background: #ffd9d9;
+  color: #a02020;
+}
+
+#obroc {
+  display: none;
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  background: #cfe1f1;
+  color: #2a4a66;
+  font: bold 24px sans-serif;
+  text-align: center;
+  padding: 16px;
+}
+
+@media (orientation: portrait) {
+  #obroc { display: flex; }
+}

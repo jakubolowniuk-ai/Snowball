@@ -11,6 +11,7 @@ Snowcraft (repozytorium Snowball) to gra na telefon w przeglądarce inspirowana 
 - `docs/GRAFIKI.md`: skala, kotwice, pliki grafik, umowa dla nowych grafik.
 - `config.js`: wszystkie liczby rozgrywki (jedyne miejsce, gdzie są wartości).
 - `mapy/*.js`, `dane/dekoracje.js` i `dane/teren.js`: układ plansz (świat, teren, dekoracje, stanowiska, starty) i opis dekoracji (rozmiar, kolizja). Nowe mapy i dekoracje idą tam, nie do `config.js`.
+- `editor.html`, `edytor.js`, `edytor.css`: edytor map (osobna strona, nie ładuje game.js). Wspólne stałe gry i edytora są w `podstawy.js`; edytor ma własny numer `?v=` w `editor.html`.
 - `docs/archiwum/`: stare plany i wykonane prompty, nieaktualne, tylko historia.
 
 ## Jak ze mną pracować (Jakub)
