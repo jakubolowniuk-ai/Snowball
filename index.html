@@ -5,9 +5,11 @@
   <!-- Blokuje powiększanie strony gestem na telefonie -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Snowcraft</title>
-  <link rel="stylesheet" href="style.css?v=31">
+  <link rel="stylesheet" href="style.css?v=33">
 </head>
 <body>
+  <!-- Warstwa tła pod grą (rysowana tylko po zmianie) i płótno gry nad nią -->
+  <canvas id="tlo"></canvas>
   <canvas id="plansza"></canvas>
   <div id="obroc">Obróć telefon poziomo</div>
 
@@ -23,24 +25,25 @@
 
   <!-- Kolejność ma znaczenie: config jako pierwszy, game na końcu.
        ?v=... to numer wersji: zmień go przy każdym kroku, żeby telefon pobrał nowe pliki. -->
-  <script src="config.js?v=31"></script>
-  <script src="dane/dekoracje.js?v=31"></script>
-  <script src="dane/teren.js?v=31"></script>
-  <script src="obrazy.js?v=31"></script>
-  <script src="mapy.js?v=31"></script>
-  <script src="mapy/arena_1.js?v=31"></script>
-  <script src="mapy/wielka_1.js?v=31"></script>
-  <script src="mapy/arena_2.js?v=31"></script>
-  <script src="draw.js?v=31"></script>
-  <script src="teren.js?v=31"></script>
-  <script src="input.js?v=31"></script>
-  <script src="ai.js?v=31"></script>
-  <script src="przeszkody.js?v=31"></script>
-  <script src="bonusy.js?v=31"></script>
-  <script src="stanowiska.js?v=31"></script>
-  <script src="wiezyczki.js?v=31"></script>
-  <script src="tryby.js?v=31"></script>
-  <script src="animacje.js?v=31"></script>
-  <script src="game.js?v=31"></script>
+  <script src="config.js?v=33"></script>
+  <script src="dane/dekoracje.js?v=33"></script>
+  <script src="dane/teren.js?v=33"></script>
+  <script src="obrazy.js?v=33"></script>
+  <script src="mapy.js?v=33"></script>
+  <script src="mapy/arena_1.js?v=33"></script>
+  <script src="mapy/wielka_1.js?v=33"></script>
+  <script src="mapy/arena_2.js?v=33"></script>
+  <script src="draw.js?v=33"></script>
+  <script src="teren.js?v=33"></script>
+  <script src="input.js?v=33"></script>
+  <script src="ai.js?v=33"></script>
+  <script src="przeszkody.js?v=33"></script>
+  <script src="bonusy.js?v=33"></script>
+  <script src="stanowiska.js?v=33"></script>
+  <script src="wiezyczki.js?v=33"></script>
+  <script src="tryby.js?v=33"></script>
+  <script src="warstwaTla.js?v=33"></script>
+  <script src="animacje.js?v=33"></script>
+  <script src="game.js?v=33"></script>
 </body>
 </html>

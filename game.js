@@ -675,8 +675,13 @@ let przesuniecieY = 0;
 // Widoczny fragment ekranu w jednostkach pola (razem z marginesami poza polem)
 const widoczny = { x0: 0, y0: 0, x1: SZEROKOSC_POLA, y1: WYSOKOSC_POLA };
 
+let gestoscEkranu = 1; // ile pikseli płótna na jeden piksel CSS (z limitem z config.js)
+
 function dopasujDoEkranu() {
-  const dpr = window.devicePixelRatio || 1; // ile pikseli ekranu na jeden piksel CSS
+  // Gęstość ekranu (devicePixelRatio): ile pikseli ekranu na jeden piksel CSS. Ograniczona,
+  // bo przy gęstości 3 płótno ma 2,25 razy więcej pikseli niż przy 2, a różnicę trudno zobaczyć.
+  const dpr = Math.min(window.devicePixelRatio || 1, CONFIG.maxGestoscEkranu);
+  gestoscEkranu = dpr;
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
   canvas.width = Math.round(w * dpr);
@@ -782,23 +787,58 @@ function aktualizuj(dt) {
 // --- Pętla gry ---
 let poprzedniCzas = 0;
 
+// Licznik płynności (adres z ?fps=1): klatki na sekundę i czas logiki oraz rysowania
+const pokazFps = new URLSearchParams(location.search).has("fps");
+const pomiar = { klatki: [], logika: [], rysowanie: [] }; // ostatnie 60 klatek (ms)
+function zapiszPomiar(lista, ms) {
+  lista.push(ms);
+  if (lista.length > 60) lista.shift();
+}
+function srednia(lista) {
+  return lista.length ? lista.reduce((a, b) => a + b, 0) / lista.length : 0;
+}
+// Rysowane w rogu ekranu, nad grą
+function rysujPomiar() {
+  const ms = srednia(pomiar.klatki);
+  const tekst = `FPS ${ms ? Math.round(1000 / ms) : 0} | klatka ${ms.toFixed(1)} ms | logika ${srednia(pomiar.logika).toFixed(1)} ms | rysowanie ${srednia(pomiar.rysowanie).toFixed(1)} ms | gęstość ${gestoscEkranu}`;
+  ctx.save();
+  ctx.font = `${j(0.018)}px sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  const x = widoczny.x0 + j(0.01);
+  const y = widoczny.y0 + j(0.01);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+  ctx.fillRect(x - j(0.005), y - j(0.004), ctx.measureText(tekst).width + j(0.01), j(0.026));
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(tekst, x, y);
+  ctx.restore();
+}
+
 function klatka(teraz) {
   // Czas od poprzedniej klatki w sekundach (max 0,1 s, gdy karta była w tle)
   const dt = Math.min((teraz - poprzedniCzas) / 1000, 0.1);
+  if (pokazFps) zapiszPomiar(pomiar.klatki, teraz - poprzedniCzas);
   poprzedniCzas = teraz;
 
-  if (stan.wMenu) {
-    rysujTlo(ctx); // za menu samo tło
-  } else {
+  aktualizujWarstweTla(); // tło na osobnej warstwie: rysowane od nowa tylko po zmianie
+  wyczyscPlansze();
+  if (!stan.wMenu) {
+    const t0 = performance.now();
     aktualizuj(dt);
+    const t1 = performance.now();
     rysujScene(ctx, stan);
+    if (pokazFps) {
+      zapiszPomiar(pomiar.logika, t1 - t0);
+      zapiszPomiar(pomiar.rysowanie, performance.now() - t1);
+    }
   }
+  if (pokazFps) rysujPomiar();
   aktualizujPrzyciskMenu(stan);
   requestAnimationFrame(klatka);
 }
 
 // Start: najpierw napis "Ładowanie...", gra rusza po wczytaniu wszystkich obrazków
-rysujTlo(ctx);
+aktualizujWarstweTla();
 rysujNapis(ctx, "Ładowanie...");
 wczytajObrazy(() => {
   pokazMenu(stan); // po wczytaniu: menu z wyborem trybu

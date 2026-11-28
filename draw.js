@@ -24,8 +24,8 @@ function wzorSniegu(ctx, nowy = false) {
 }
 
 // Tło: śnieg na całym ekranie, przyciemnienie poza światem i przy jego brzegach.
-// Rysowane we współrzędnych świata (wywołuj po przesunięciu o kamerę).
-function rysujTlo(ctx) {
+// Rysowane we współrzędnych świata, na warstwie tła (warstwaTla.js), w obszarze "e" (jednostki pola).
+function rysujTlo(ctx, e) {
   // Przyciemnienie przy brzegach pełnego świata (zwężanie pokazuje zamieć, nie tło)
   const sw = stan.swiatPelny || stan.swiat || { x0: 0, y0: 0, x1: SZEROKOSC_POLA, y1: WYSOKOSC_POLA };
   const X0 = sw.x0;
@@ -33,7 +33,6 @@ function rysujTlo(ctx) {
   const W = sw.x1 - sw.x0;
   const H = sw.y1 - sw.y0;
   const g = j(CONFIG.glebokoscBrzegu);
-  const e = widokSwiata();
   const ekranX = e.x0;
   const ekranY = e.y0;
   const ekranW = e.x1 - e.x0;
@@ -821,7 +820,7 @@ function widac(x, y) {
 }
 
 function rysujSwiat(ctx, stan) {
-  rysujTlo(ctx);
+  // Tło jest na osobnej warstwie pod płótnem gry (warstwaTla.js)
   rysujCienieSniezek(ctx, stan);
 
   // Najpierw leżący (są na ziemi), potem stojący od góry do dołu,

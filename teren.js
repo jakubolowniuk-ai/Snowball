@@ -112,7 +112,6 @@ function rysujTeren(ctx) {
   const bufor = buforTerenu();
   if (!bufor) return;
   for (const k of bufor) {
-    if (!naEkranie(k.x + SZEROKOSC_POLA / 2, k.y + WYSOKOSC_POLA / 2, SZEROKOSC_POLA)) continue;
     ctx.drawImage(k.plotno, k.x, k.y, SZEROKOSC_POLA, WYSOKOSC_POLA);
   }
 }
