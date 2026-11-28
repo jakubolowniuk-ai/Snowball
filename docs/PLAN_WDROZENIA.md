@@ -125,7 +125,7 @@ MAPY.arena_1 = {
 | E1 ✅ | Format mapy i ładowanie: Arena i Wielka arena z `mapy/*.js` zamiast z `config.js`, teren z jednego kafelka | obie areny wyglądają i grają jak dziś (porównanie liczb) |
 | E2 ✅ | Rysowanie terenu w grze z bufora (w kawałkach), test na ręcznie wpisanej mapie | teren z kafelków bez spadku płynności |
 | E3 ✅ | Szkielet `editor.html`: wczytanie mapy, widok, przesuwanie i powiększanie, siatka | można oglądać mapy na telefonie |
-| E4 | Malowanie terenu, cofnij i ponów | można zmienić podłoże |
+| E4 ✅ | Malowanie terenu, cofnij i ponów | można zmienić podłoże |
 | E5 | Dekoracje: paleta, stawianie, przesuwanie, usuwanie, duplikowanie, warianty, podgląd kolizji | można przestawić przeszkody |
 | E6 | Stanowiska i starty, ostrzeżenia (coś w przeszkodzie, za blisko startu) | pełna mapa do edycji |
 | E7 | Zapis roboczy w pamięci telefonu, eksport i import pliku, sprawdzanie poprawności, „Zagraj tę mapę” | pętla: zrób mapę, zagraj, popraw |

@@ -1,6 +1,6 @@
-// Edytor map (krok E3: podgląd). Wczytuje mapę z mapy/*.js i pokazuje ją: tło, teren, dekoracje,
-// stanowiska, miejsca startu i siatkę pól. Mapę przesuwa się palcem (albo myszą), a powiększa
-// dwoma palcami (albo kółkiem myszy). Edycja dojdzie w następnych krokach (E4-E7).
+// Edytor map. Wczytuje mapę z mapy/*.js i pokazuje ją: tło, teren, dekoracje, stanowiska,
+// miejsca startu i siatkę pól. Dwa palce (albo kółko myszy) zawsze przesuwają i powiększają,
+// jeden palec używa wybranego narzędzia (rączka przesuwa, narzędzia terenu w edytorTeren.js).
 // Rysujemy tylko po zmianie (przesunięcie, powiększenie), a tło z terenem raz do bufora.
 
 const widokPlotno = document.getElementById("widok");
@@ -15,7 +15,10 @@ const edytor = {
   widok: { x: 0, y: 0, zoom: 1 }, // lewy górny róg ekranu w świecie i pikseli CSS na jednostkę
   siatka: true,
   doNarysowania: true,
+  narzedzie: "raczka", // wybrane narzędzie (edytorTeren.js)
 };
+// Miejsce na ekranie zajęte przez paski (pikseli CSS): góra, lewo (narzędzia), prawo (paleta)
+const MARGINES = { gora: 60, lewo: 64, prawo: 76, dol: 40 };
 
 // --- Wczytanie grafik (tło, wszystkie dekoracje, tekstury terenu) ---
 function wczytajGrafikiEdytora(gotowe) {
@@ -43,6 +46,7 @@ function rozmiarSwiata(mapa) {
 function wczytajMape(id) {
   edytor.idMapy = id;
   edytor.mapa = JSON.parse(JSON.stringify(MAPY[id])); // kopia: oryginał zostaje bez zmian
+  przygotujTerenDoEdycji(); // pełna siatka pól (edytorTeren.js), nowa historia cofania
   zbudujBuforEdytora();
   dopasujWidok();
   pokazInfo();
@@ -72,10 +76,13 @@ function zbudujBuforEdytora() {
     wycinek.getContext("2d").drawImage(obraz, s.poleX * px, s.poleY * px, wycinek.width, wycinek.height, 0, 0, wycinek.width, wycinek.height);
     const wzor = c.createPattern(wycinek, "repeat");
     wzor.setTransform(new DOMMatrix().scale(1 / px));
-    c.fillStyle = wzor;
+    edytor.wzorTla = wzor;
   } else {
-    c.fillStyle = CONFIG.kolorSniegu;
+    edytor.wzorTla = CONFIG.kolorSniegu;
   }
+  edytor.buforCtx = c;
+  edytor.wzory = {}; // wzory materiałów dla tego bufora
+  c.fillStyle = edytor.wzorTla;
   c.fillRect(0, 0, w, h);
   // Teren: wiersze pól, sąsiednie pola z tym samym materiałem jako jeden prostokąt
   const teren = mapa.teren;
@@ -87,7 +94,7 @@ function zbudujBuforEdytora() {
       const id = materialPola(teren, k, wiersz);
       let koniec = k + 1;
       while (koniec < kolumn && materialPola(teren, koniec, wiersz) === id) koniec++;
-      const wzor = id && wzorMaterialu(c, id);
+      const wzor = id && wzorBufora(id);
       if (wzor) {
         c.fillStyle = wzor;
         c.fillRect(k * r, wiersz * r, (koniec - k) * r, r);
@@ -97,6 +104,31 @@ function zbudujBuforEdytora() {
   }
   edytor.bufor = plotno;
   edytor.buforSkala = R;
+}
+
+function wzorBufora(id) {
+  if (!edytor.wzory[id]) edytor.wzory[id] = wzorMaterialu(edytor.buforCtx, id);
+  return edytor.wzory[id];
+}
+
+// Rysuje od nowa jedno pole w buforze (po malowaniu pędzlem, bez przebudowy całości)
+function odswiezPoleBufora(k, w) {
+  const c = edytor.buforCtx;
+  const r = edytor.mapa.teren.rozmiarPola;
+  const { w: sw, h: sh } = rozmiarSwiata(edytor.mapa);
+  const x = k * r;
+  const y = w * r;
+  const szer = Math.min(r, sw - x);
+  const wys = Math.min(r, sh - y);
+  c.fillStyle = edytor.wzorTla;
+  c.fillRect(x, y, szer, wys);
+  const id = materialPola(edytor.mapa.teren, k, w);
+  const wzor = id && wzorBufora(id);
+  if (wzor) {
+    c.fillStyle = wzor;
+    c.fillRect(x, y, szer, wys);
+  }
+  edytor.doNarysowania = true;
 }
 
 function pokazInfo() {
@@ -125,15 +157,19 @@ function dopasujPlotno() {
 // Najmniejsze powiększenie: cała mapa (z marginesem) mieści się na ekranie
 function zoomDopasowany() {
   const { w, h } = rozmiarSwiata(edytor.mapa);
-  return Math.min(widokPlotno.clientWidth / (w * 1.08), (widokPlotno.clientHeight - 60) / (h * 1.08));
+  const szer = widokPlotno.clientWidth - MARGINES.lewo - MARGINES.prawo;
+  const wys = widokPlotno.clientHeight - MARGINES.gora - MARGINES.dol;
+  return Math.min(szer / (w * 1.04), wys / (h * 1.06));
 }
 
 function dopasujWidok() {
   const { w, h } = rozmiarSwiata(edytor.mapa);
   const zoom = zoomDopasowany();
   edytor.widok.zoom = zoom;
-  edytor.widok.x = w / 2 - widokPlotno.clientWidth / 2 / zoom;
-  edytor.widok.y = h / 2 - (widokPlotno.clientHeight + 60) / 2 / zoom;
+  const srodekX = (MARGINES.lewo + widokPlotno.clientWidth - MARGINES.prawo) / 2;
+  const srodekY = (MARGINES.gora + widokPlotno.clientHeight - MARGINES.dol) / 2;
+  edytor.widok.x = w / 2 - srodekX / zoom;
+  edytor.widok.y = h / 2 - srodekY / zoom;
   edytor.doNarysowania = true;
 }
 
@@ -170,16 +206,27 @@ function srodekIRozstaw() {
   };
 }
 
+// Punkt ekranu (piksele CSS) -> punkt świata (jednostki pola)
+function ekranNaSwiat(sx, sy) {
+  return { x: edytor.widok.x + sx / edytor.widok.zoom, y: edytor.widok.y + sy / edytor.widok.zoom };
+}
+
 widokPlotno.addEventListener("pointerdown", (e) => {
   widokPlotno.setPointerCapture(e.pointerId);
   palce.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (palce.size === 1) {
+    if (edytor.narzedzie !== "raczka") zacznijNarzedzie(ekranNaSwiat(e.clientX, e.clientY));
+  } else {
+    przerwijNarzedzie(); // drugi palec: to gest przesuwania, a nie malowanie
+  }
 });
 
 widokPlotno.addEventListener("pointermove", (e) => {
   const p = palce.get(e.pointerId);
   if (!p) return;
   if (palce.size === 1) {
-    przesun(e.clientX - p.x, e.clientY - p.y);
+    if (edytor.narzedzie === "raczka") przesun(e.clientX - p.x, e.clientY - p.y);
+    else ruchNarzedzia(ekranNaSwiat(e.clientX, e.clientY));
   } else if (palce.size === 2) {
     const przed = srodekIRozstaw();
     p.x = e.clientX;
@@ -194,6 +241,7 @@ widokPlotno.addEventListener("pointermove", (e) => {
 });
 
 function puscPalec(e) {
+  if (palce.size === 1 && palce.has(e.pointerId)) zakonczNarzedzie(ekranNaSwiat(e.clientX, e.clientY));
   palce.delete(e.pointerId);
 }
 widokPlotno.addEventListener("pointerup", puscPalec);
@@ -238,6 +286,8 @@ function rysujEdytor() {
     }
     wctx.stroke();
   }
+
+  rysujPodgladNarzedzia(wctx, piksel); // np. ramka prostokąta w trakcie przeciągania
 
   // Arena: przekątna, czyli granica drużyn
   if (mapa.tryb === "arena") {
@@ -384,6 +434,7 @@ window.addEventListener("resize", () => {
 });
 dopasujPlotno();
 wczytajGrafikiEdytora(() => {
+  przygotujPaski(); // narzędzia i paleta materiałów (edytorTeren.js)
   // Mapa z adresu (editor.html?mapa=arena_2) albo pierwsza z listy
   const zAdresu = new URLSearchParams(location.search).get("mapa");
   const id = MAPY[zAdresu] ? zAdresu : Object.keys(MAPY)[0];
